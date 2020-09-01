@@ -3,7 +3,7 @@
 # -- Simulating Exc-Inh spiking networks in response to inhibitory perturbation
 ################################################################################
 
-import numpy as np; import pylab as pl; import time, os, pickle
+import numpy as np; import pylab as pl; import time, os, sys, pickle
 from scipy.stats import norm
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *;
@@ -121,56 +121,69 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
 
 ################################################################################
 
-for ij1, Be in enumerate(Be_rng):
-    for ij2, Bi in enumerate(Bi_rng):
-
-        Bee, Bei = Be, Be
-        Bie, Bii = Bi, Bi
-
-        print('####################')
-        print('### (Be, Bi): ', Be, Bi)
-        print('####################')
-
-        # -- result path
-        res_path = os.path.join(cwd, res_dir+sim_suffix)
-        if not os.path.exists(res_path): os.mkdir(res_path)
-
-        os.chdir(res_path)
-        print('Restting random seed ...')
-        np.random.seed(1)
-
-        # -- L23 recurrent connectivity
-        W_EtoE = _mycon_(NE, NE, Bee, .15)
-        W_EtoI = _mycon_(NE, NI, Bei, .15)
-        W_ItoE = _mycon_(NI, NE, Bie, 1.)
-        W_ItoI = _mycon_(NI, NI, Bii, 1.)
-
-        # -- running simulations
-        sim_res = {}
-
-        for nn_stim in nn_stim_rng:
-
-            print('\n # -----> size of pert. inh: ', nn_stim)
-
-            np.random.seed(2)
-            r_extra = np.zeros(N)
-            r_extra[NE:NE+nn_stim] = r_stim
-
-            rr1 = r_bkg*np.ones(N)
-            rr2 = rr1 + r_extra
-
-            sim_res[nn_stim] = myRun(rr1, rr2, nn_stim=nn_stim)
-
-        sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials
-        sim_res['N'], sim_res['NE'], sim_res['NI'] = N, NE, NI
-        sim_res['Tblank'], sim_res['Tstim'], sim_res['Ttrans'] = Tblank, Tstim, Ttrans
-        sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
-
-        os.chdir(res_path);
-        sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
-        fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
+if len(sys.argv) == 1:
+    job_id = 0; num_jobs = 1
+else:
+    job_id = int(sys.argv[1])
+    num_jobs = int(sys.argv[2])
+    
+# simulate(job_id, num_jobs)
 
 os.chdir(cwd)
+
+# def simulate(job_id, num_jobs):
+
+Be_rng_comb, Bi_rng_comb = np.meshgrid(Be_rng, Bi_rng)
+Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
+Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
+
+for ij1 in range(Be_rng_comb.size):
+
+    Bee, Bei = Be_rng_comb[ij1], Be_rng_comb[ij1]
+    Bie, Bii = Bi_rng_comb[ij1], Bi_rng_comb[ij1]
+
+    print('####################')
+    print('### (Be, Bi): ', Be, Bi)
+    print('####################')
+
+    # -- result path
+    res_path = os.path.join(cwd, res_dir+sim_suffix)
+    if not os.path.exists(res_path): os.mkdir(res_path)
+
+    os.chdir(res_path)
+    print('Resetting random seed ...')
+    np.random.seed(1)
+
+    # -- L23 recurrent connectivity
+    W_EtoE = _mycon_(NE, NE, Bee, .15)
+    W_EtoI = _mycon_(NE, NI, Bei, .15)
+    W_ItoE = _mycon_(NI, NE, Bie, 1.)
+    W_ItoI = _mycon_(NI, NI, Bii, 1.)
+
+    # -- running simulations
+    sim_res = {}
+
+    for nn_stim in nn_stim_rng:
+
+        print('\n # -----> size of pert. inh: ', nn_stim)
+
+        np.random.seed(2)
+        r_extra = np.zeros(N)
+        r_extra[NE:NE+nn_stim] = r_stim
+
+        rr1 = r_bkg*np.ones(N)
+        rr2 = rr1 + r_extra
+
+        sim_res[nn_stim] = myRun(rr1, rr2, nn_stim=nn_stim)
+
+    sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials
+    sim_res['N'], sim_res['NE'], sim_res['NI'] = N, NE, NI
+    sim_res['Tblank'], sim_res['Tstim'], sim_res['Ttrans'] = Tblank, Tstim, Ttrans
+    sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
+
+    os.chdir(res_path);
+    sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
+    fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
 
 t_end = time.time()
 print('took: ', np.round((t_end-t_init)/60), ' mins')
