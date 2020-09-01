@@ -13,6 +13,11 @@ n_cores = 4
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
 if os.path.exists(nest_path):
     sys.path.append(nest_path)
+    
+# Result directory
+res_dir = ""
+fig_dir = "Figures"
+sim_suffix = "saveW"
 
 #------------- neuron params
 

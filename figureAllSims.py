@@ -13,13 +13,13 @@ import defaultParams; reload(defaultParams); from defaultParams import *
 cwd = os.getcwd()
 
 # -- reading the results
-os.chdir(cwd+'/SimulationResults')
+os.chdir(os.path.join(cwd, res_dir + sim_suffix))
 
 fl = open('analysis_results', 'rb'); analysis_results=pickle.load(fl); fl.close()
 [rdIp_all, nns_finer, zip_finer_all,  nn_crit_all] = analysis_results
 
 # -- plotting
-fig_path = cwd+'/Figures/'
+fig_path = os.path.join(cwd, fig_dir + sim_suffix)
 if not os.path.exists(fig_path): os.mkdir(fig_path)
 os.chdir(fig_path)
 

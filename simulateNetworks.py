@@ -34,8 +34,8 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
 
         # -- restart the simulator
         net_tools._nest_start_()
-
         init_seed = np.random.randint(1, 1234, n_cores)
+        print('init_seed = ', init_seed)
         nest.SetStatus([0],[{'rng_seeds':init_seed.tolist()}])
 
         # -- exc & inh neurons
@@ -132,10 +132,12 @@ for ij1, Be in enumerate(Be_rng):
         print('####################')
 
         # -- result path
-        res_path = cwd+'/SimulationResults/'
+        res_path = os.path.join(cwd, res_dir+sim_suffix)
         if not os.path.exists(res_path): os.mkdir(res_path)
 
         os.chdir(res_path)
+        print('Restting random seed ...')
+        np.random.seed(1)
 
         # -- L23 recurrent connectivity
         W_EtoE = _mycon_(NE, NE, Bee, .15)
@@ -150,6 +152,7 @@ for ij1, Be in enumerate(Be_rng):
 
             print('\n # -----> size of pert. inh: ', nn_stim)
 
+            np.random.seed(2)
             r_extra = np.zeros(N)
             r_extra[NE:NE+nn_stim] = r_stim
 
@@ -161,6 +164,7 @@ for ij1, Be in enumerate(Be_rng):
         sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials
         sim_res['N'], sim_res['NE'], sim_res['NI'] = N, NE, NI
         sim_res['Tblank'], sim_res['Tstim'], sim_res['Ttrans'] = Tblank, Tstim, Ttrans
+        sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
 
         os.chdir(res_path);
         sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)

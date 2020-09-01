@@ -19,7 +19,7 @@ nn_crit_all = np.zeros((len(Be_rng), len(Bi_rng)))
 for ij1, Be in enumerate(Be_rng):
     for ij2, Bi in enumerate(Bi_rng):
 
-        os.chdir(cwd+'/SimulationResults')
+        os.chdir(os.path.join(cwd, res_dir + sim_suffix))
         sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
         fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
 
