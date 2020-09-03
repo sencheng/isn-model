@@ -21,9 +21,9 @@ t_init = time.time()
 def _rect_(xx): return xx*(xx>0)
 
 # -- generates the weight matrix
-def _mycon_(N1, N2, B12, pr=1.):
+def _mycon_(N1, N2, B12, B12_std, pr=1.):
     zb = np.random.binomial(1, pr, (N1,N2))
-    zw = np.sign(B12) * _rect_(np.random.normal(abs(B12),abs(B12)/5,(N1,N2)))
+    zw = np.sign(B12) * _rect_(np.random.normal(abs(B12),abs(B12_std),(N1,N2)))
     zz = zb* zw
     return zz
 
@@ -138,9 +138,10 @@ Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
-
-    Bee, Bei = Be_rng_comb[ij1], Be_rng_comb[ij1]
-    Bie, Bii = Bi_rng_comb[ij1], Bi_rng_comb[ij1]
+    
+    Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
+    Bee, Bei = Be, Be
+    Bie, Bii = Bi, Bi
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -155,10 +156,10 @@ for ij1 in range(Be_rng_comb.size):
     np.random.seed(1)
 
     # -- L23 recurrent connectivity
-    W_EtoE = _mycon_(NE, NE, Bee, .15)
-    W_EtoI = _mycon_(NE, NI, Bei, .15)
-    W_ItoE = _mycon_(NI, NE, Bie, 1.)
-    W_ItoI = _mycon_(NI, NI, Bii, 1.)
+    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, .15)
+    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, .15)
+    W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
+    W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
 
     # -- running simulations
     sim_res = {}
