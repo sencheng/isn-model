@@ -28,6 +28,18 @@ def _mycon_(N1, N2, B12, B12_std, pr=1.):
     return zz
 
 def _guasconn_(N1, N2, B12, conn_std, pr=1.):
+    
+    '''
+    This function is very similar the "_mycon_". The reason I added this function
+    is that the sparse connections in "_mycon_" are created using a binomial
+    process. Changing the variance in binomial process requires changing "n, p",
+    which consequently changes the total number of input connections and thus
+    lead to a different network behavior. To overcome this limitation, I used 
+    a Guassian process instead of the binomial one, which enables me to change
+    the variance while keeping the total number of incoming connections almost
+    fixed.
+    '''
+    
     zb = np.zeros((N1, N2))
     num_in = np.random.normal(N1*pr, conn_std, N2)
     num_in[num_in<0] = 0
