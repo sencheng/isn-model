@@ -137,6 +137,7 @@ for ij1, Be in enumerate(Be_rng):
         
         os.chdir(os.path.join(cwd, res_dir + sim_suffix))
         sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
+        print('Reading {} ...\n'.format(sim_name))
         # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
         
         fig, ax = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
@@ -177,16 +178,16 @@ for ij1, Be in enumerate(Be_rng):
             ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
             
             
-        # fig.savefig(os.path.join(fig_path, "fr-Ninp-{}-{}.pdf".format(Be, Bi)),
-        #             format="pdf")
+        fig.savefig(os.path.join(fig_path, "fr-Ninp-{}-{}.pdf".format(Be, Bi)),
+                    format="pdf")
         fig_e.savefig(os.path.join(fig_path, "fre-Ninp-{}-{}.pdf".format(Be, Bi)),
                     format="pdf")
         
-        # fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-{}-{}.pdf".format(Be, Bi)),
-        #                  format="pdf")
+        fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-{}-{}.pdf".format(Be, Bi)),
+                         format="pdf")
         
-        # fig_base.savefig(os.path.join(fig_path, "fr-base-dist-{}-{}.pdf".format(Be, Bi)),
-        #                  format="pdf")
+        fig_base.savefig(os.path.join(fig_path, "fr-base-dist-{}-{}.pdf".format(Be, Bi)),
+                         format="pdf")
         plt.close(fig)
         plt.close(fig_e)
         plt.close(fig_dist)
