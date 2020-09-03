@@ -15,9 +15,9 @@ if os.path.exists(nest_path):
     sys.path.append(nest_path)
     
 # Result directory
-res_dir = ""
+res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "saveW"
+sim_suffix = "-newconn"
 
 #------------- neuron params
 
