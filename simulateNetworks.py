@@ -27,6 +27,20 @@ def _mycon_(N1, N2, B12, B12_std, pr=1.):
     zz = zb* zw
     return zz
 
+def _guasconn_(N1, N2, B12, conn_std, pr=1.):
+    zb = np.zeros((N1, N2))
+    num_in = np.random.normal(N1*pr, conn_std, N2)
+    num_in[num_in<0] = 0
+    num_in_i = num_in.astype(int)
+    
+    for n2 in range(N2):
+        rp = np.random.permutation(N1)[:num_in_i[n2]]
+        zb[rp, n2] = 1
+    
+    zw = np.sign(B12) * _rect_(np.random.normal(abs(B12),abs(B12/5),(N1,N2)))
+    zz = zb * zw
+    return zz
+
 # -- runs a network simulation with a defined inh perturbation
 bw = 50.
 def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
@@ -156,8 +170,15 @@ for ij1 in range(Be_rng_comb.size):
     np.random.seed(1)
 
     # -- L23 recurrent connectivity
-    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, .15)
-    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, .15)
+    # W_EtoE = _mycon_(NE, NE, Bee, Bee/5, .15)
+    # W_EtoI = _mycon_(NE, NI, Bei, Bei/5, .15)
+    # W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
+    # W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+    
+    # Indegree with Guassian distribution
+    p_conn = 0.15
+    W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn*(1-p_conn)), p_conn)
+    W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn*(1-p_conn)), p_conn)
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
 
