@@ -159,15 +159,24 @@ os.chdir(cwd)
 
 # def simulate(job_id, num_jobs):
 
-Be_rng_comb, Bi_rng_comb = np.meshgrid(Be_rng, Bi_rng)
+#pert_fr = np.arange(-400, -2100, -400)
+fr_chg_factor = np.arange(1.05, 1.40, .05)
+
+Be_rng_comb, Bi_rng_comb, fr_chg_comb = np.meshgrid(Be_rng, Bi_rng, fr_chg_factor)
 Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
+fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
+#pert_comb = pert_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
     
+    #r_stim = pert_comb[ij1]
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
     Bee, Bei = Be, Be
     Bie, Bii = Bi, Bi
+
+    #sim_suffix = "-pert{}".format(r_stim)
+    sim_suffix = "-incfac{:.3f}".format(fr_chg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -175,25 +184,26 @@ for ij1 in range(Be_rng_comb.size):
 
     # -- result path
     res_path = os.path.join(cwd, res_dir+sim_suffix)
-    if not os.path.exists(res_path): os.mkdir(res_path)
+    if not os.path.exists(res_path): os.makedirs(res_path, exist_ok=True)
 
     os.chdir(res_path)
     print('Resetting random seed ...')
     np.random.seed(1)
-
-    # -- L23 recurrent connectivity
-    # W_EtoE = _mycon_(NE, NE, Bee, Bee/5, .15)
-    # W_EtoI = _mycon_(NE, NI, Bei, Bei/5, .15)
-    # W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
-    # W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
     
-    # Indegree with Guassian distribution
+    # -- L23 recurrent connectivity
     p_conn = 0.15
-    W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn*(1-p_conn)), p_conn)
-    W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn*(1-p_conn)), p_conn)
+    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn)
+    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn)
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
-
+    '''
+    # Indegree with Guassian distribution
+    p_conn = 0.15
+    W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn*(1-p_conn))*6, p_conn)
+    W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn*(1-p_conn))*0.5, p_conn)
+    W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
+    W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+    '''
     # -- running simulations
     sim_res = {}
 
@@ -205,7 +215,10 @@ for ij1 in range(Be_rng_comb.size):
         r_extra = np.zeros(N)
         r_extra[NE:NE+nn_stim] = r_stim
 
-        rr1 = r_bkg*np.ones(N)
+        fr_inc_factor = fr_chg_comb[ij1]
+        r_bkg_e = r_bkg; r_bkg_i = r_bkg*fr_inc_factor
+        rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
+        #rr1 = r_bkg*np.ones(N)
         rr2 = rr1 + r_extra
 
         sim_res[nn_stim] = myRun(rr1, rr2, nn_stim=nn_stim)

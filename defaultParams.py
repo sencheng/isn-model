@@ -7,7 +7,7 @@ import numpy as np; import pylab as pl; import time, sys, os
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 4
+n_cores = 6
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-newconn"
+sim_suffix = "-incfac1.350"
 
 #------------- neuron params
 
