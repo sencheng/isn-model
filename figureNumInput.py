@@ -8,6 +8,7 @@
 import numpy as np; import pylab as pl; import os, pickle
 import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
+from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 
@@ -104,13 +105,50 @@ class simdata():
         self.sum_w_itoe = self.w_itoe.sum(axis=0)
         self.sum_w_itoi = self.w_itoi.sum(axis=0)
         
+    def plot_reg_line(self, x, y, ax):
+        
+        x_line = np.array([x.min(), x.max()])
+        
+        out = linregress(x, y)
+        y_line = out.slope*x_line + out.intercept
+        
+        ax.plot(x_line, y_line, color='black')
+        ax.set_title('r={:.2f}-'.format(out.pvalue)+ax.get_title())
+        
+        
     def plot_indeg_frdiff(self, ax):
         
         ax.scatter(self.diff_inh_m, self.indeg_etoi, s=1)
+        self.plot_reg_line(self.diff_inh_m, self.indeg_etoi, ax)
         
     def plot_indeg_frdiff_e(self, ax):
         
         ax.scatter(self.diff_exc_m, self.indeg_etoe, s=1)
+        self.plot_reg_line(self.diff_exc_m, self.indeg_etoe, ax)
+        
+    def plot_inpfr_frdiff(self, ax):
+
+        sum_fr = np.zeros_like(self.stim_inh)        
+        w_etoi_bin = self.w_etoi>0
+        
+        for i in range(self.NI):
+            
+            sum_fr[i, :] = self.stim_exc[w_etoi_bin[:, i], :].mean(axis=0)
+        
+        ax.scatter(self.diff_inh.flatten(), sum_fr.flatten())
+        self.plot_reg_line(self.diff_inh.flatten(), sum_fr.flatten(), ax)
+        
+    def plot_inpfr_frdiff_e(self, ax):
+
+        sum_fr = np.zeros_like(self.stim_exc)        
+        w_etoe_bin = self.w_etoe>0
+        
+        for i in range(self.NE):
+            
+            sum_fr[i, :] = self.stim_exc[w_etoe_bin[:, i], :].mean(axis=0)
+        
+        ax.scatter(self.diff_exc.flatten(), sum_fr.flatten())
+        self.plot_reg_line(self.diff_exc.flatten(), sum_fr.flatten(), ax)
         
     def plot_frdiff_dist(self, ax, num_bins=20):
         
@@ -144,17 +182,27 @@ for ij1, Be in enumerate(Be_rng):
         fig_e, ax_e = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         
         simdata_obj = simdata(sim_name)
         
         ax[0, 0].set_ylabel('E to I')
         ax[1, 0].set_ylabel('E to I')
         
+        ax_i_fr[0, 0].set_ylabel('Avg. fr. E to I')
+        ax_i_fr[1, 0].set_ylabel('Avg. fr. E to I')
+        
+        ax_e_fr[0, 0].set_ylabel('Avg. fr. E to E')
+        ax_e_fr[1, 0].set_ylabel('Avg. fr. E to E')
+        
         ax_e[0, 0].set_ylabel('E to E')
         ax_e[1, 0].set_ylabel('E to E')
         
         ax[1, 1].set_xlabel('Firing rate change (Hz)')
         ax_e[1, 1].set_xlabel('Firing rate change (Hz)')
+        ax_i_fr[1, 1].set_xlabel('Firing rate change (Hz)')
+        ax_e_fr[1, 1].set_xlabel('Firing rate change (Hz)')
         
         ax_base[1, 1].set_xlabel('Firing rate (Hz)')
         
@@ -173,6 +221,10 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
             
+            simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
+            
+            simdata_obj.plot_inpfr_frdiff_e(ax_e_fr[a_r, a_c])
+            
             ax[a_r, a_c].set_title('P={}'.format(nn_stim))
             ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
             ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
@@ -183,14 +235,23 @@ for ij1, Be in enumerate(Be_rng):
         fig_e.savefig(os.path.join(fig_path, "fre-Ninp-{}-{}.pdf".format(Be, Bi)),
                     format="pdf")
         
+        fig_e_fr.savefig(os.path.join(fig_path, "fr-fr-diff-dist-{}-{}.pdf".format(Be, Bi)),
+                         format="pdf")
+        
+        fig_i_fr.savefig(os.path.join(fig_path, "fre-fr-diff-dist-{}-{}.pdf".format(Be, Bi)),
+                         format="pdf")
+        
         fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-{}-{}.pdf".format(Be, Bi)),
                          format="pdf")
         
         fig_base.savefig(os.path.join(fig_path, "fr-base-dist-{}-{}.pdf".format(Be, Bi)),
                          format="pdf")
+                
         plt.close(fig)
         plt.close(fig_e)
         plt.close(fig_dist)
         plt.close(fig_base)
+        plt.close(fig_i_fr)
+        plt.close(fig_e_fr)
 
 os.chdir(cwd)
