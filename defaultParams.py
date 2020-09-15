@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-incfac1.350"
+sim_suffix = "-pert-400"
 
 #------------- neuron params
 
@@ -115,7 +115,7 @@ cell_type = 'aeif_cond_alpha'
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')
 
-SIZE = 15
+SIZE = 10
 pl.rc('font', size=SIZE)  # controls default text sizes
 pl.rc('axes', titlesize=SIZE)  # fontsize of the axes title
 pl.rc('axes', labelsize=SIZE)  # fontsize of the x and y labels
