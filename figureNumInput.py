@@ -14,6 +14,28 @@ import defaultParams; reload(defaultParams); from defaultParams import *
 
 class simdata():
     
+    '''
+    Class for analyzing simulation data of an inhibition stabilized network.
+    
+    Parameters
+    ----------
+    
+    fl_path : Path for the data file (these files are discriminated by
+                                      inh. and exc. conductances)
+    
+    
+    Attributes
+    ----------
+    
+    Ntrials : Number of trials
+    
+    NE, NI      : Size of excitatory, inhibitory population
+    
+    st_tr_time, end_tr_time : Python arrays that contain the time point at which 
+                              trials start and end.
+    
+    '''
+    
     def __init__(self, fl_path):
         
         fl = open(fl_path, 'rb'); sim_res = pickle.load(fl); fl.close()
@@ -46,25 +68,63 @@ class simdata():
         
     def get_trial_times(self):
         
-        trial_duration = self.Ttrans + self.Tblank + self.Tstim
+        '''
+        Trials appear in a single simulation session one after another. This
+        method extract starting (attr: st_tr_time) and finishing time
+        (attr: end_tr_time) of each trial.
+        '''
         
-        self.st_tr_time = np.arange(self.Ntrials)*trial_duration
-        self.end_tr_time = np.arange(1, self.Ntrials+1)*trial_duration
+        self.st_tr_time = np.arange(self.Ntrials)*self.Texp
+        self.end_tr_time = np.arange(1, self.Ntrials+1)*self.Texp
         
     def get_ind_fr(self, Id, duration, is_ms=True):
+        
+        """
+        Calculates the firing rate of individual neurons for a given duration.
+        
+        Inputs
+        ------
+        Id : numpy array
+             containing neuron ids for the given duration.
+        
+        duration :  int
+                    The time interval during which the recording is performed.
+        
+        is_ms : bool
+                whether the duration is in ms or not. Default is True.
+        
+        Outputs
+        -------
+        
+        fr_e, fr_i : (numpy array, numpy array)
+                    Average firing rate of individual excitatory
+                    and inhibitory neurons.
+        """
         
         if is_ms:
             c_factor = 1000
         else:
             c_factor = 1
-        
-        fr = np.histogram(Id, self.Nall)[0]/duration*c_factor
-        
-        fr_e, fr_i = fr[:self.NE], fr[self.NE:]
-        
+            
+        fr_e = np.histogram(Id[Id <= self.NE], np.arange(1, self.NE+1.1))[0]/duration*c_factor
+        fr_i = np.histogram(Id[Id > self.NE], np.arange(self.NE+1, self.Nall+1.1))[0]/duration*c_factor
+
         return fr_e, fr_i
     
     def smooth(self, signal, win_size=20, kernel='rect'):
+        
+        '''
+        Smoothen the input signal.
+        
+        Inputs
+        ------
+        
+        signal : The signal to be smoothened.
+        
+        win_size : Smoothing filter size. Default is 20.
+        
+        kernel : The flitering kernel. The only available option is "rect"
+        '''
         
         if kernel=='rect':
             
@@ -129,7 +189,7 @@ class simdata():
             sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
                                (spk_times <  self.st_tr_time[tr]+interval[1])]
             
-            e, i = self.get_ind_fr(sel_id, self.Tblank, is_ms=True)   
+            e, i = self.get_ind_fr(sel_id, np.diff(interval), is_ms=True)   
             
             fr_exc[:, tr] = e
             fr_inh[:, tr] = i
@@ -143,8 +203,8 @@ class simdata():
             
         bin_size = 1
         T_edges_def = np.arange(interval[0],
-                            interval[1],
-                            bin_size)
+                                interval[1],
+                                bin_size)
         
         fr_inh = np.zeros((self.Ntrials, T_edges_def.size-1))
         fr_exc = np.zeros((self.Ntrials, T_edges_def.size-1))
@@ -172,6 +232,15 @@ class simdata():
         return fr_exc, fr_inh, T_edges[0:-1]+bin_size/2
             
     def get_fr_diff(self, pert_val):
+        
+        '''
+        This method calculates the change of average firing rate for each
+        individual neuron in each trial due to perturbation.
+        
+        Parameters
+        ----------
+        pert_val : perturbation value
+        '''
         
         self.base_exc, self.base_inh = self.get_fr(pert_val,
                                                    [self.Ttrans,
@@ -397,7 +466,6 @@ for ij1, Be in enumerate(Be_rng):
             simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
             
             simdata_obj.plot_inpfr_frdiff_e(ax_e_fr[a_r, a_c])
-            simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
             
             simdata_obj.get_avg_frs(nn_stim)
             simdata_obj.concat_avg_frs_perts(ii)
