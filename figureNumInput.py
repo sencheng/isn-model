@@ -400,11 +400,64 @@ class simdata():
         edges = np.linspace(_min, _max, num_bins)
         
         ax.hist([self.base_exc.flatten(),
+        
                  self.base_inh.flatten()], edges, color=['red', 'blue'])
         
+    def create_fig_subdir(self, path, dir_name):
+        
+        dir_path = os.path.join(path, dir_name)
+        os.makedirs(dir_path, exist_ok=True)
+        
+        return dir_path
+    
+    def plot_raster_tr(self, ids, times, ax):
+        
+        for i, e_id in enumerate(self.vis_E_ids):
+            
+            sel_spks = times[ids==e_id]
+            
+            ax.plot(sel_spks, (i+1)*np.ones_like(sel_spks),
+                    color='red', marker='|', markersize=1, linestyle='')
+            
+        for i, i_id in enumerate(self.vis_I_ids):
+            
+            sel_spks = times[ids==i_id]
+            
+            ax.plot(sel_spks, (i+self.vis_E_ids.size+1)*np.ones_like(sel_spks),
+                    color='blue', marker='|', markersize=1, linestyle='')
+        
+    def plot_raster(self, pert_val, ax, prop=0.05):
+        
+        if not hasattr(self, 'st_tr_time'):
+            self.get_trial_times()
+            
+        spk_times = self.sim_res[pert_val][2]['times']
+        spk_ids   = self.sim_res[pert_val][2]['senders']
+        
+        vis_NE = int(self.NE*prop)
+        vis_NI = int(self.NI*prop)
+        
+        self.vis_E_ids = np.random.choice(np.unique(spk_ids[spk_ids<=self.NE]),
+                                          vis_NE, replace=False)
+        self.vis_I_ids = np.random.choice(np.unique(spk_ids[spk_ids>self.NE]),
+                                          vis_NI, replace=False)
+            
+        for i in range(self.Ntrials):
+            
+            spk_t = spk_times[(spk_times>=self.st_tr_time[i]) & 
+                              (spk_times<=self.end_tr_time[i])] - self.st_tr_time[i]
+            
+            spk_id = spk_ids[(spk_times>=self.st_tr_time[i]) & 
+                             (spk_times<=self.end_tr_time[i])]
+            
+            self.plot_raster_tr(spk_id, spk_t, ax[i])
+            
+        ax[-1].set_xlabel("Time (ms)")
+        ax[2].set_ylabel("Neuron ID")
     
 cwd = os.getcwd()
 fig_path = os.path.join(cwd, fig_dir+sim_suffix)
+os.makedirs(fig_path, exist_ok=True)
         
 for ij1, Be in enumerate(Be_rng):
     
@@ -452,6 +505,9 @@ for ij1, Be in enumerate(Be_rng):
         
         for ii, nn_stim in enumerate(nn_stim_rng):
             
+            fig_raster, ax_raster = plt.subplots(nrows=Ntrials, ncols=1,
+                                                 sharex=True, sharey=True)
+            
             a_r, a_c = ii//3, ii%3
             
             simdata_obj.get_fr_diff(nn_stim)
@@ -469,6 +525,12 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.get_avg_frs(nn_stim)
             simdata_obj.concat_avg_frs_perts(ii)
+            
+            path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
+            simdata_obj.plot_raster(nn_stim, ax_raster)
+            fig_raster.savefig(os.path.join(path_raster_fig,
+                                            "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                               format="png")
             
             ax[a_r, a_c].set_title('P={}'.format(nn_stim))
             ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
