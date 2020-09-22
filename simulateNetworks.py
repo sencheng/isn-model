@@ -1,4 +1,4 @@
-
+\
 ################################################################################
 # -- Simulating Exc-Inh spiking networks in response to inhibitory perturbation
 ################################################################################
@@ -160,14 +160,18 @@ os.chdir(cwd)
 # def simulate(job_id, num_jobs):
 
 #pert_fr = np.arange(-400, -2100, -400)
-fr_chg_factor = np.array([1.150])#np.arange(1.05, 1.40, .05)
+fr_chg_factor = np.arange(0.5, 1, .1)
 E_extra_stim_factor = np.arange(1.2, 2.1, 0.2)
+EEconn_chg_factor = np.arange(0.9, 0.95, 0.05)
+EIconn_chg_factor = np.arange(2.0, 2.01, 0.1)
 
-Be_rng_comb, Bi_rng_comb, fr_chg_comb, E_extra_comb = np.meshgrid(Be_rng, Bi_rng, fr_chg_factor, E_extra_stim_factor)
+Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor)
 Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
-fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
-E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
+EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
+EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
+#fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
+#E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
 #pert_comb = pert_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
@@ -178,7 +182,9 @@ for ij1 in range(Be_rng_comb.size):
     Bie, Bii = Bi, Bi
 
     #sim_suffix = "-pert{}".format(r_stim)
-    sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
+    #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
+    #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
+    sim_suffix = "-EEstdfac2-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -191,21 +197,22 @@ for ij1 in range(Be_rng_comb.size):
     os.chdir(res_path)
     print('Resetting random seed ...')
     np.random.seed(1)
-    
+    '''
     # -- L23 recurrent connectivity
     p_conn = 0.15
-    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn)
-    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn)
+    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
+    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
     '''
     # Indegree with Guassian distribution
     p_conn = 0.15
-    W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn*(1-p_conn))*6, p_conn)
-    W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn*(1-p_conn))*0.5, p_conn)
+    p_conn_ee = p_conn*EE_probchg_comb[ij1]
+    p_conn_ei = p_conn*EI_probchg_comb[ij1]
+    W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn_ee*(1-p_conn_ee))*3, p_conn_ee)
+    W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn_ei*(1-p_conn_ei)), p_conn_ei)
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
-    '''
     # -- running simulations
     sim_res = {}
 
@@ -216,10 +223,10 @@ for ij1 in range(Be_rng_comb.size):
         np.random.seed(2)
         r_extra = np.zeros(N)
         r_extra[NE:NE+nn_stim] = r_stim
-        r_extra[0:NE] = r_stim*E_extra_comb[ij1]
+        #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
 
-        fr_inc_factor = fr_chg_comb[ij1]
-        r_bkg_e = r_bkg; r_bkg_i = r_bkg*fr_inc_factor
+        #fr_inc_factor = fr_chg_comb[ij1]
+        r_bkg_e = r_bkg; r_bkg_i = r_bkg
         rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         #rr1 = r_bkg*np.ones(N)
         rr2 = rr1 + r_extra
