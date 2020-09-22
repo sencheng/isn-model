@@ -1,4 +1,4 @@
-
+\
 ################################################################################
 # -- Default set of parameters
 ################################################################################
@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-pert-400"
+sim_suffix = "-EEstdfac2-HEEcond-EE_probchg0.90-EI_probchg2.10"
 
 #------------- neuron params
 
@@ -36,12 +36,12 @@ Ureset = -60.e-3
 C = 120e-12
 # leak conductance (S)
 Gl = 1./140e6
-
 # sample Exc and Inh conductances (nS)
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
 # background and stimulus conductances (nS)
