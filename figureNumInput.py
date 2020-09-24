@@ -66,6 +66,14 @@ class simdata():
         self.base_ticks = np.zeros_like(nn_stim_rng)
         self.stim_ticks = np.zeros_like(nn_stim_rng)
         
+        self.trans_cv = np.zeros((2, self.Ntrials))
+        self.base_cv  = np.zeros_like(self.trans_cv)
+        self.stim_cv  = np.zeros_like(self.trans_cv)
+        
+        self.trans_ff = np.zeros_like(self.trans_cv)
+        self.base_ff  = np.zeros_like(self.trans_cv)
+        self.stim_ff  = np.zeros_like(self.trans_cv)
+        
     def get_trial_times(self):
         
         '''
@@ -169,7 +177,64 @@ class simdata():
         fr_i = self.smooth(fr_i)
         
         return fr_e, fr_i
+    
+    def get_ind_cv(self, ID, T):
+        
+        u_id = np.unique(ID)
+        cv = np.zeros_like(u_id)
+        
+        for i, Id in enumerate(u_id):
             
+            spks = T[ID==Id]
+            spks.sort()
+            if spks.size > 1:            
+                ISI = np.diff(spks)
+                cv[i] = ISI.var()/(ISI.mean()**2)
+            else:
+                cv[i] = -1
+            
+        return cv
+    
+    def get_cv(self, pert_val, interval, ff_bin=2):
+        
+        if not hasattr(self, 'st_tr_time'):
+            self.get_trial_times()
+        
+        spk_times = self.sim_res[pert_val][2]['times']
+        spk_ids   = self.sim_res[pert_val][2]['senders']
+        
+        e_cv = np.zeros(self.Ntrials)
+        i_cv, e_ff, i_ff = np.zeros_like(e_cv), np.zeros_like(e_cv), np.zeros_like(e_cv)
+        
+        for tr in range(self.Ntrials):
+            
+            # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
+            #                      (spk_times <  self.st_tr_time[i]+interval[1])]
+            sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                               (spk_times <  self.st_tr_time[tr]+interval[1])]
+            
+            spk_time = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                 (spk_times <  self.st_tr_time[tr]+interval[1])]
+            
+            e_id = sel_id[sel_id<=self.NE]
+            e_t  = spk_time[sel_id<=self.NE]
+            i_id = sel_id[sel_id> self.NE]
+            i_t  = spk_time[sel_id>self.NE]
+            
+            e_cv[tr] = self.get_ind_cv(e_id, e_t).mean()
+            i_cv[tr] = self.get_ind_cv(i_id, i_t).mean()
+            
+            e_fr_bin = np.histogram(e_t, np.arange(self.st_tr_time[tr]+interval[0],
+                                                   self.st_tr_time[tr]+interval[1],
+                                                   ff_bin))[0]/self.NE/np.diff(interval)*1000
+            e_ff[tr] = e_fr_bin.var()/e_fr_bin.mean()
+            
+            i_fr_bin = np.histogram(i_t, np.arange(self.st_tr_time[tr]+interval[0],
+                                                   self.st_tr_time[tr]+interval[1],
+                                                   ff_bin))[0]/self.NI/np.diff(interval)*1000
+            i_ff[tr] = e_fr_bin.var()/e_fr_bin.mean()
+            
+        return e_cv, i_cv, e_ff, i_ff
         
     def get_fr(self, pert_val, interval):
         
@@ -224,6 +289,8 @@ class simdata():
             sel_T    = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
                                  (spk_times <  self.st_tr_time[tr]+interval[1])]
             
+            
+            
             e, i = self.get_pop_fr(sel_id, sel_T, T_edges, is_ms=True)   
             
             fr_exc[tr, :] = e
@@ -248,6 +315,15 @@ class simdata():
         self.stim_exc, self.stim_inh = self.get_fr(pert_val,
                                                    [self.Ttrans+self.Tblank, 
                                                     self.Ttrans+self.Tblank+self.Tstim])
+        
+        self.trans_cv[0, :], self.trans_cv[1, :], self.trans_ff[0, :], self.trans_ff[1, :] = \
+        self.get_cv(pert_val, [0, self.Ttrans])
+        
+        self.base_cv[0, :], self.base_cv[1, :], self.base_ff[0, :], self.base_ff[1, :] = \
+        self.get_cv(pert_val, [self.Ttrans, self.Ttrans+self.Tblank])
+        
+        self.stim_cv[0, :], self.stim_cv[1, :], self.stim_ff[0, :], self.stim_ff[1, :] = \
+        self.get_cv(pert_val, [self.Ttrans+self.Tblank, self.Ttrans+self.Tblank+self.Tstim])
         
         self.diff_exc = self.stim_exc - self.base_exc
         self.diff_inh = self.stim_inh - self.base_inh
@@ -458,6 +534,13 @@ class simdata():
 cwd = os.getcwd()
 fig_path = os.path.join(cwd, fig_dir+sim_suffix)
 os.makedirs(fig_path, exist_ok=True)
+
+cv_e = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 3))
+cv_i = np.zeros_like(cv_e)
+
+ff_e = np.zeros_like(cv_e)
+ff_i = np.zeros_like(cv_e)
+
         
 for ij1, Be in enumerate(Be_rng):
     
@@ -526,11 +609,29 @@ for ij1, Be in enumerate(Be_rng):
             simdata_obj.get_avg_frs(nn_stim)
             simdata_obj.concat_avg_frs_perts(ii)
             
-            path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
-            simdata_obj.plot_raster(nn_stim, ax_raster)
-            fig_raster.savefig(os.path.join(path_raster_fig,
-                                            "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
-                               format="png")
+            
+            cv_e[ij1, ij2, ii, 0] = simdata_obj.trans_cv[0, :].mean()
+            cv_e[ij1, ij2, ii, 1] = simdata_obj.base_cv[0, :].mean()
+            cv_e[ij1, ij2, ii, 2] = simdata_obj.stim_cv[0, :].mean()
+            
+            ff_e[ij1, ij2, ii, 0] = simdata_obj.trans_ff[0, :].mean()
+            ff_e[ij1, ij2, ii, 1] = simdata_obj.base_ff[0, :].mean()
+            ff_e[ij1, ij2, ii, 2] = simdata_obj.stim_ff[0, :].mean()
+            
+            cv_i[ij1, ij2, ii, 0] = simdata_obj.trans_cv[1, :].mean()
+            cv_i[ij1, ij2, ii, 1] = simdata_obj.base_cv[1, :].mean()
+            cv_i[ij1, ij2, ii, 2] = simdata_obj.stim_cv[1, :].mean()
+            
+            ff_i[ij1, ij2, ii, 0] = simdata_obj.trans_ff[1, :].mean()
+            ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
+            ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
+            
+            # path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
+            # simdata_obj.plot_raster(nn_stim, ax_raster)
+            # fig_raster.savefig(os.path.join(path_raster_fig,
+            #                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+            #                    format="png")
+            plt.close(fig_raster)
             
             ax[a_r, a_c].set_title('P={}'.format(nn_stim))
             ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
@@ -577,5 +678,49 @@ for ij1, Be in enumerate(Be_rng):
                      format="pdf")
     
     plt.close(fig_box)
+    
+cv_ff_fig_path = os.path.join(fig_path, "CV-FF")
+os.makedirs(cv_ff_fig_path, exist_ok=True)
+    
+for ii, nn_stim in enumerate(nn_stim_rng):
+    
+    fig_cv, ax_cv = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    fig_ff, ax_ff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    
+    for i in range(3):
+    
+        ce = ax_cv[0, i].pcolor(Bi_rng, Be_rng, cv_e[:, :, ii, i], vmin=0, vmax=cv_e.max())
+        ci = ax_cv[1, i].pcolor(Bi_rng, Be_rng, cv_i[:, :, ii, i], vmin=0, vmax=cv_i.max())
+        
+        fe = ax_ff[0, i].pcolor(Bi_rng, Be_rng, ff_e[:, :, ii, i], vmin=ff_e.min(), vmax=ff_e.max())
+        fi = ax_ff[1, i].pcolor(Bi_rng, Be_rng, ff_i[:, :, ii, i], vmin=ff_i.min(), vmax=ff_i.max())
+    
+    
+    fig_cv.subplots_adjust(right=0.8)
+    fig_ff.subplots_adjust(right=0.8)
+    
+    cbar_cve = fig_cv.add_axes([0.85, 0.15, 0.02, 0.3])
+    cbar_cvi = fig_cv.add_axes([0.85, 0.5, 0.02, 0.3])
+    cbar_ffe = fig_ff.add_axes([0.85, 0.15, 0.02, 0.3])
+    cbar_ffi = fig_ff.add_axes([0.85, 0.5, 0.02, 0.3])
+    
+    plt.colorbar(ce, cax=cbar_cve)
+    plt.colorbar(ci, cax=cbar_cvi)
+    plt.colorbar(fe, cax=cbar_ffe)
+    plt.colorbar(fi, cax=cbar_ffi)
+    
+    ax_cv[1, 1].set_xlabel("Bi")
+    ax_cv[1, 0].set_ylabel("Be")
+    ax_cv[0, 0].set_ylabel("Be")
+    
+    ax_ff[1, 1].set_xlabel("Bi")
+    ax_ff[1, 0].set_ylabel("Be")
+    ax_ff[0, 0].set_ylabel("Be")
+    
+    fig_cv.suptitle("Coefficient of variation")
+    fig_ff.suptitle("Fano factor")
+    
+    fig_cv.savefig(os.path.join(cv_ff_fig_path, "CV-P{}.pdf".format(nn_stim)))
+    fig_ff.savefig(os.path.join(cv_ff_fig_path, "FF-P{}.pdf".format(nn_stim)))
 
 os.chdir(cwd)
