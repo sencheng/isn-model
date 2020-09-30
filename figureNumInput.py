@@ -181,18 +181,16 @@ class simdata():
     def get_ind_cv(self, ID, T):
         
         u_id = np.unique(ID)
-        cv = np.zeros_like(u_id)
+        cv = []
         
         for i, Id in enumerate(u_id):
             
             spks = T[ID==Id]
             spks.sort()
-            if spks.size > 1:            
+            if spks.size > 2:            
                 ISI = np.diff(spks)
-                cv[i] = ISI.var()/(ISI.mean()**2)
-            else:
-                cv[i] = -1
-            
+                cv.append(ISI.var()/(ISI.mean()**2))
+                             
         return cv
     
     def get_cv(self, pert_val, interval, ff_bin=2):
@@ -221,8 +219,8 @@ class simdata():
             i_id = sel_id[sel_id> self.NE]
             i_t  = spk_time[sel_id>self.NE]
             
-            e_cv[tr] = self.get_ind_cv(e_id, e_t).mean()
-            i_cv[tr] = self.get_ind_cv(i_id, i_t).mean()
+            e_cv[tr] = np.mean(self.get_ind_cv(e_id, e_t))
+            i_cv[tr] = np.mean(self.get_ind_cv(i_id, i_t))
             
             e_fr_bin = np.histogram(e_t, np.arange(self.st_tr_time[tr]+interval[0],
                                                    self.st_tr_time[tr]+interval[1],
