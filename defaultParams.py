@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-EEstdfac2-HEEcond-EE_probchg0.90-EI_probchg2.10"
+sim_suffix = "-EIpert-longersim-HEEcond-EE_probchg0.90-EI_probchg2.00"
 
 #------------- neuron params
 
@@ -85,11 +85,11 @@ r_bkg = 10000.-400.
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 150.
+Ttrans = 300.
 # simulation time before perturbation (ms)
-Tblank= 500.
+Tblank= 900.
 # simulation time of perturbation (ms)
-Tstim = 500.
+Tstim = 900.
 
 # number of trials
 Ntrials = 5
