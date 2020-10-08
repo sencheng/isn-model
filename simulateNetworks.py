@@ -161,32 +161,36 @@ os.chdir(cwd)
 
 #pert_fr = np.arange(-400, -2100, -400)
 fr_chg_factor = np.arange(0.5, 1, .1)
-E_extra_stim_factor = np.arange(1.2, 2.1, 0.2)
+E_extra_stim_factor = np.arange(0.2, 1., 0.2)
 EEconn_chg_factor = np.arange(0.9, 0.95, 0.05)
 EIconn_chg_factor = np.arange(2.0, 2.01, 0.1)
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
+bkg_chg_factor    = np.arange(1., 1.01, 0.05)
 
-Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor)
+Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
 Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
 EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
 EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
 II_condchg_comb = II_condchg_comb.flatten()[job_id::num_jobs]
 #fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
-#E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
+E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
+bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
 #pert_comb = pert_comb.flatten()[job_id::num_jobs]
+
+
 
 for ij1 in range(Be_rng_comb.size):
     
     #r_stim = pert_comb[ij1]
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
     Bee, Bei = Be, Be
-    Bie, Bii = Bi, -0.2
+    Bie, Bii = Bi, Bi
 
     #sim_suffix = "-pert{}".format(r_stim)
     #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
     #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
-    sim_suffix = "-EIpert-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-EqEIpertpop-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -225,10 +229,11 @@ for ij1 in range(Be_rng_comb.size):
         np.random.seed(2)
         r_extra = np.zeros(N)
         r_extra[NE:NE+nn_stim] = r_stim
-        r_extra[0:NE] = r_stim#*E_extra_comb[ij1]
+        #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
+        r_extra[0:int(nn_stim*NE/NI)] = r_stim*E_extra_comb[ij1]
 
         #fr_inc_factor = fr_chg_comb[ij1]
-        r_bkg_e = r_bkg; r_bkg_i = r_bkg
+        r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         #rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.random.uniform(0.9, 1.1, NI)))
         rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         #rr1 = r_bkg*np.ones(N)
