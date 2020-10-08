@@ -333,6 +333,10 @@ class simdata():
             
             self.diff_exc = self.diff_exc[(self.base_exc!=0) | (self.stim_exc!=0)]
             self.diff_inh = self.diff_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
+            
+            self.paradox_score = ((np.sum(self.diff_inh>0)/self.diff_inh.size -\
+                                   np.sum(self.diff_exc>0)/self.diff_exc.size)*\
+                                   np.sum(self.diff_inh>0)/self.diff_inh.size)
         
             self.diff_exc_m = self.diff_exc.mean()
             self.diff_inh_m = self.diff_inh.mean()
@@ -547,6 +551,8 @@ cv_i = np.zeros_like(cv_e)
 ff_e = np.zeros_like(cv_e)
 ff_i = np.zeros_like(cv_e)
 
+paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
+
         
 for ij1, Be in enumerate(Be_rng):
     
@@ -606,7 +612,11 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
             
+            paradox_score[ij1, ij2, ii] = simdata_obj.paradox_score
+            
             simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
+            
+            simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
             
             # simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
             
@@ -645,6 +655,7 @@ for ij1, Be in enumerate(Be_rng):
             
         
         ax_box[0, ij2].set_title('Bi={}'.format(Bi))
+        ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
         
         simdata_obj.plot_avg_frs(ax_avg_fr)
         ax_avg_fr.set_title("Be={}, Bi={}".format(Be, Bi))
@@ -687,46 +698,67 @@ for ij1, Be in enumerate(Be_rng):
     
 cv_ff_fig_path = os.path.join(fig_path, "CV-FF")
 os.makedirs(cv_ff_fig_path, exist_ok=True)
+
+Ge = np.append(0, Be_rng)
+Gi = np.append(0, Bi_rng)
+
+fig_psc, ax_psc = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+bar_psc = fig_psc.add_axes([0.7, 0.15, 0.02, 0.3])
     
 for ii, nn_stim in enumerate(nn_stim_rng):
     
-    fig_cv, ax_cv = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-    fig_ff, ax_ff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
+                                       vmin=paradox_score.min(),
+                                       vmax=paradox_score.max())
+    ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
     
-    for i in range(3):
+ax_psc[1, 0].set_xlabel("Inh. Cond.")
+ax_psc[1, 1].set_xlabel("Inh. Cond.")
+
+ax_psc[0, 0].set_ylabel("Exc. Cond.")
+ax_psc[1, 0].set_ylabel("Exc. Cond.")
+
+plt.colorbar(f, cax=bar_psc)
+
+fig_psc.savefig(os.path.join(fig_path, "paradoxical-score.pdf"), format="pdf")
     
-        ce = ax_cv[0, i].pcolor(Bi_rng, Be_rng, cv_e[:, :, ii, i], vmin=0, vmax=cv_e.max())
-        ci = ax_cv[1, i].pcolor(Bi_rng, Be_rng, cv_i[:, :, ii, i], vmin=0, vmax=cv_i.max())
+    # fig_cv, ax_cv = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    # fig_ff, ax_ff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    
+    # for i in range(3):
+    
+    #     ce = ax_cv[0, i].pcolor(Bi_rng, Be_rng, cv_e[:, :, ii, i], vmin=0, vmax=cv_e.max())
+    #     ci = ax_cv[1, i].pcolor(Bi_rng, Be_rng, cv_i[:, :, ii, i], vmin=0, vmax=cv_i.max())
         
-        fe = ax_ff[0, i].pcolor(Bi_rng, Be_rng, ff_e[:, :, ii, i], vmin=ff_e.min(), vmax=ff_e.max())
-        fi = ax_ff[1, i].pcolor(Bi_rng, Be_rng, ff_i[:, :, ii, i], vmin=ff_i.min(), vmax=ff_i.max())
+    #     fe = ax_ff[0, i].pcolor(Bi_rng, Be_rng, ff_e[:, :, ii, i], vmin=ff_e.min(), vmax=ff_e.max())
+    #     fi = ax_ff[1, i].pcolor(Bi_rng, Be_rng, ff_i[:, :, ii, i], vmin=ff_i.min(), vmax=ff_i.max())
     
     
-    fig_cv.subplots_adjust(right=0.8)
-    fig_ff.subplots_adjust(right=0.8)
+    # fig_cv.subplots_adjust(right=0.8)
+    # fig_ff.subplots_adjust(right=0.8)
     
-    cbar_cve = fig_cv.add_axes([0.85, 0.15, 0.02, 0.3])
-    cbar_cvi = fig_cv.add_axes([0.85, 0.5, 0.02, 0.3])
-    cbar_ffe = fig_ff.add_axes([0.85, 0.15, 0.02, 0.3])
-    cbar_ffi = fig_ff.add_axes([0.85, 0.5, 0.02, 0.3])
+    # cbar_cve = fig_cv.add_axes([0.85, 0.15, 0.02, 0.3])
+    # cbar_cvi = fig_cv.add_axes([0.85, 0.5, 0.02, 0.3])
+    # cbar_ffe = fig_ff.add_axes([0.85, 0.15, 0.02, 0.3])
+    # cbar_ffi = fig_ff.add_axes([0.85, 0.5, 0.02, 0.3])
     
-    plt.colorbar(ce, cax=cbar_cve)
-    plt.colorbar(ci, cax=cbar_cvi)
-    plt.colorbar(fe, cax=cbar_ffe)
-    plt.colorbar(fi, cax=cbar_ffi)
+    # plt.colorbar(ce, cax=cbar_cve)
+    # plt.colorbar(ci, cax=cbar_cvi)
+    # plt.colorbar(fe, cax=cbar_ffe)
+    # plt.colorbar(fi, cax=cbar_ffi)
     
-    ax_cv[1, 1].set_xlabel("Bi")
-    ax_cv[1, 0].set_ylabel("Be")
-    ax_cv[0, 0].set_ylabel("Be")
+    # ax_cv[1, 1].set_xlabel("Bi")
+    # ax_cv[1, 0].set_ylabel("Be")
+    # ax_cv[0, 0].set_ylabel("Be")
     
-    ax_ff[1, 1].set_xlabel("Bi")
-    ax_ff[1, 0].set_ylabel("Be")
-    ax_ff[0, 0].set_ylabel("Be")
+    # ax_ff[1, 1].set_xlabel("Bi")
+    # ax_ff[1, 0].set_ylabel("Be")
+    # ax_ff[0, 0].set_ylabel("Be")
     
-    fig_cv.suptitle("Coefficient of variation")
-    fig_ff.suptitle("Fano factor")
+    # fig_cv.suptitle("Coefficient of variation")
+    # fig_ff.suptitle("Fano factor")
     
-    fig_cv.savefig(os.path.join(cv_ff_fig_path, "CV-P{}.pdf".format(nn_stim)))
-    fig_ff.savefig(os.path.join(cv_ff_fig_path, "FF-P{}.pdf".format(nn_stim)))
+    # fig_cv.savefig(os.path.join(cv_ff_fig_path, "CV-P{}.pdf".format(nn_stim)))
+    # fig_ff.savefig(os.path.join(cv_ff_fig_path, "FF-P{}.pdf".format(nn_stim)))
 
 os.chdir(cwd)
