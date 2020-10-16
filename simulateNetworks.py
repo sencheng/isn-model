@@ -178,6 +178,7 @@ E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
 bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
 #pert_comb = pert_comb.flatten()[job_id::num_jobs]
 
+E_pert_frac = 0.2
 
 
 for ij1 in range(Be_rng_comb.size):
@@ -190,7 +191,7 @@ for ij1 in range(Be_rng_comb.size):
     #sim_suffix = "-pert{}".format(r_stim)
     #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
     #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
-    sim_suffix = "-EqEIpertpop-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -230,7 +231,7 @@ for ij1 in range(Be_rng_comb.size):
         r_extra = np.zeros(N)
         r_extra[NE:NE+nn_stim] = r_stim
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
-        r_extra[0:int(nn_stim*NE/NI)] = r_stim*E_extra_comb[ij1]
+        r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
 
         #fr_inc_factor = fr_chg_comb[ij1]
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
