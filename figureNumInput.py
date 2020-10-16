@@ -85,6 +85,42 @@ class simdata():
         self.st_tr_time = np.arange(self.Ntrials)*self.Texp
         self.end_tr_time = np.arange(1, self.Ntrials+1)*self.Texp
         
+    def get_ind_cond(self, Id, g_in):
+        
+        """
+        Calculates the inhibitory input conductances
+        of individual neurons for a given duration.
+        
+        Inputs
+        ------
+        Id : numpy array
+             containing neuron ids for the given duration.
+        
+        duration :  int
+                    The time interval during which the recording is performed.
+        
+        is_ms : bool
+                whether the duration is in ms or not. Default is True.
+        
+        Outputs
+        -------
+        
+        cond_e, cond_i : (numpy array, numpy array)
+                         inhibitory input conductance of individual excitatory
+                         and inhibitory neurons.
+        """
+        ids = np.unique(Id)
+        avg_curr = np.zeros(ids.shape)
+        
+        for i, ID in enumerate(ids):
+            avg_curr[i] = g_in[Id==ID].mean()
+            
+        curr_e = avg_curr[ids<=NE]
+        curr_i = avg_curr[ids>NE]
+        
+        return curr_e, curr_i
+            
+        
     def get_ind_fr(self, Id, duration, is_ms=True):
         
         """
@@ -233,6 +269,32 @@ class simdata():
             i_ff[tr] = e_fr_bin.var()/e_fr_bin.mean()
             
         return e_cv, i_cv, e_ff, i_ff
+    
+    def get_cond(self, pert_val, interval):
+        
+        if not hasattr(self, 'st_tr_time'):
+            self.get_trial_times()
+        
+        cond_inh = np.zeros((self.NI, self.Ntrials))
+        cond_exc = np.zeros((self.NE, self.Ntrials))
+        
+        times = self.sim_res[pert_val][3]['times']
+        ids   = self.sim_res[pert_val][3]['senders']
+        conds = self.sim_res[pert_val][3]['g_in']
+        
+        for tr in range(self.Ntrials):
+            
+            # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
+            #                      (spk_times <  self.st_tr_time[i]+interval[1])]
+            sel_id = ids[(times >= self.st_tr_time[tr]+interval[0]) &
+                         (times <  self.st_tr_time[tr]+interval[1])]
+            
+            sel_g  = conds[(times >= self.st_tr_time[tr]+interval[0]) &
+                           (times <  self.st_tr_time[tr]+interval[1])]
+            
+            cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id, sel_g, is_ms=True)   
+            
+        return cond_exc, cond_inh
         
     def get_fr(self, pert_val, interval):
         
@@ -295,6 +357,30 @@ class simdata():
             fr_inh[tr, :] = i
             
         return fr_exc, fr_inh, T_edges[0:-1]+bin_size/2
+    
+    def get_cond_diff(self, pert_val):
+        
+        '''
+        This method calculates the change of average firing rate for each
+        individual neuron in each trial due to perturbation.
+        
+        Parameters
+        ----------
+        pert_val : perturbation value
+        '''
+        
+        self.base_e_cond, self.base_i_cond = self.get_cond(pert_val,
+                                                           [self.Ttrans,
+                                                            self.Ttrans+self.Tblank])
+        self.stim_e_cond, self.stim_i_cond = self.get_cond(pert_val,
+                                                           [self.Ttrans+self.Tblank, 
+                                                            self.Ttrans+self.Tblank+self.Tstim])
+            
+        self.diff_e_cond = self.stim_e_cond - self.base_e_cond
+        self.diff_i_cond = self.stim_i_cond - self.base_i_cond
+        
+        self.diff_exc_m = self.diff_e_cond.mean(axis=1)
+        self.diff_inh_m = self.diff_i_cond.mean(axis=1)
             
     def get_fr_diff(self, pert_val, exclude_inactives=True):
         
@@ -334,10 +420,14 @@ class simdata():
             self.diff_exc = self.diff_exc[(self.base_exc!=0) | (self.stim_exc!=0)]
             self.diff_inh = self.diff_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
             
-            self.paradox_score = ((np.sum(self.diff_inh>0)/self.diff_inh.size -\
-                                   np.sum(self.diff_exc>0)/self.diff_exc.size)*\
-                                   np.sum(self.diff_inh>0)/self.diff_inh.size)
-        
+            #self.paradox_score = ((np.sum(self.diff_inh>0)/self.diff_inh.size -\
+            #                       np.sum(self.diff_exc>0)/self.diff_exc.size)*\
+            #                       np.sum(self.diff_inh>0)/self.diff_inh.size)
+
+            self.paradox_score = np.sign(np.sum(self.diff_inh>0)/self.diff_inh.size-0.5)*\
+                                         (np.sum(self.diff_inh>0)/self.diff_inh.size/\
+                                         (np.sum(self.diff_exc>0)/self.diff_exc.size))
+
             self.diff_exc_m = self.diff_exc.mean()
             self.diff_inh_m = self.diff_inh.mean()
         
@@ -470,12 +560,26 @@ class simdata():
         ax.hist([self.diff_inh.flatten(),
                  self.diff_exc.flatten()], edges, color=['blue', 'red'])
         
+    def plot_conddiff_dist(self, ax, num_bins=20):
+        
+        edges = np.linspace(self.diff_i_cond.min(), self.diff_i_cond.max(), num_bins)
+        ax.hist([self.diff_i_cond.flatten(),
+                 self.diff_e_cond.flatten()], edges, color=['blue', 'red'])
+        
     def plot_box_frdiff(self, ax, pert_val):
         
         ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_val],
                       widths=[25], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_val],
+                      widths=[25], flierprops={'marker': '.'})
+        
+    def plot_box_conddiff(self, ax, pert_val):
+        
+        ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_val],
+                      widths=[25], flierprops={'marker': '.'})
+        
+        ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_val],
                       widths=[25], flierprops={'marker': '.'})
         
     def plot_fr_dist(self, ax, num_bins=20):
@@ -559,6 +663,9 @@ for ij1, Be in enumerate(Be_rng):
     fig_box, ax_box = plt.subplots(nrows=2, ncols=Bi_rng.size,
                                    sharex=True, sharey=True)
     
+    fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                   sharex=True, sharey=True)
+    
     for ij2, Bi in enumerate(Bi_rng):
         
         os.chdir(os.path.join(cwd, res_dir + sim_suffix))
@@ -570,6 +677,7 @@ for ij1, Be in enumerate(Be_rng):
         fig_e, ax_e = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         
@@ -606,17 +714,23 @@ for ij1, Be in enumerate(Be_rng):
             a_r, a_c = ii//3, ii%3
             
             simdata_obj.get_fr_diff(nn_stim)
+            
+            simdata_obj.get_cond_diff(nn_stim)
             # simdata_obj.get_indegree()
             # simdata_obj.plot_indeg_frdiff(ax[a_r, a_c])
             # simdata_obj.plot_indeg_frdiff_e(ax_e[a_r, a_c])
             
             simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
             
+            simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
+            
             paradox_score[ij1, ij2, ii] = simdata_obj.paradox_score
             
             simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
             
-            simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
+            simdata_obj.plot_box_frdiff(ax_box_[:, ij2], nn_stim)
+            
+            simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
             # simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
             
@@ -677,6 +791,9 @@ for ij1, Be in enumerate(Be_rng):
         fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                          format="pdf")
         
+        fig_dist_g.savefig(os.path.join(fig_path, "g-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+                           format="pdf")
+        
         fig_base.savefig(os.path.join(fig_path, "fr-base-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                          format="pdf")
         
@@ -686,6 +803,7 @@ for ij1, Be in enumerate(Be_rng):
         plt.close(fig)
         plt.close(fig_e)
         plt.close(fig_dist)
+        plt.close(fig_dist_g)
         plt.close(fig_base)
         plt.close(fig_i_fr)
         plt.close(fig_e_fr)
@@ -693,6 +811,9 @@ for ij1, Be in enumerate(Be_rng):
         
     fig_box.savefig(os.path.join(fig_path, "fr-diff-box-Be{}.pdf".format(Be)),
                      format="pdf")
+    
+    fig_box_g.savefig(os.path.join(fig_path, "g-diff-box-Be{}.pdf".format(Be)),
+                      format="pdf")
     
     plt.close(fig_box)
     
@@ -707,9 +828,11 @@ bar_psc = fig_psc.add_axes([0.7, 0.15, 0.02, 0.3])
     
 for ii, nn_stim in enumerate(nn_stim_rng):
     
-    f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
-                                       vmin=paradox_score.min(),
-                                       vmax=paradox_score.max())
+    if paradox_score[:, :, ii].max()>1:
+    
+        f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii]-1,
+                                           vmin=0,
+                                           vmax=paradox_score.max()-1)
     ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
     
 ax_psc[1, 0].set_xlabel("Inh. Cond.")
@@ -718,7 +841,8 @@ ax_psc[1, 1].set_xlabel("Inh. Cond.")
 ax_psc[0, 0].set_ylabel("Exc. Cond.")
 ax_psc[1, 0].set_ylabel("Exc. Cond.")
 
-plt.colorbar(f, cax=bar_psc)
+if "f" in locals():
+    plt.colorbar(f, cax=bar_psc)
 
 fig_psc.savefig(os.path.join(fig_path, "paradoxical-score.pdf"), format="pdf")
     
