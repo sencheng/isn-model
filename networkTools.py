@@ -89,20 +89,36 @@ def _recording_spikes_(neurons, start=0., stop=np.inf, to_file=False, to_memory=
     ConvConnect(neurons, spikes)
     return spikes
 
+def _recording_gin_(neurons, start=0., stop=np.inf, to_file=False, to_memory=True):
+    mm = nest.Create("multimeter", 1)
+    nest.SetStatus(mm, {"record_from": ["g_in"],
+                        "withtime":True,
+                        "label":'current',
+                        "to_file":to_file,
+                        "to_memory":to_memory,
+                        "start": start,
+                        "stop": stop})
+
+    ConvConnect(mm, neurons)
+    return mm
+
 def _recording_voltages_(neurons, start=0., stop=np.inf):
     voltages = nest.Create("voltmeter")
     nest.SetStatus(voltages, {"withtime":True,
-                        "label":'volt-meter',
-                        "to_file":False,
-                        "to_memory":True,
-                        "start": start,
-                        "stop": stop})
+                            "label":'volt-meter',
+                            "to_file":False,
+                            "to_memory":True,
+                            "start": start,
+                            "stop": stop})
     DivConnect(voltages, neurons)
     return voltages
 
 def _reading_spikes_(spikes):
     spike_data = nest.GetStatus(spikes)[0]['events']
     return spike_data
+
+def _reading_currents_(currs):
+    return nest.GetStatus(currs)[0]['events']
 
 def _reading_voltages_(voltages):
     voltage_data = nest.GetStatus(voltages)[0]['events']
