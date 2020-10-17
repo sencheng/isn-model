@@ -85,7 +85,7 @@ class simdata():
         self.st_tr_time = np.arange(self.Ntrials)*self.Texp
         self.end_tr_time = np.arange(1, self.Ntrials+1)*self.Texp
         
-    def get_ind_cond(self, Id, g_in):
+    def get_ind_cond(self, Id, g_in, g_ex):
         
         """
         Calculates the inhibitory input conductances
@@ -110,15 +110,17 @@ class simdata():
                          and inhibitory neurons.
         """
         ids = np.unique(Id)
-        avg_curr = np.zeros(ids.shape)
+        avg_curr_i = np.zeros(ids.shape)
+        avg_curr_e = np.zeros(ids.shape)
         
         for i, ID in enumerate(ids):
-            avg_curr[i] = g_in[Id==ID].mean()
+            avg_curr_i[i] = g_in[Id==ID].mean()
+            avg_curr_e[i] = g_ex[Id==ID].mean()
             
-        curr_e = avg_curr[ids<=NE]
-        curr_i = avg_curr[ids>NE]
+        # curr_e = avg_curr[ids<=NE]
+        # curr_i = avg_curr[ids>NE]
         
-        return curr_e, curr_i
+        return avg_curr_e, avg_curr_i
             
         
     def get_ind_fr(self, Id, duration, is_ms=True):
@@ -275,12 +277,13 @@ class simdata():
         if not hasattr(self, 'st_tr_time'):
             self.get_trial_times()
         
-        cond_inh = np.zeros((self.NI, self.Ntrials))
-        cond_exc = np.zeros((self.NE, self.Ntrials))
+        cond_inh = np.zeros((self.N, self.Ntrials))
+        cond_exc = np.zeros((self.N, self.Ntrials))
         
         times = self.sim_res[pert_val][3]['times']
         ids   = self.sim_res[pert_val][3]['senders']
-        conds = self.sim_res[pert_val][3]['g_in']
+        conds_i = self.sim_res[pert_val][3]['g_in']
+        conds_e = self.sim_res[pert_val][3]['g_ex']
         
         for tr in range(self.Ntrials):
             
@@ -289,10 +292,14 @@ class simdata():
             sel_id = ids[(times >= self.st_tr_time[tr]+interval[0]) &
                          (times <  self.st_tr_time[tr]+interval[1])]
             
-            sel_g  = conds[(times >= self.st_tr_time[tr]+interval[0]) &
-                           (times <  self.st_tr_time[tr]+interval[1])]
+            sel_g_i  = conds_i[(times >= self.st_tr_time[tr]+interval[0]) &
+                               (times <  self.st_tr_time[tr]+interval[1])]
             
-            cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id, sel_g, is_ms=True)   
+            sel_g_e  = conds_e[(times >= self.st_tr_time[tr]+interval[0]) &
+                               (times <  self.st_tr_time[tr]+interval[1])]
+            
+            cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id,
+                                                                 [sel_g_i, sel_g_e])   
             
         return cond_exc, cond_inh
         

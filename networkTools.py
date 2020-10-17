@@ -91,7 +91,7 @@ def _recording_spikes_(neurons, start=0., stop=np.inf, to_file=False, to_memory=
 
 def _recording_gin_(neurons, start=0., stop=np.inf, to_file=False, to_memory=True):
     mm = nest.Create("multimeter", 1)
-    nest.SetStatus(mm, {"record_from": ["g_in"],
+    nest.SetStatus(mm, {"record_from": ["g_in", "g_ex"],
                         "withtime":True,
                         "label":'current',
                         "to_file":to_file,
