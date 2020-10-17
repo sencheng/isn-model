@@ -272,7 +272,8 @@ for ij1 in range(Be_rng_comb.size):
 
         np.random.seed(2)
         r_extra = np.zeros(N)
-        r_extra[NE:NE+nn_stim] = r_stim
+        r_extra[N-NI_vip:N-NI_vip+int(NI_vip*nn_stim/NI)] = r_stim
+        #r_extra[NE:NE+nn_stim] = r_stim
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
 
         #fr_inc_factor = fr_chg_comb[ij1]

@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.stats import linregress
 from imp import reload
-import defaultParams; reload(defaultParams); from defaultParams import *
+import defaultParams_3INTtype; reload(defaultParams_3INTtype); from defaultParams_3INTtype import *
 
 class simdata():
     
@@ -50,11 +50,11 @@ class simdata():
         self.Tblank = sim_res['Tblank']
         self.Texp   = self.Ttrans + self.Tstim + self.Tblank
         
-        self.w_etoe = sim_res['W_EtoE']
-        self.w_etoi = sim_res['W_EtoI']
-        self.w_itoe = sim_res['W_ItoE']        
-        self.w_itoi = sim_res['W_ItoI']
-        del sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI']
+        #self.w_etoe = sim_res['W_EtoE']
+        #self.w_etoi = sim_res['W_EtoI']
+        #self.w_itoe = sim_res['W_ItoE']        
+        #self.w_itoi = sim_res['W_ItoI']
+        #del sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI']
         
         self.sim_res = sim_res
         
@@ -292,7 +292,7 @@ class simdata():
             sel_g  = conds[(times >= self.st_tr_time[tr]+interval[0]) &
                            (times <  self.st_tr_time[tr]+interval[1])]
             
-            cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id, sel_g, is_ms=True)   
+            cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id, sel_g)   
             
         return cond_exc, cond_inh
         
@@ -728,7 +728,7 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
             
-            simdata_obj.plot_box_frdiff(ax_box_[:, ij2], nn_stim)
+            simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
             
             simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
