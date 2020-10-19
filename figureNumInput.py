@@ -420,6 +420,22 @@ class simdata():
         self.diff_exc = self.stim_exc - self.base_exc
         self.diff_inh = self.stim_inh - self.base_inh
         
+        if 'NI_pv' in locals():
+            
+            self.base_inh_pv = self.base_inh[:NI_pv]
+            self.stim_inh_pv = self.stim_inh[:NI_pv]
+            
+            self.base_inh_som = self.base_inh[NI_pv:NI-NI_vip]
+            self.stim_inh_som = self.stim_inh[NI_pv:NI-NI_vip]
+            
+            self.base_inh_vip = self.base_inh[NI-NI_vip:]
+            self.stim_inh_vip = self.stim_inh[NI-NI_vip:]
+            
+            self.diff_inh_pv = self.diff_inh[:NI_pv]
+            self.diff_inh_som = self.diff_inh[NI_pv:NI-NI_vip]
+            self.diff_inh_vip = self.diff_inh[NI-NI_vip:]
+        
+        
         self.diff_exc_m = self.diff_exc.mean(axis=1)
         self.diff_inh_m = self.diff_inh.mean(axis=1)
         
@@ -427,6 +443,17 @@ class simdata():
             
             self.diff_exc = self.diff_exc[(self.base_exc!=0) | (self.stim_exc!=0)]
             self.diff_inh = self.diff_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
+            
+            if hasattr(self, 'diff_inh_pv'):
+                
+                self.diff_inh_pv = self.diff_inh_pv[(self.base_inh_pv!=0) |
+                                                    (self.stim_inh_pv!=0)]
+                
+                self.diff_inh_som = self.diff_inh_som[(self.base_inh_som!=0) |
+                                                      (self.stim_inh_som!=0)]
+                
+                self.diff_inh_vip = self.diff_inh_vip[(self.base_inh_vip!=0) |
+                                                      (self.stim_inh_vip!=0)]
             
             #self.paradox_score = ((np.sum(self.diff_inh>0)/self.diff_inh.size -\
             #                       np.sum(self.diff_exc>0)/self.diff_exc.size)*\
@@ -565,14 +592,27 @@ class simdata():
     def plot_frdiff_dist(self, ax, num_bins=20):
         
         edges = np.linspace(self.diff_inh.min(), self.diff_inh.max(), num_bins)
-        ax.hist([self.diff_inh.flatten(),
-                 self.diff_exc.flatten()], edges, color=['blue', 'red'])
+        
+        if hasattr(self, 'diff_inh_pv'):
+            ax.hist([self.diff_inh_pv.flatten(),
+                     self.diff_inh_som.flatten(),
+                     self.diff_inh_vip.flatten(),
+                     self.diff_exc.flatten()], edges,
+                    color=[(0,0,.2), (0,0,.5), (0,0,.8), (1,0,0)],
+                    label=['I_pv', 'I_som', 'I_vip', 'E'])
+        else:
+            ax.hist([self.diff_inh.flatten(),
+                     self.diff_exc.flatten()], edges,
+                    color=['blue', 'red'],
+                    label=['I', 'E'])
         
     def plot_conddiff_dist(self, ax, num_bins=20):
         
         edges = np.linspace(self.diff_i_cond.min(), self.diff_i_cond.max(), num_bins)
         ax.hist([self.diff_i_cond.flatten(),
-                 self.diff_e_cond.flatten()], edges, color=['blue', 'red'])
+                 self.diff_e_cond.flatten()], edges,
+                color=['blue', 'red'],
+                label=['I', 'E'])
         
     def plot_box_frdiff(self, ax, pert_val):
         
@@ -597,9 +637,10 @@ class simdata():
         
         edges = np.linspace(_min, _max, num_bins)
         
-        ax.hist([self.base_exc.flatten(),
-        
-                 self.base_inh.flatten()], edges, color=['red', 'blue'])
+        ax.hist([self.base_exc.flatten(),  
+                 self.base_inh.flatten()], edges,
+                color=['red', 'blue'],
+                label=['E', 'I'])
         
     def create_fig_subdir(self, path, dir_name):
         
@@ -729,6 +770,7 @@ for ij1, Be in enumerate(Be_rng):
             # simdata_obj.plot_indeg_frdiff_e(ax_e[a_r, a_c])
             
             simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
+            ax_dist[a_r, a_c].legend()
             
             simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
             
