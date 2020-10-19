@@ -277,8 +277,8 @@ class simdata():
         if not hasattr(self, 'st_tr_time'):
             self.get_trial_times()
         
-        cond_inh = np.zeros((self.N, self.Ntrials))
-        cond_exc = np.zeros((self.N, self.Ntrials))
+        cond_inh = np.zeros((self.Nall, self.Ntrials))
+        cond_exc = np.zeros((self.Nall, self.Ntrials))
         
         times = self.sim_res[pert_val][3]['times']
         ids   = self.sim_res[pert_val][3]['senders']
