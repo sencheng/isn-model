@@ -420,7 +420,7 @@ class simdata():
         self.diff_exc = self.stim_exc - self.base_exc
         self.diff_inh = self.stim_inh - self.base_inh
         
-        if 'NI_pv' in locals():
+        if 'NI_pv' in globals():
             
             self.base_inh_pv = self.base_inh[:NI_pv]
             self.stim_inh_pv = self.stim_inh[:NI_pv]
@@ -443,6 +443,8 @@ class simdata():
             
             self.diff_exc = self.diff_exc[(self.base_exc!=0) | (self.stim_exc!=0)]
             self.diff_inh = self.diff_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
+            
+            self.base_inh_nz = self.base_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
             
             if hasattr(self, 'diff_inh_pv'):
                 
@@ -554,6 +556,11 @@ class simdata():
         ax.plot(x_line, y_line, color='black')
         ax.set_title('r={:.2f}-'.format(out.pvalue)+ax.get_title())
         
+    def plot_basefr_frdiff(self, ax):
+        
+        ax.scatter(self.base_inh_nz, self.diff_inh, s=1)
+        self.plot_reg_line(self.base_inh_nz, self.diff_inh, ax)
+        
         
     def plot_indeg_frdiff(self, ax):
         
@@ -598,7 +605,7 @@ class simdata():
                      self.diff_inh_som.flatten(),
                      self.diff_inh_vip.flatten(),
                      self.diff_exc.flatten()], edges,
-                    color=[(0,0,.2), (0,0,.5), (0,0,.8), (1,0,0)],
+                    color=[(1,1,.2), (1,1,.5), (0,0,.8), (1,0,0)],
                     label=['I_pv', 'I_som', 'I_vip', 'E'])
         else:
             ax.hist([self.diff_inh.flatten(),
@@ -729,6 +736,7 @@ for ij1, Be in enumerate(Be_rng):
         fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         
         fig_avg_fr, ax_avg_fr = plt.subplots()
         
@@ -782,6 +790,8 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
+            simdata_obj.plot_basefr_frdiff(ax_base_frdiff[a_r, a_c])
+            
             # simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
             
             # simdata_obj.plot_inpfr_frdiff_e(ax_e_fr[a_r, a_c])
@@ -818,6 +828,9 @@ for ij1, Be in enumerate(Be_rng):
             ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
             
         
+        ax_base_frdiff[1, 1].set_xlabel("Baseline firing rate (sp/s)")
+        ax_base_frdiff[1, 0].set_xlabel("Firing rate changes (sp/s)")
+        ax_base_frdiff[0, 0].set_xlabel("Firing rate changes (sp/s)")
         ax_box[0, ij2].set_title('Bi={}'.format(Bi))
         ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
         
@@ -849,6 +862,9 @@ for ij1, Be in enumerate(Be_rng):
         
         fig_avg_fr.savefig(os.path.join(fig_path, "avgfr-Be{}-Bi{}.pdf".format(Be, Bi)),
                            format="pdf")
+        
+        fig_base_frdiff.savefig(os.path.join(fig_path, "basevsdiff-Be{}-Bi{}.pdf".format(Be, Bi)),
+                           format="pdf")
                 
         plt.close(fig)
         plt.close(fig_e)
@@ -858,6 +874,7 @@ for ij1, Be in enumerate(Be_rng):
         plt.close(fig_i_fr)
         plt.close(fig_e_fr)
         plt.close(fig_avg_fr)
+        plt.close(fig_base_frdiff)
         
     fig_box.savefig(os.path.join(fig_path, "fr-diff-box-Be{}.pdf".format(Be)),
                      format="pdf")
