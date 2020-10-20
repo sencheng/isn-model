@@ -274,7 +274,7 @@ for ij1 in range(Be_rng_comb.size):
         r_extra = np.zeros(N)
         r_extra[N-NI_vip:N-NI_vip+int(NI_vip*nn_stim/NI)] = r_stim
         #r_extra[NE:NE+nn_stim] = r_stim
-        #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
+        r_extra[0:int(NE*nn_stim/NI)] = r_stim
 
         #fr_inc_factor = fr_chg_comb[ij1]
         r_bkg_e = r_bkg; r_bkg_i = r_bkg

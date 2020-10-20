@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-3INT-pertVIP"
+sim_suffix = "-3INT-pertE_VIP-Eqfrac"
 
 #------------- neuron params
 
