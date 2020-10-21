@@ -445,6 +445,7 @@ class simdata():
             self.diff_inh = self.diff_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
             
             self.base_inh_nz = self.base_inh[(self.base_inh!=0) | (self.stim_inh!=0)]
+            self.base_exc_nz = self.base_exc[(self.base_exc!=0) | (self.stim_exc!=0)]
             
             if hasattr(self, 'diff_inh_pv'):
                 
@@ -558,9 +559,11 @@ class simdata():
         
     def plot_basefr_frdiff(self, ax):
         
-        ax.scatter(self.base_inh_nz, self.diff_inh, s=1)
+        ax.scatter(self.base_inh_nz, self.diff_inh, s=1, color='blue', label='I')
+        ax.scatter(self.base_exc_nz, self.diff_exc, s=1, color='red', label='E')
         self.plot_reg_line(self.base_inh_nz, self.diff_inh, ax)
-        
+        self.plot_reg_line(self.base_exc_nz, self.diff_exc, ax)
+        ax.legend()
         
     def plot_indeg_frdiff(self, ax):
         
@@ -829,8 +832,8 @@ for ij1, Be in enumerate(Be_rng):
             
         
         ax_base_frdiff[1, 1].set_xlabel("Baseline firing rate (sp/s)")
-        ax_base_frdiff[1, 0].set_xlabel("Firing rate changes (sp/s)")
-        ax_base_frdiff[0, 0].set_xlabel("Firing rate changes (sp/s)")
+        ax_base_frdiff[1, 0].set_ylabel("Firing rate changes (sp/s)")
+        ax_base_frdiff[0, 0].set_ylabel("Firing rate changes (sp/s)")
         ax_box[0, ij2].set_title('Bi={}'.format(Bi))
         ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
         
@@ -883,6 +886,7 @@ for ij1, Be in enumerate(Be_rng):
                       format="pdf")
     
     plt.close(fig_box)
+    plt.close(fig_box_g)
     
 cv_ff_fig_path = os.path.join(fig_path, "CV-FF")
 os.makedirs(cv_ff_fig_path, exist_ok=True)
