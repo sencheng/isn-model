@@ -10,7 +10,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import interp1d
 from scipy.stats import linregress
 from imp import reload
-import defaultParams_3INTtype; reload(defaultParams_3INTtype); from defaultParams_3INTtype import *
+import defaultParams; reload(defaultParams); from defaultParams import *
 
 class simdata():
     
@@ -772,7 +772,7 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.get_fr_diff(nn_stim)
             
-            simdata_obj.get_cond_diff(nn_stim)
+            # simdata_obj.get_cond_diff(nn_stim)
             # simdata_obj.get_indegree()
             # simdata_obj.plot_indeg_frdiff(ax[a_r, a_c])
             # simdata_obj.plot_indeg_frdiff_e(ax_e[a_r, a_c])
@@ -780,7 +780,7 @@ for ij1, Be in enumerate(Be_rng):
             simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
             ax_dist[a_r, a_c].legend()
             
-            simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
+            #simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
             
             paradox_score[ij1, ij2, ii] = simdata_obj.paradox_score
             
@@ -788,7 +788,7 @@ for ij1, Be in enumerate(Be_rng):
             
             simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
             
-            simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
+            #simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
             simdata_obj.plot_basefr_frdiff(ax_base_frdiff[a_r, a_c])
             
