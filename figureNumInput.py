@@ -462,9 +462,15 @@ class simdata():
             #                       np.sum(self.diff_exc>0)/self.diff_exc.size)*\
             #                       np.sum(self.diff_inh>0)/self.diff_inh.size)
 
-            self.paradox_score = np.sign(np.sum(self.diff_inh>0)/self.diff_inh.size-0.5)*\
-                                         (np.sum(self.diff_inh>0)/self.diff_inh.size/\
-                                         (np.sum(self.diff_exc>0)/self.diff_exc.size))
+            # self.paradox_score = np.sign(np.sum(self.diff_inh>0)/self.diff_inh.size-0.5)*\
+            #                              (np.sum(self.diff_inh>0)/self.diff_inh.size/\
+            #                              (np.sum(self.diff_exc>0)/self.diff_exc.size))
+                                             
+            if np.sum(self.diff_inh>0)/self.diff_inh.size > 0.5:
+                self.paradox_score = np.sum(self.diff_inh>0)/self.diff_inh.size-\
+                                     np.sum(self.diff_exc>0)/self.diff_exc.size
+            else:
+                self.paradox_score = np.nan
 
             self.diff_exc_m = self.diff_exc.mean()
             self.diff_inh_m = self.diff_inh.mean()
@@ -904,7 +910,7 @@ frchgdata = {'E': {'proportion_increase': pos_prop[:,:,:,0],
                    'mean_increase': mean_fr[:,:,:,0]},
              'I': {'proportion_increase': pos_prop[:,:,:,1],
                    'mean_increase': mean_fr[:,:,:,1]}}
-fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(fl, frchgdata); fl.close()
+fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
     
 '''    
 fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True, sharey=False)
@@ -928,9 +934,9 @@ for ii, nn_stim in enumerate(nn_stim_rng):
     
     if paradox_score[:, :, ii].max()>1:
     
-        f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii]-1,
+        f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
                                            vmin=0,
-                                           vmax=paradox_score.max()-1)
+                                           vmax=paradox_score.max())
     ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
     
 ax_psc[1, 0].set_xlabel("Inh. Cond.")
