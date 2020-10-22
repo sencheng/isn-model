@@ -659,10 +659,6 @@ class simdata():
         
         return dir_path
     
-    def plot_scatter(self, ax):
-        
-        
-    
     def plot_raster_tr(self, ids, times, ax):
         
         for i, e_id in enumerate(self.vis_E_ids):
