@@ -714,8 +714,8 @@ cv_i = np.zeros_like(cv_e)
 ff_e = np.zeros_like(cv_e)
 ff_i = np.zeros_like(cv_e)
 
-pos_prop = np.zeros((Be_rng.size, Bi_rng.size, nn_stim, 2))
-mean_fr  = np.zeros((Be_rng.size, Bi_rng.size, nn_stim, 2))
+pos_prop = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+mean_fr  = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
 
 paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
 
