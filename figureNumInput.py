@@ -659,6 +659,10 @@ class simdata():
         
         return dir_path
     
+    def plot_scatter(self, ax):
+        
+        
+    
     def plot_raster_tr(self, ids, times, ax):
         
         for i, e_id in enumerate(self.vis_E_ids):
@@ -713,6 +717,9 @@ cv_i = np.zeros_like(cv_e)
 
 ff_e = np.zeros_like(cv_e)
 ff_i = np.zeros_like(cv_e)
+
+pos_prop = np.zeros((Be_rng.size, Bi_rng.size, nn_stim, 2))
+mean_fr  = np.zeros((Be_rng.size, Bi_rng.size, nn_stim, 2))
 
 paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
 
@@ -802,22 +809,30 @@ for ij1, Be in enumerate(Be_rng):
             simdata_obj.get_avg_frs(nn_stim)
             simdata_obj.concat_avg_frs_perts(ii)
             
+            pos_prop[ij1, ij2, ii, 0] = np.sum(simdata_obj.diff_exc>0)/\
+                                        simdata_obj.diff_exc.size*100
+                                        
+            pos_prop[ij1, ij2, ii, 1] = np.sum(simdata_obj.diff_inh>0)/\
+                                        simdata_obj.diff_inh.size*100                            
             
-            cv_e[ij1, ij2, ii, 0] = simdata_obj.trans_cv[0, :].mean()
-            cv_e[ij1, ij2, ii, 1] = simdata_obj.base_cv[0, :].mean()
-            cv_e[ij1, ij2, ii, 2] = simdata_obj.stim_cv[0, :].mean()
+            mean_fr[ij1, ij2, ii, 0]  = simdata_obj.diff_exc.mean()
+            mean_fr[ij1, ij2, ii, 1]  = simdata_obj.diff_inh.mean()
             
-            ff_e[ij1, ij2, ii, 0] = simdata_obj.trans_ff[0, :].mean()
-            ff_e[ij1, ij2, ii, 1] = simdata_obj.base_ff[0, :].mean()
-            ff_e[ij1, ij2, ii, 2] = simdata_obj.stim_ff[0, :].mean()
+            # cv_e[ij1, ij2, ii, 0] = simdata_obj.trans_cv[0, :].mean()
+            # cv_e[ij1, ij2, ii, 1] = simdata_obj.base_cv[0, :].mean()
+            # cv_e[ij1, ij2, ii, 2] = simdata_obj.stim_cv[0, :].mean()
             
-            cv_i[ij1, ij2, ii, 0] = simdata_obj.trans_cv[1, :].mean()
-            cv_i[ij1, ij2, ii, 1] = simdata_obj.base_cv[1, :].mean()
-            cv_i[ij1, ij2, ii, 2] = simdata_obj.stim_cv[1, :].mean()
+            # ff_e[ij1, ij2, ii, 0] = simdata_obj.trans_ff[0, :].mean()
+            # ff_e[ij1, ij2, ii, 1] = simdata_obj.base_ff[0, :].mean()
+            # ff_e[ij1, ij2, ii, 2] = simdata_obj.stim_ff[0, :].mean()
             
-            ff_i[ij1, ij2, ii, 0] = simdata_obj.trans_ff[1, :].mean()
-            ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
-            ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
+            # cv_i[ij1, ij2, ii, 0] = simdata_obj.trans_cv[1, :].mean()
+            # cv_i[ij1, ij2, ii, 1] = simdata_obj.base_cv[1, :].mean()
+            # cv_i[ij1, ij2, ii, 2] = simdata_obj.stim_cv[1, :].mean()
+            
+            # ff_i[ij1, ij2, ii, 0] = simdata_obj.trans_ff[1, :].mean()
+            # ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
+            # ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
             
             # path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
             # simdata_obj.plot_raster(nn_stim, ax_raster)
@@ -887,6 +902,22 @@ for ij1, Be in enumerate(Be_rng):
     
     plt.close(fig_box)
     plt.close(fig_box_g)
+    
+    
+frchgdata = {'E': {'proportion_increase': pos_prop[:,:,:,0],
+                   'mean_increase': mean_fr[:,:,:,0]},
+             'I': {'proportion_increase': pos_prop[:,:,:,1],
+                   'mean_increase': mean_fr[:,:,:,1]}}
+fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(fl, frchgdata); fl.close()
+    
+'''    
+fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True, sharey=False)
+for ij2 in range(Bi_rng.size):
+    for ii in range(nn_stim_rng.size):
+        
+        ax[ij2, ii].scatter(pos_prop[:, ])
+        simdata_obj.plot_pos_prop(, )
+'''        
     
 cv_ff_fig_path = os.path.join(fig_path, "CV-FF")
 os.makedirs(cv_ff_fig_path, exist_ok=True)
