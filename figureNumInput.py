@@ -932,11 +932,10 @@ bar_psc = fig_psc.add_axes([0.7, 0.15, 0.02, 0.3])
     
 for ii, nn_stim in enumerate(nn_stim_rng):
     
-    if paradox_score[:, :, ii].max()>1:
-    
-        f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
-                                           vmin=0,
-                                           vmax=paradox_score.max())
+    # if paradox_score[:, :, ii].max()>1:
+    f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
+                                       vmin=paradox_score.min(),
+                                       vmax=paradox_score.max())
     ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
     
 ax_psc[1, 0].set_xlabel("Inh. Cond.")
