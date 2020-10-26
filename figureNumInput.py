@@ -729,7 +729,8 @@ paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
 for ij1, Be in enumerate(Be_rng):
     
     fig_box, ax_box = plt.subplots(nrows=2, ncols=Bi_rng.size,
-                                   sharex=True, sharey=True)
+                                   sharex=True, sharey=True,
+                                   figsize=(6, 6))
     
     fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
                                    sharex=True, sharey=True)
@@ -895,6 +896,11 @@ for ij1, Be in enumerate(Be_rng):
         plt.close(fig_e_fr)
         plt.close(fig_avg_fr)
         plt.close(fig_base_frdiff)
+        
+    ax_box[-1, 2].set_xlabel("Number of perturbed Is")
+    ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
+    ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
+    fig_box.suptitle("Be={:.2f}".format(Be))
         
     fig_box.savefig(os.path.join(fig_path, "fr-diff-box-Be{}.pdf".format(Be)),
                      format="pdf")
