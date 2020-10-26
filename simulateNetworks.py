@@ -229,7 +229,11 @@ for ij1 in range(Be_rng_comb.size):
 
         np.random.seed(2)
         r_extra = np.zeros(N)
-        r_extra[NE:NE+nn_stim] = r_stim
+        r_extra[NE:NE+int(nn_stim/2)] = r_stim
+        r_extra[NE+int(nn_stim/2):NE+nn_stim] = -r_stim
+        r_extra[0:int(NE*nn_stim/NI/2)] = r_stim
+        r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = -r_stim
+        #r_extra[NE:NE+nn_stim] = r_stim
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
         #r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
 
