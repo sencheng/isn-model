@@ -561,15 +561,16 @@ class simdata():
         y_line = out.slope*x_line + out.intercept
         
         ax.plot(x_line, y_line, color='black')
-        ax.set_title('r={:.2f}-'.format(out.pvalue)+ax.get_title())
+        #ax.set_title('r={:.2f}-'.format(out.pvalue)+ax.get_title())
         
     def plot_basefr_frdiff(self, ax):
         
-        ax.scatter(self.base_inh_nz, self.diff_inh, s=1, color='blue', label='I')
-        ax.scatter(self.base_exc_nz, self.diff_exc, s=1, color='red', label='E')
-        self.plot_reg_line(self.base_inh_nz, self.diff_inh, ax)
-        self.plot_reg_line(self.base_exc_nz, self.diff_exc, ax)
-        ax.legend()
+        ax[0].scatter(self.base_inh_nz, self.diff_inh, s=1, color='blue', label='I')
+        ax[1].scatter(self.base_exc_nz, self.diff_exc, s=1, color='red', label='E')
+        self.plot_reg_line(self.base_inh_nz, self.diff_inh, ax[0])
+        self.plot_reg_line(self.base_exc_nz, self.diff_exc, ax[1])
+        #ax[0].legend()
+        #ax[1].legend()
         
     def plot_indeg_frdiff(self, ax):
         
@@ -749,7 +750,7 @@ for ij1, Be in enumerate(Be_rng):
         fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-        fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True)
         
         fig_avg_fr, ax_avg_fr = plt.subplots()
         
@@ -803,7 +804,8 @@ for ij1, Be in enumerate(Be_rng):
             
             #simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
-            simdata_obj.plot_basefr_frdiff(ax_base_frdiff[a_r, a_c])
+            simdata_obj.plot_basefr_frdiff(ax_base_frdiff[:, ii])
+            ax_base_frdiff[0, ii].set_title("pert={:.0f}".format(nn_stim/NI*100))
             
             # simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
             
@@ -850,8 +852,8 @@ for ij1, Be in enumerate(Be_rng):
             
         
         ax_base_frdiff[1, 1].set_xlabel("Baseline firing rate (sp/s)")
-        ax_base_frdiff[1, 0].set_ylabel("Firing rate changes (sp/s)")
-        ax_base_frdiff[0, 0].set_ylabel("Firing rate changes (sp/s)")
+        ax_base_frdiff[1, 0].set_ylabel(r"$\Delta FR_E (sp/s)$")
+        ax_base_frdiff[0, 0].set_ylabel(r"$\Delta FR_I (sp/s)$")
         ax_box[0, ij2].set_title('Bi={}'.format(Bi))
         ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
         
