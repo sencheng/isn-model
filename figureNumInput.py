@@ -50,11 +50,12 @@ class simdata():
         self.Tblank = sim_res['Tblank']
         self.Texp   = self.Ttrans + self.Tstim + self.Tblank
         
-        #self.w_etoe = sim_res['W_EtoE']
-        #self.w_etoi = sim_res['W_EtoI']
-        #self.w_itoe = sim_res['W_ItoE']        
-        #self.w_itoi = sim_res['W_ItoI']
-        #del sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI']
+        if not "NI_pv" in globals():
+            self.w_etoe = sim_res['W_EtoE']
+            self.w_etoi = sim_res['W_EtoI']
+            self.w_itoe = sim_res['W_ItoE']        
+            self.w_itoi = sim_res['W_ItoI']
+            del sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI']
         
         self.sim_res = sim_res
         
@@ -584,27 +585,47 @@ class simdata():
         
     def plot_inpfr_frdiff(self, ax):
 
-        sum_fr = np.zeros_like(self.stim_inh)        
+        sum_fr_e = np.zeros_like(self.stim_inh)
+        sum_fr_i = np.zeros_like(self.stim_inh)
         w_etoi_bin = self.w_etoi>0
+        w_itoi_bin = self.w_itoi<0
         
         for i in range(self.NI):
             
-            sum_fr[i, :] = self.stim_exc[w_etoi_bin[:, i], :].mean(axis=0)
+            sum_fr_e[i, :] = self.stim_exc[w_etoi_bin[:, i], :].sum(axis=0)
+            sum_fr_i[i, :] = self.stim_inh[w_itoi_bin[:, i], :].sum(axis=0)
+            
+        sum_fr_e = sum_fr_e[(self.base_inh!=0) | (self.stim_inh!=0)]
+        sum_fr_i = sum_fr_i[(self.base_inh!=0) | (self.stim_inh!=0)]
         
-        ax.scatter(self.diff_inh.flatten(), sum_fr.flatten())
-        self.plot_reg_line(self.diff_inh.flatten(), sum_fr.flatten(), ax)
+        ax[0].scatter(self.diff_inh.flatten(), sum_fr_i.flatten(),
+                      color='blue', s=1)
+        ax[1].scatter(self.diff_inh.flatten(), sum_fr_e.flatten(),
+                      color='red', s=1)
+        self.plot_reg_line(self.diff_inh.flatten(), sum_fr_i.flatten(), ax[0])
+        self.plot_reg_line(self.diff_inh.flatten(), sum_fr_e.flatten(), ax[1])
         
     def plot_inpfr_frdiff_e(self, ax):
 
-        sum_fr = np.zeros_like(self.stim_exc)        
+        sum_fr_e = np.zeros_like(self.stim_exc)
+        sum_fr_i = np.zeros_like(self.stim_exc)
         w_etoe_bin = self.w_etoe>0
+        w_itoe_bin = self.w_itoe<0
         
         for i in range(self.NE):
             
-            sum_fr[i, :] = self.stim_exc[w_etoe_bin[:, i], :].mean(axis=0)
+            sum_fr_e[i, :] = self.stim_exc[w_etoe_bin[:, i], :].sum(axis=0)
+            sum_fr_i[i, :] = self.stim_inh[w_itoe_bin[:, i], :].sum(axis=0)
+            
+        sum_fr_e = sum_fr_e[(self.base_exc!=0) | (self.stim_exc!=0)]
+        sum_fr_i = sum_fr_i[(self.base_exc!=0) | (self.stim_exc!=0)]
         
-        ax.scatter(self.diff_exc.flatten(), sum_fr.flatten())
-        self.plot_reg_line(self.diff_exc.flatten(), sum_fr.flatten(), ax)
+        ax[0].scatter(self.diff_exc.flatten(), sum_fr_i.flatten(),
+                      color='blue', s=1)
+        ax[1].scatter(self.diff_exc.flatten(), sum_fr_e.flatten(),
+                      color='red', s=1)
+        self.plot_reg_line(self.diff_exc.flatten(), sum_fr_i.flatten(), ax[0])
+        self.plot_reg_line(self.diff_exc.flatten(), sum_fr_e.flatten(), ax[1])
         
     def plot_frdiff_dist(self, ax, num_bins=20):
         
@@ -748,8 +769,8 @@ for ij1, Be in enumerate(Be_rng):
         fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-        fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-        fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
+        fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
         fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True)
         
         fig_avg_fr, ax_avg_fr = plt.subplots()
@@ -759,23 +780,23 @@ for ij1, Be in enumerate(Be_rng):
         ax[0, 0].set_ylabel('E to I')
         ax[1, 0].set_ylabel('E to I')
         
-        ax_i_fr[0, 0].set_ylabel('Avg. fr. E to I')
-        ax_i_fr[1, 0].set_ylabel('Avg. fr. E to I')
+        ax_i_fr[0, 0].set_ylabel(r'$\sum (spikes_I)$ to I')
+        ax_i_fr[1, 0].set_ylabel(r'$\sum (spikes_E)$ to I')
         
-        ax_e_fr[0, 0].set_ylabel('Avg. fr. E to E')
-        ax_e_fr[1, 0].set_ylabel('Avg. fr. E to E')
+        ax_e_fr[0, 0].set_ylabel(r'$\sum (spikes_I)$ to E')
+        ax_e_fr[1, 0].set_ylabel(r'$\sum (spikes_E)$ to E')
         
         ax_e[0, 0].set_ylabel('E to E')
         ax_e[1, 0].set_ylabel('E to E')
         
-        ax[1, 1].set_xlabel('Firing rate change (Hz)')
-        ax_e[1, 1].set_xlabel('Firing rate change (Hz)')
-        ax_i_fr[1, 1].set_xlabel('Firing rate change (Hz)')
-        ax_e_fr[1, 1].set_xlabel('Firing rate change (Hz)')
+        ax[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
+        ax_e[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
+        ax_i_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
+        ax_e_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
         
-        ax_base[1, 1].set_xlabel('Firing rate (Hz)')
+        ax_base[1, 1].set_xlabel('Firing rate (sp/s)')
         
-        ax_dist[1, 1].set_xlabel('Firing rate change (Hz)')
+        ax_dist[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
         
         for ii, nn_stim in enumerate(nn_stim_rng):
             
@@ -805,11 +826,13 @@ for ij1, Be in enumerate(Be_rng):
             #simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
             
             simdata_obj.plot_basefr_frdiff(ax_base_frdiff[:, ii])
-            ax_base_frdiff[0, ii].set_title("pert={:.0f}".format(nn_stim/NI*100))
+            ax_base_frdiff[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
             
-            # simdata_obj.plot_inpfr_frdiff(ax_i_fr[a_r, a_c])
+            simdata_obj.plot_inpfr_frdiff(ax_i_fr[:, ii])
+            ax_i_fr[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
             
-            # simdata_obj.plot_inpfr_frdiff_e(ax_e_fr[a_r, a_c])
+            simdata_obj.plot_inpfr_frdiff_e(ax_e_fr[:, ii])
+            ax_e_fr[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
             
             simdata_obj.get_avg_frs(nn_stim)
             simdata_obj.concat_avg_frs_perts(ii)
@@ -851,7 +874,7 @@ for ij1, Be in enumerate(Be_rng):
             ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
             
         
-        ax_base_frdiff[1, 1].set_xlabel("Baseline firing rate (sp/s)")
+        ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
         ax_base_frdiff[1, 0].set_ylabel(r"$\Delta FR_E (sp/s)$")
         ax_base_frdiff[0, 0].set_ylabel(r"$\Delta FR_I (sp/s)$")
         ax_box[0, ij2].set_title('Bi={}'.format(Bi))
@@ -868,10 +891,12 @@ for ij1, Be in enumerate(Be_rng):
         fig_e.savefig(os.path.join(fig_path, "fre-Ninp-Be{}-Bi{}.pdf".format(Be, Bi)),
                     format="pdf")
         
-        fig_e_fr.savefig(os.path.join(fig_path, "fr-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+        fig_e_fr.suptitle("Excitatory neurons")
+        fig_e_fr.savefig(os.path.join(fig_path, "fre-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                          format="pdf")
         
-        fig_i_fr.savefig(os.path.join(fig_path, "fre-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+        fig_i_fr.suptitle("Inhibitory neurons")
+        fig_i_fr.savefig(os.path.join(fig_path, "fr-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                          format="pdf")
         
         fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
