@@ -731,6 +731,78 @@ class simdata():
             
         ax[-1].set_xlabel("Time (ms)")
         ax[2].set_ylabel("Neuron ID")
+        
+''' Functions '''
+def frchg_vs_EtoI_E(data, ref_cond="E"):
+    
+    '''
+    Function for analyzing the firing rate changes as a function of balance
+    between excitation and inhibition.
+    
+    Parameters:
+    -----------
+    
+    data : dict (nested, values 3D numpy array)
+        contains "I" and "E" keys that points to inhibitory and excitatory
+        populations respectively. Under each key there are two dictionaries
+        with two keys: "mean_change" & "proportion_increase". "mean_change" has
+        mean firing rate changes and "proportion_increase" has proportion of
+        neurons increase their firing rates.
+        
+        Each key has 3D numpy array as value. 1st D corresponds to Be_rng,
+        2nd to Bi_rng and 3rd to nn_stim_rng.
+        
+    ref_cond: str (default="E")
+        specifying the color coding whether excitatory or inhibitory conductances
+        
+    Returns:
+    --------
+    fig : matplotlib object
+        figure handle that can e.g. be used for saving the figure.        
+    '''
+    
+    fig, ax = plt.subplots(nrows=2, ncols=5, sharex=True,  sharey=True, figsize=(9,5))
+    cax = fig.add_axes([.91, 0.2, 0.02, 0.5])
+    
+    if ref_cond == "E":
+        cax.set_ylabel('E conductance (nS)')
+        for i in range(Bi_rng.size):
+            for j in range(nn_stim_rng.size):
+                EtoI = Be_rng/Bi_rng[i]*-1
+                sc1 = ax[0, j].scatter(EtoI,
+                                       data['I']['mean_increase'][:, i, j],
+                                       c=Be_rng,
+                                       s=5)
+                sc2 = ax[1, j].scatter(EtoI,
+                                       data['E']['mean_increase'][:, i, j],
+                                       c=Be_rng,
+                                       s=5)
+    elif ref_cond == "I":
+        cax.set_ylabel('I conductance (nS)')
+        for i in range(Be_rng.size):
+            for j in range(nn_stim_rng.size):
+                EtoI = Be_rng[i]/Bi_rng*-1
+                sc1 = ax[0, j].scatter(EtoI,
+                                       data['I']['mean_increase'][i, :, j],
+                                       c=-Bi_rng,
+                                       s=5)
+                sc2 = ax[1, j].scatter(EtoI,
+                                       data['E']['mean_increase'][i, :, j],
+                                       c=-Bi_rng,
+                                       s=5)
+        
+        
+            
+    fig.colorbar(sc1, cax=cax, orientation='vertical')
+    ax[-1, 2].set_xlabel(r'$E/I$')
+    ax[0, 0].set_ylabel(r'Mean $\Delta FR_I$ (spk/s)')
+    ax[1, 0].set_ylabel(r'Mean $\Delta FR_E$ (spk/s)')
+    ax[1, 0].set_xticks(np.array([0., 1., 2.5]))
+    for j, nn in enumerate(nn_stim_rng):
+        ax[0, j].set_title('pert={:.0f}%'.format(nn/nn_stim_rng.max()*100))
+        
+    return fig
+    # fig.savefig('frchg-EtoI-E.pdf', format='pdf')         
     
 cwd = os.getcwd()
 fig_path = os.path.join(cwd, fig_dir+sim_suffix)
@@ -943,6 +1015,15 @@ frchgdata = {'E': {'proportion_increase': pos_prop[:,:,:,0],
                    'mean_increase': mean_fr[:,:,:,0]},
              'I': {'proportion_increase': pos_prop[:,:,:,1],
                    'mean_increase': mean_fr[:,:,:,1]}}
+
+fig_frchg_ei_e = frchg_vs_EtoI_E(frchgdata)
+fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-E.pdf"),
+                       format="pdf")
+
+fig_frchg_ei_e = frchg_vs_EtoI_E(frchgdata, "I")
+fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-I.pdf"),
+                       format="pdf")
+
 fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
     
 '''    
