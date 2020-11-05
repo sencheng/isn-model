@@ -804,6 +804,58 @@ def frchg_vs_EtoI(data, ref_cond="E"):
     elif ref_cond == "I":
         cax.set_ylabel('I conductance (nS)')
     return fig
+
+def propposfrchg(data):
+    
+    '''
+    Function for visualizing the proportion of firing rate changes for excitatory
+    and inihibitory populations
+    
+    Parameters:
+    -----------
+    
+    data : dict (nested, values 3D numpy array)
+        contains "I" and "E" keys that points to inhibitory and excitatory
+        populations respectively. Under each key there are two dictionaries
+        with two keys: "mean_change" & "proportion_increase". "mean_change" has
+        mean firing rate changes and "proportion_increase" has proportion of
+        neurons increase their firing rates.
+        
+        Each key has 3D numpy array as value. 1st D corresponds to Be_rng,
+        2nd to Bi_rng and 3rd to nn_stim_rng.
+        
+    Returns:
+    --------
+    fig : matplotlib object
+        figure handle that can e.g. be used for saving the figure.        
+    '''
+    
+    fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True,  sharey=True, figsize=(7,8))
+    cax = fig.add_axes([.25, 0.92, 0.5, 0.02])
+    for i in range(Bi_rng.size):
+        for j in range(nn_stim_rng.size):
+            sc = ax[i, j].scatter(data['I']['proportion_increase'][:, i, j],
+                                 data['E']['proportion_increase'][:, i, j],
+                                 c=Be_rng,
+                                 s=10)
+            ax[i, j].plot([0, 100], [0, 100], color='red', linestyle='-.', linewidth=0.5)
+            ax[i, j].plot([50, 50], [0, 100], color='blue', linestyle='-.', linewidth=0.5)
+            ax[i, j].spines["right"].set_visible(False)
+            ax[i, j].spines["top"].set_visible(False)
+    fig.colorbar(sc, cax=cax, orientation='horizontal')
+    cax.xaxis.set_ticks_position('top')
+    cax.xaxis.set_label_position('top')
+    ax[-1, 2].set_xlim([0, 101])
+    ax[-1, 2].set_ylim([0, 101])
+    ax[-1, 2].set_xlabel('Proportion of positive changes in I (%)')
+    ax[2, 0].set_ylabel('Proportion of positive changes in E (%)')
+    for j, nn in enumerate(nn_stim_rng):
+        ax[0, j].set_title('pert={:.0f}%'.format(nn/nn_stim_rng.max()*100))
+    for i, bi in enumerate(Bi_rng):
+        ax[i, -1].set_ylabel('Gi={:.1f}'.format(bi))
+        ax[i, -1].yaxis.set_label_position('right')
+    cax.set_xlabel('E conductance')
+    return fig
     # fig.savefig('frchg-EtoI-E.pdf', format='pdf')         
     
 cwd = os.getcwd()
@@ -1025,6 +1077,10 @@ fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-E.pdf"),
 fig_frchg_ei_e = frchg_vs_EtoI(frchgdata, "I")
 fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-I.pdf"),
                        format="pdf")
+
+fig_posprop = propposfrchg(frchgdata)
+fig_posprop.savefig(os.path.join(fig_path, "propposfrchg.pdf"),
+                    format="pdf")
 
 fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
     
