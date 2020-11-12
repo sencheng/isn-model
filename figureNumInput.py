@@ -388,6 +388,11 @@ class simdata():
         self.diff_e_cond = self.stim_e_cond - self.base_e_cond
         self.diff_i_cond = self.stim_i_cond - self.base_i_cond
         
+        self.diff_cond = {"E": {"ge": self.diff_e_cond[0:NE, :],
+                                "gi": self.diff_i_cond[0:NE, :]},
+                          "I": {"ge": self.diff_e_cond[NE:, :],
+                                "gi": self.diff_i_cond[NE:, :]}}
+        
         self.diff_exc_m = self.diff_e_cond.mean(axis=1)
         self.diff_inh_m = self.diff_i_cond.mean(axis=1)
             
@@ -566,12 +571,67 @@ class simdata():
         
     def plot_basefr_frdiff(self, ax):
         
-        ax[0].scatter(self.base_inh_nz, self.diff_inh, s=1, color='blue', label='I')
-        ax[1].scatter(self.base_exc_nz, self.diff_exc, s=1, color='red', label='E')
-        self.plot_reg_line(self.base_inh_nz, self.diff_inh, ax[0])
-        self.plot_reg_line(self.base_exc_nz, self.diff_exc, ax[1])
-        #ax[0].legend()
-        #ax[1].legend()
+        """
+        Method for visualizing the relationship between changes of 
+        baseline firing rate against firing rate changes of both populations.
+        
+        Parameters: 
+            
+            ax: numpy array, list
+                axes in which scatter plots will appear. First element refers 
+                to the top and second to the bottom panel in a figure with
+                2-by-n subplots.
+            
+            EI: list of strings (default: "I")
+                for which neural population the visualization should be. It can
+                be either "I" or "E"
+        
+        """
+        
+        ax[0].scatter(self.diff_inh, self.base_inh_nz, s=1, color='blue', label='I')
+        ax[1].scatter(self.diff_exc, self.base_exc_nz, s=1, color='red', label='E')
+        self.plot_reg_line(self.diff_inh, self.base_inh_nz, ax[0])
+        self.plot_reg_line(self.diff_exc, self.base_exc_nz, ax[1])
+        
+    def plot_gdiff_frdiff(self, ax, EI="I"):
+        
+        """
+        Method for visualizing the relationship between changes of 
+        inhibitory/excitatory conductances against firing rate changes of their
+        target neurons.
+        
+        Parameters: 
+            
+            ax: numpy array, list
+                axes in which scatter plots will appear. First element refers 
+                to the top and second to the bottom panel in a figure with
+                2-by-n subplots.
+            
+            EI: list of strings (default: "I")
+                for which neural population the visualization should be. It can
+                be either "I" or "E"
+        
+        """
+        
+        if EI == "I":
+            dfr = self.diff_inh
+            c = "blue"
+            nonzero = (self.base_inh!=0) | (self.stim_inh!=0)
+        elif EI == "E":
+            dfr = self.diff_exc
+            c = "red"
+            nonzero = (self.base_exc!=0) | (self.stim_exc!=0)
+        else:
+            pass #rise error
+        
+        gidiff = self.diff_cond[EI]["gi"][nonzero]
+        gediff = self.diff_cond[EI]["ge"][nonzero]
+        
+        ax[0].scatter(dfr, gidiff, s=1, color=c)
+        ax[1].scatter(dfr, gediff, s=1, color=c)
+        self.plot_reg_line(dfr, gidiff, ax[0])
+        self.plot_reg_line(dfr, gediff, ax[1])
+        
         
     def plot_indeg_frdiff(self, ax):
         
@@ -892,14 +952,26 @@ if __name__=='__main__':
             print('Reading {} ...\n'.format(sim_name))
             # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
             
-            fig, ax = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_e, ax_e = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
-            fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
-            fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True)
+            fig, ax = plt.subplots(nrows=2, ncols=3,
+                                   sharex=True, sharey=True)
+            fig_e, ax_e = plt.subplots(nrows=2, ncols=3,
+                                       sharex=True, sharey=True)
+            fig_base, ax_base = plt.subplots(nrows=2, ncols=3,
+                                             sharex=True, sharey=True)
+            fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3,
+                                             sharex=True, sharey=True)
+            fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3,
+                                                 sharex=True, sharey=True)
+            fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5,
+                                             sharex=True, sharey='row')
+            fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5,
+                                             sharex=True, sharey='row')
+            fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=5,
+                                                           sharex=True, sharey=True)
+            fig_dg_dfrI, ax_dg_dfrI = plt.subplots(nrows=2, ncols=5,
+                                                   sharex=True, sharey=True)
+            fig_dg_dfrE, ax_dg_dfrE = plt.subplots(nrows=2, ncols=5,
+                                                   sharex=True, sharey=True)
             
             fig_avg_fr, ax_avg_fr = plt.subplots()
             
@@ -935,7 +1007,8 @@ if __name__=='__main__':
                 
                 simdata_obj.get_fr_diff(nn_stim)
                 
-                # simdata_obj.get_cond_diff(nn_stim)
+                if len(simdata_obj.sim_res[nn_stim])>3:
+                    simdata_obj.get_cond_diff(nn_stim)
                 # simdata_obj.get_indegree()
                 # simdata_obj.plot_indeg_frdiff(ax[a_r, a_c])
                 # simdata_obj.plot_indeg_frdiff_e(ax_e[a_r, a_c])
@@ -955,6 +1028,12 @@ if __name__=='__main__':
                 
                 simdata_obj.plot_basefr_frdiff(ax_base_frdiff[:, ii])
                 ax_base_frdiff[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+                
+                simdata_obj.plot_gdiff_frdiff(ax_dg_dfrI[:, ii], EI="I")
+                ax_dg_dfrI[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+                
+                simdata_obj.plot_gdiff_frdiff(ax_dg_dfrE[:, ii], EI="E")
+                ax_dg_dfrE[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
                 
                 simdata_obj.plot_inpfr_frdiff(ax_i_fr[:, ii])
                 ax_i_fr[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
@@ -1005,6 +1084,15 @@ if __name__=='__main__':
             ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
             ax_base_frdiff[1, 0].set_ylabel(r"$\Delta FR_E (sp/s)$")
             ax_base_frdiff[0, 0].set_ylabel(r"$\Delta FR_I (sp/s)$")
+            
+            ax_dg_dfrI[1, 2].set_xlabel(r"$\Delta FR_I (sp/s)$")
+            ax_dg_dfrI[1, 0].set_ylabel(r"$\Delta g_E$")
+            ax_dg_dfrI[0, 0].set_ylabel(r"$\Delta g_I$")
+            
+            ax_dg_dfrI[1, 2].set_xlabel(r"$\Delta FR_E (sp/s)$")
+            ax_dg_dfrI[1, 0].set_ylabel(r"$\Delta g_E$")
+            ax_dg_dfrI[0, 0].set_ylabel(r"$\Delta g_I$")
+            
             ax_box[0, ij2].set_title('Bi={}'.format(Bi))
             ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
             
@@ -1041,6 +1129,12 @@ if __name__=='__main__':
             
             fig_base_frdiff.savefig(os.path.join(fig_path, "basevsdiff-Be{}-Bi{}.pdf".format(Be, Bi)),
                                format="pdf")
+            
+            fig_dg_dfrI.savefig(os.path.join(fig_path, "dfrvsd-I-Be{}-Bi{}.pdf".format(Be, Bi)),
+                               format="pdf")
+            
+            fig_dg_dfrE.savefig(os.path.join(fig_path, "dfrvsd-E-Be{}-Bi{}.pdf".format(Be, Bi)),
+                               format="pdf")
                     
             plt.close(fig)
             plt.close(fig_e)
@@ -1051,6 +1145,8 @@ if __name__=='__main__':
             plt.close(fig_e_fr)
             plt.close(fig_avg_fr)
             plt.close(fig_base_frdiff)
+            plt.close(fig_dg_dfrI)
+            plt.close(fig_dg_dfrE)
             
         ax_box[-1, 2].set_xlabel("Number of perturbed Is")
         ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")

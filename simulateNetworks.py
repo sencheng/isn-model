@@ -85,6 +85,10 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         # -- recording spike data
         spikes_all = net_tools._recording_spikes_(neurons=all_neurons)
 
+        # -- recording inhibitory current data
+        if rec_from_cond:
+            currents_all = net_tools._recording_gin_(neurons=all_neurons)
+
         # -- background input
         pos_inp = nest.Create("poisson_generator", N)
 
@@ -114,6 +118,10 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
 
         # -- reading out spiking activity
         spd = net_tools._reading_spikes_(spikes_all)
+        
+        # -- reading out currents
+        if rec_from_cond:
+            curr = net_tools._reading_currents_(currents_all)
 
         # -- computes the rates out of spike data in a given time interval
         def _rate_interval_(spikedata, T1, T2, bw=bw):
@@ -142,8 +150,11 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         np.round(rout_stim[:,:,NE:NE+nn_stim].mean(),1), \
         np.round(rout_stim[:,:,NE+nn_stim:].mean(),1) )
         print('##########')
-
-        return rout_blank, rout_stim, spd
+        
+        if rec_from_cond:
+            return rout_blank, rout_stim, spd, curr
+        else:
+            return rout_blank, rout_stim, spd
 
 ################################################################################
 

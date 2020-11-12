@@ -8,7 +8,7 @@ from defaultParams import *
 
 fr_chg_factor = np.array([1])#np.arange(0.5, 1, .1)
 E_extra_stim_factor = np.arange(0.2, 0.3, 0.2)#np.array([0.8])
-EEconn_chg_factor = np.array([1.2])#np.arange(1.2, 1.41, 0.1)#np.array([0.9])
+EEconn_chg_factor = np.array([1.5])#np.arange(1.2, 1.41, 0.1)#np.array([0.9])
 EIconn_chg_factor = np.arange(0.6, 3, 0.2)#np.array([2.0])
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
 bkg_chg_factor    = np.arange(1., 1.01, 0.05)
