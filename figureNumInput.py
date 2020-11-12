@@ -1089,9 +1089,9 @@ if __name__=='__main__':
             ax_dg_dfrI[1, 0].set_ylabel(r"$\Delta g_E$")
             ax_dg_dfrI[0, 0].set_ylabel(r"$\Delta g_I$")
             
-            ax_dg_dfrI[1, 2].set_xlabel(r"$\Delta FR_E (sp/s)$")
-            ax_dg_dfrI[1, 0].set_ylabel(r"$\Delta g_E$")
-            ax_dg_dfrI[0, 0].set_ylabel(r"$\Delta g_I$")
+            ax_dg_dfrE[1, 2].set_xlabel(r"$\Delta FR_E (sp/s)$")
+            ax_dg_dfrE[1, 0].set_ylabel(r"$\Delta g_E$")
+            ax_dg_dfrE[0, 0].set_ylabel(r"$\Delta g_I$")
             
             ax_box[0, ij2].set_title('Bi={}'.format(Bi))
             ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
