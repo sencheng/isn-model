@@ -916,6 +916,58 @@ def propposfrchg(data):
         ax[i, -1].yaxis.set_label_position('right')
     cax.set_xlabel('E conductance')
     return fig
+
+def frchg(data):
+    
+    '''
+    Function for visualizing the mean firing rate changes for excitatory
+    and inihibitory populations
+    
+    Parameters:
+    -----------
+    
+    data : dict (nested, values 3D numpy array)
+        contains "I" and "E" keys that points to inhibitory and excitatory
+        populations respectively. Under each key there are two dictionaries
+        with two keys: "mean_change" & "proportion_increase". "mean_change" has
+        mean firing rate changes and "proportion_increase" has proportion of
+        neurons increase their firing rates.
+        
+        Each key has 3D numpy array as value. 1st D corresponds to Be_rng,
+        2nd to Bi_rng and 3rd to nn_stim_rng.
+        
+    Returns:
+    --------
+    fig : matplotlib object
+        figure handle that can e.g. be used for saving the figure.        
+    '''
+    
+    fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True,  sharey=True, figsize=(7,8))
+    cax = fig.add_axes([.25, 0.92, 0.5, 0.02])
+    for i in range(Bi_rng.size):
+        for j in range(nn_stim_rng.size):
+            sc = ax[i, j].scatter(data['I']['mean_change'][:, i, j],
+                                 data['E']['mean_change'][:, i, j],
+                                 c=Be_rng,
+                                 s=10)
+            # ax[i, j].plot([0, 100], [0, 100], color='red', linestyle='-.', linewidth=0.5)
+            # ax[i, j].plot([50, 50], [0, 100], color='blue', linestyle='-.', linewidth=0.5)
+            ax[i, j].spines["right"].set_visible(False)
+            ax[i, j].spines["top"].set_visible(False)
+    fig.colorbar(sc, cax=cax, orientation='horizontal')
+    cax.xaxis.set_ticks_position('top')
+    cax.xaxis.set_label_position('top')
+    # ax[-1, 2].set_xlim([0, 101])
+    # ax[-1, 2].set_ylim([0, 101])
+    ax[-1, 2].set_xlabel(r'Mean $\Delta FR_I$ (spk/s)')
+    ax[2, 0].set_ylabel(r'Mean $\Delta FR_E$ (spk/s)')
+    for j, nn in enumerate(nn_stim_rng):
+        ax[0, j].set_title('pert={:.0f}%'.format(nn/nn_stim_rng.max()*100))
+    for i, bi in enumerate(Bi_rng):
+        ax[i, -1].set_ylabel('Gi={:.1f}'.format(bi))
+        ax[i, -1].yaxis.set_label_position('right')
+    cax.set_xlabel('E conductance')
+    return fig
     # fig.savefig('frchg-EtoI-E.pdf', format='pdf')
 
 if __name__=='__main__':    
@@ -1069,11 +1121,11 @@ if __name__=='__main__':
                 # ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
                 
-                # path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
-                # simdata_obj.plot_raster(nn_stim, ax_raster)
-                # fig_raster.savefig(os.path.join(path_raster_fig,
-                #                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
-                #                    format="png")
+                path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
+                simdata_obj.plot_raster(nn_stim, ax_raster)
+                fig_raster.savefig(os.path.join(path_raster_fig,
+                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                    format="png")
                 plt.close(fig_raster)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))

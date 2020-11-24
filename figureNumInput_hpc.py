@@ -12,7 +12,7 @@ from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 import searchParams; reload(searchParams); from searchParams import *
-from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg
+from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg
 
 def run_for_each_parset(sim_suffix):
     cwd = os.getcwd()
@@ -237,6 +237,10 @@ def run_for_each_parset(sim_suffix):
 
     fig_posprop = propposfrchg(frchgdata)
     fig_posprop.savefig(os.path.join(fig_path, "propposfrchg.pdf"),
+                        format="pdf")
+    
+    fig_frchg = frchg(frchgdata)
+    fig_frchg.savefig(os.path.join(fig_path, "frchg.pdf"),
                         format="pdf")
     
     fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()

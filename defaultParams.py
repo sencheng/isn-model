@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-Ipert400"
+sim_suffix = "-EIpert400"
 
 #------------- neuron params
 
@@ -111,7 +111,7 @@ nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
 cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
-rec_from_cond = False
+rec_from_cond = True
 
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
