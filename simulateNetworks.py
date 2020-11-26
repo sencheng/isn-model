@@ -58,6 +58,11 @@ bw = 50.
 def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
             rec_conn={'EtoE':1, 'EtoI':1, 'ItoE':1, 'ItoI':1}, nn_stim=0):
 
+    SPD = {}; CURR = {}
+    # -- simulating network for N-trials
+    for tri in range(Ntrials):
+        print('')
+        print('# -> trial # ', tri+1)
         # -- restart the simulator
         net_tools._nest_start_()
         init_seed = np.random.randint(1, 1234, n_cores)
@@ -95,43 +100,45 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         for ii in range(N):
             nest.Connect([pos_inp[ii]], [all_neurons[ii]], \
             syn_spec = {'weight':Be_bkg, 'delay':delay_default})
-
+        '''
         # -- simulating network for N-trials
         for tri in range(Ntrials):
             print('')
             print('# -> trial # ', tri+1)
+        '''
+        ## transient
+        for ii in range(N):
+            nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
+        net_tools._run_simulation_(Ttrans)
 
-            ## transient
-            for ii in range(N):
-                nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
-            net_tools._run_simulation_(Ttrans)
+        ## baseline
+        for ii in range(N):
+            nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
+        net_tools._run_simulation_(Tblank)
 
-            ## baseline
-            for ii in range(N):
-                nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
-            net_tools._run_simulation_(Tblank)
-
-            ## perturbing a subset of inh
-            for ii in range(N):
-                nest.SetStatus([pos_inp[ii]], {'rate':rr2[ii]})
-            net_tools._run_simulation_(Tstim)
-
+        ## perturbing a subset of inh
+        for ii in range(N):
+            nest.SetStatus([pos_inp[ii]], {'rate':rr2[ii]})
+        net_tools._run_simulation_(Tstim)
         # -- reading out spiking activity
-        spd = net_tools._reading_spikes_(spikes_all)
+        # spd = net_tools._reading_spikes_(spikes_all)
+        SPD[tri] = net_tools._reading_spikes_(spikes_all)
         
         # -- reading out currents
         if rec_from_cond:
-            curr = net_tools._reading_currents_(currents_all)
-
+            # curr = net_tools._reading_currents_(currents_all)
+            CURR[tri] = net_tools._reading_currents_(currents_all)
+        '''
         # -- computes the rates out of spike data in a given time interval
         def _rate_interval_(spikedata, T1, T2, bw=bw):
             tids = (spikedata['times']>T1) * (spikedata['times']<T2)
             rr = np.histogram2d(spikedata['times'][tids], spikedata['senders'][tids], \
                  range=((T1,T2),(1,N)), bins=(int((T2-T1)/bw),N))[0] / (bw/1e3)
             return rr
-
+        '''
         rout_blank = np.zeros((Ntrials, int(Tblank / bw), N))
         rout_stim = np.zeros((Ntrials, int(Tstim / bw), N))
+        '''
         for tri in range(Ntrials):
             Tblock = Tstim+Tblank+Ttrans
             rblk = _rate_interval_(spd, Tblock*tri+Ttrans, Tblock*tri+Ttrans+Tblank)
@@ -150,11 +157,11 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         np.round(rout_stim[:,:,NE:NE+nn_stim].mean(),1), \
         np.round(rout_stim[:,:,NE+nn_stim:].mean(),1) )
         print('##########')
-        
-        if rec_from_cond:
-            return rout_blank, rout_stim, spd, curr
-        else:
-            return rout_blank, rout_stim, spd
+        '''
+    if rec_from_cond:
+        return rout_blank, rout_stim, SPD, CURR
+    else:
+        return rout_blank, rout_stim, CURR
 
 ################################################################################
 
@@ -203,8 +210,9 @@ for ij1 in range(Be_rng_comb.size):
     #sim_suffix = "-pert{}".format(r_stim)
     #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
     #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
-    sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    #sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -244,12 +252,12 @@ for ij1 in range(Be_rng_comb.size):
         r_extra = np.zeros(N)
         #r_extra[NE:NE+int(nn_stim/2)] = r_stim
         #r_extra[NE+int(nn_stim/2):NE+nn_stim] = r_stim
-        #r_extra[0:int(NE*nn_stim/NI)] = r_stim
+        r_extra[0:int(NE*nn_stim/NI)] = r_stim
         #r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = r_stim
         r_extra[NE:NE+nn_stim] = r_stim
         #r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
-        r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
+        # r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
 
         #fr_inc_factor = fr_chg_comb[ij1]
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]

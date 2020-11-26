@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-EIpert400"
+sim_suffix = "-EIeqpert-bkgfac1.00-Epertfac1.0-longersim-HEEcond-EE_probchg1.00-EI_probchg1.00"
 
 #------------- neuron params
 
@@ -39,8 +39,8 @@ Gl = 1./140e6
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
-Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
+Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+# Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
 # background and stimulus conductances (nS)
@@ -84,11 +84,11 @@ r_bkg = 10000.-400.
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 300.
+Ttrans = 100.
 # simulation time before perturbation (ms)
-Tblank= 900.
+Tblank= 500.
 # simulation time of perturbation (ms)
-Tstim = 900.
+Tstim = 500.
 
 # number of trials
 Ntrials = 5

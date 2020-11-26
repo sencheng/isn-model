@@ -59,6 +59,11 @@ class simdata():
         
         self.sim_res = sim_res
         
+        if len(sim_res[400][2]) == self.Ntrials:
+            self.trial_type = 'MultipleSim'
+        else:
+            self.trial_type = 'SingleSim'
+        
         self.all_fr_exc = np.array([])#Storing concatenated firing rates
         self.all_fr_inh = np.array([])#Storing concatenated firing rates
         self.all_fr_time = np.array([])#Storing concatenated firing rates
@@ -237,8 +242,9 @@ class simdata():
         if not hasattr(self, 'st_tr_time'):
             self.get_trial_times()
         
-        spk_times = self.sim_res[pert_val][2]['times']
-        spk_ids   = self.sim_res[pert_val][2]['senders']
+        if self.trial_type == 'SingleSim':
+            spk_times = self.sim_res[pert_val][2]['times']
+            spk_ids   = self.sim_res[pert_val][2]['senders']
         
         e_cv = np.zeros(self.Ntrials)
         i_cv, e_ff, i_ff = np.zeros_like(e_cv), np.zeros_like(e_cv), np.zeros_like(e_cv)
@@ -247,11 +253,19 @@ class simdata():
             
             # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
             #                      (spk_times <  self.st_tr_time[i]+interval[1])]
-            sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
-                               (spk_times <  self.st_tr_time[tr]+interval[1])]
             
-            spk_time = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
-                                 (spk_times <  self.st_tr_time[tr]+interval[1])]
+            if self.trial_type == 'SingleSim':
+            
+                sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                   (spk_times <  self.st_tr_time[tr]+interval[1])]
+                
+                spk_time = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                     (spk_times <  self.st_tr_time[tr]+interval[1])]
+                
+            else:
+                
+                sel_id = self.sim_res[pert_val][2][tr]['times']
+                spk_time = self.sim_res[pert_val][2][tr]['senders']
             
             e_id = sel_id[sel_id<=self.NE]
             e_t  = spk_time[sel_id<=self.NE]
@@ -281,24 +295,42 @@ class simdata():
         cond_inh = np.zeros((self.Nall, self.Ntrials))
         cond_exc = np.zeros((self.Nall, self.Ntrials))
         
-        times = self.sim_res[pert_val][3]['times']
-        ids   = self.sim_res[pert_val][3]['senders']
-        conds_i = self.sim_res[pert_val][3]['g_in']
-        conds_e = self.sim_res[pert_val][3]['g_ex']
+        if self.trial_type == 'SingleSim':
+            times = self.sim_res[pert_val][3]['times']
+            ids   = self.sim_res[pert_val][3]['senders']
+            conds_i = self.sim_res[pert_val][3]['g_in']
+            conds_e = self.sim_res[pert_val][3]['g_ex']
         
         for tr in range(self.Ntrials):
             
             # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
             #                      (spk_times <  self.st_tr_time[i]+interval[1])]
-            sel_id = ids[(times >= self.st_tr_time[tr]+interval[0]) &
-                         (times <  self.st_tr_time[tr]+interval[1])]
             
-            sel_g_i  = conds_i[(times >= self.st_tr_time[tr]+interval[0]) &
-                               (times <  self.st_tr_time[tr]+interval[1])]
-            
-            sel_g_e  = conds_e[(times >= self.st_tr_time[tr]+interval[0]) &
-                               (times <  self.st_tr_time[tr]+interval[1])]
-            
+            if self.trial_type == 'SingleSim':
+                sel_id = ids[(times >= self.st_tr_time[tr]+interval[0]) &
+                             (times <  self.st_tr_time[tr]+interval[1])]
+                
+                sel_g_i  = conds_i[(times >= self.st_tr_time[tr]+interval[0]) &
+                                   (times <  self.st_tr_time[tr]+interval[1])]
+                
+                sel_g_e  = conds_e[(times >= self.st_tr_time[tr]+interval[0]) &
+                                   (times <  self.st_tr_time[tr]+interval[1])]
+                
+            else:
+                times = self.sim_res[pert_val][3][tr]['times']
+                ids   = self.sim_res[pert_val][3][tr]['senders']
+                conds_i = self.sim_res[pert_val][3][tr]['g_in']
+                conds_e = self.sim_res[pert_val][3][tr]['g_ex']
+                
+                sel_id = ids[(times >= interval[0]) &
+                             (times <  interval[1])]
+                
+                sel_g_i  = conds_i[(times >= interval[0]) &
+                                   (times <  interval[1])]
+                
+                sel_g_e  = conds_e[(times >= interval[0]) &
+                                   (times <  interval[1])]
+                
             cond_exc[:, tr], cond_inh[:, tr] = self.get_ind_cond(sel_id,
                                                                  sel_g_i,
                                                                  sel_g_e)
@@ -313,15 +345,24 @@ class simdata():
         fr_inh = np.zeros((self.NI, self.Ntrials))
         fr_exc = np.zeros((self.NE, self.Ntrials))
         
-        spk_times = self.sim_res[pert_val][2]['times']
-        spk_ids   = self.sim_res[pert_val][2]['senders']
+        if self.trial_type == 'SingleSim':
+        
+            spk_times = self.sim_res[pert_val][2]['times']
+            spk_ids   = self.sim_res[pert_val][2]['senders']
         
         for tr in range(self.Ntrials):
             
             # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
             #                      (spk_times <  self.st_tr_time[i]+interval[1])]
-            sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
-                               (spk_times <  self.st_tr_time[tr]+interval[1])]
+            if self.trial_type == 'SingleSim':
+                sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                   (spk_times <  self.st_tr_time[tr]+interval[1])]
+            else:
+                spk_ids = self.sim_res[pert_val][2][tr]['senders']
+                spk_times = self.sim_res[pert_val][2][tr]['times']
+                sel_id   = spk_ids[(spk_times >= interval[0]) &
+                                   (spk_times <  interval[1])]
+                
             
             e, i = self.get_ind_fr(sel_id, np.diff(interval), is_ms=True)   
             
@@ -343,22 +384,27 @@ class simdata():
         fr_inh = np.zeros((self.Ntrials, T_edges_def.size-1))
         fr_exc = np.zeros((self.Ntrials, T_edges_def.size-1))
         
-        spk_times = self.sim_res[pert_val][2]['times']
-        spk_ids   = self.sim_res[pert_val][2]['senders']
+        if self.trial_type == 'SingleSim':
+            spk_times = self.sim_res[pert_val][2]['times']
+            spk_ids   = self.sim_res[pert_val][2]['senders']
         
         for tr in range(self.Ntrials):
             
-            T_edges = T_edges_def + self.st_tr_time[tr]
+            if self.trial_type == 'SingleSim':
             
-            # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
-            #                      (spk_times <  self.st_tr_time[i]+interval[1])]
-            sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
-                               (spk_times <  self.st_tr_time[tr]+interval[1])]
+                T_edges = T_edges_def + self.st_tr_time[tr]
+                # sel_sp_t = spk_times[(spk_times >= self.st_tr_time[i]+interval[0]) & 
+                #                      (spk_times <  self.st_tr_time[i]+interval[1])]
+                sel_id   = spk_ids[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                   (spk_times <  self.st_tr_time[tr]+interval[1])]
+                sel_T    = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
+                                     (spk_times <  self.st_tr_time[tr]+interval[1])]
+                
+            else:
             
-            sel_T    = spk_times[(spk_times >= self.st_tr_time[tr]+interval[0]) &
-                                 (spk_times <  self.st_tr_time[tr]+interval[1])]
-            
-            
+                sel_id = self.sim_res[pert_val][2][tr]['senders']
+                sel_T  = self.sim_res[pert_val][2][tr]['times']
+                T_edges = T_edges_def
             
             e, i = self.get_pop_fr(sel_id, sel_T, T_edges, is_ms=True)   
             
@@ -368,6 +414,8 @@ class simdata():
         return fr_exc, fr_inh, T_edges[0:-1]+bin_size/2
     
     def get_cond_diff(self, pert_val):
+        
+        print("Computing conductance changes for pert={}".format(pert_val))
         
         '''
         This method calculates the change of average firing rate for each
@@ -398,6 +446,8 @@ class simdata():
             
     def get_fr_diff(self, pert_val, exclude_inactives=True):
         
+        print("Computing firing rate changes for pert={}".format(pert_val))
+        
         '''
         This method calculates the change of average firing rate for each
         individual neuron in each trial due to perturbation.
@@ -413,7 +463,7 @@ class simdata():
         self.stim_exc, self.stim_inh = self.get_fr(pert_val,
                                                    [self.Ttrans+self.Tblank, 
                                                     self.Ttrans+self.Tblank+self.Tstim])
-        
+        '''
         self.trans_cv[0, :], self.trans_cv[1, :], self.trans_ff[0, :], self.trans_ff[1, :] = \
         self.get_cv(pert_val, [0, self.Ttrans])
         
@@ -422,7 +472,7 @@ class simdata():
         
         self.stim_cv[0, :], self.stim_cv[1, :], self.stim_ff[0, :], self.stim_ff[1, :] = \
         self.get_cv(pert_val, [self.Ttrans+self.Tblank, self.Ttrans+self.Tblank+self.Tstim])
-        
+        '''
         self.diff_exc = self.stim_exc - self.base_exc
         self.diff_inh = self.stim_inh - self.base_inh
         
@@ -714,18 +764,22 @@ class simdata():
         
     def plot_box_frdiff(self, ax, pert_val):
         
-        ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_val],
+        pert_percent = pert_val//self.NI*100
+        
+        ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_percent],
                       widths=[25], flierprops={'marker': '.'})
         
-        ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_val],
+        ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_percent],
                       widths=[25], flierprops={'marker': '.'})
         
     def plot_box_conddiff(self, ax, pert_val):
         
-        ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_val],
+        pert_percent = pert_val//self.NI*100
+        
+        ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_percent],
                       widths=[25], flierprops={'marker': '.'})
         
-        ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_val],
+        ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_percent],
                       widths=[25], flierprops={'marker': '.'})
         
     def plot_fr_dist(self, ax, num_bins=20):
@@ -768,24 +822,38 @@ class simdata():
         if not hasattr(self, 'st_tr_time'):
             self.get_trial_times()
             
-        spk_times = self.sim_res[pert_val][2]['times']
-        spk_ids   = self.sim_res[pert_val][2]['senders']
-        
         vis_NE = int(self.NE*prop)
         vis_NI = int(self.NI*prop)
+            
+        if self.trial_type == 'SingleSim':
+            
+            spk_times = self.sim_res[pert_val][2]['times']
+            spk_ids   = self.sim_res[pert_val][2]['senders']
         
-        self.vis_E_ids = np.random.choice(np.unique(spk_ids[spk_ids<=self.NE]),
-                                          vis_NE, replace=False)
-        self.vis_I_ids = np.random.choice(np.unique(spk_ids[spk_ids>self.NE]),
-                                          vis_NI, replace=False)
+            self.vis_E_ids = np.random.choice(np.unique(spk_ids[spk_ids<=self.NE]),
+                                              vis_NE, replace=False)
+            self.vis_I_ids = np.random.choice(np.unique(spk_ids[spk_ids>self.NE]),
+                                              vis_NI, replace=False)
+            
+        else:
+            
+            self.vis_E_ids = np.random.choice(np.arange(self.NE), vis_NE, replace=False)
+            self.vis_I_ids = np.random.choice(np.arange(self.NE, self.Nall), vis_NI, replace=False)
             
         for i in range(self.Ntrials):
             
-            spk_t = spk_times[(spk_times>=self.st_tr_time[i]) & 
-                              (spk_times<=self.end_tr_time[i])] - self.st_tr_time[i]
+            if self.trial_type == 'SingleSim':
             
-            spk_id = spk_ids[(spk_times>=self.st_tr_time[i]) & 
-                             (spk_times<=self.end_tr_time[i])]
+                spk_t = spk_times[(spk_times>=self.st_tr_time[i]) & 
+                                  (spk_times<=self.end_tr_time[i])] - self.st_tr_time[i]
+                
+                spk_id = spk_ids[(spk_times>=self.st_tr_time[i]) & 
+                                 (spk_times<=self.end_tr_time[i])]
+                
+            else:
+                
+                spk_t = self.sim_res[pert_val][2][i]['times']
+                spk_id = self.sim_res[pert_val][2][i]['senders']
             
             self.plot_raster_tr(spk_id, spk_t, ax[i])
             
@@ -1052,6 +1120,8 @@ if __name__=='__main__':
             
             for ii, nn_stim in enumerate(nn_stim_rng):
                 
+                print('Analyzing simulation data for Be={}, Bi={} and pert={}'.format(Be, Bi, nn_stim))
+                
                 fig_raster, ax_raster = plt.subplots(nrows=Ntrials, ncols=1,
                                                      sharex=True, sharey=True)
                 
@@ -1120,17 +1190,18 @@ if __name__=='__main__':
                 # ff_i[ij1, ij2, ii, 0] = simdata_obj.trans_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
-                
+
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
                 simdata_obj.plot_raster(nn_stim, ax_raster)
                 fig_raster.savefig(os.path.join(path_raster_fig,
                                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
+
                 plt.close(fig_raster)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
-                ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
-                ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
+                ax_dist[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_base[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 
             
             ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
