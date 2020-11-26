@@ -764,23 +764,25 @@ class simdata():
         
     def plot_box_frdiff(self, ax, pert_val):
         
-        pert_percent = pert_val//self.NI*100
+        pert_percent = int(pert_val/self.NI*100)
+        dist = np.diff(pert_percent)
         
         ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_percent],
-                      widths=[25], flierprops={'marker': '.'})
+                      widths=[dist[0]], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_percent],
-                      widths=[25], flierprops={'marker': '.'})
+                      widths=[dist[0]], flierprops={'marker': '.'})
         
     def plot_box_conddiff(self, ax, pert_val):
         
-        pert_percent = pert_val//self.NI*100
+        pert_percent = int(pert_val/self.NI*100)
+        dist = np.diff(pert_percent)
         
         ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_percent],
-                      widths=[25], flierprops={'marker': '.'})
+                      widths=[dist[0]], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_percent],
-                      widths=[25], flierprops={'marker': '.'})
+                      widths=[dist[0]], flierprops={'marker': '.'})
         
     def plot_fr_dist(self, ax, num_bins=20):
         
@@ -1190,13 +1192,13 @@ if __name__=='__main__':
                 # ff_i[ij1, ij2, ii, 0] = simdata_obj.trans_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
-
+                '''
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
                 simdata_obj.plot_raster(nn_stim, ax_raster)
                 fig_raster.savefig(os.path.join(path_raster_fig,
                                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
-
+                '''
                 plt.close(fig_raster)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
@@ -1271,9 +1273,14 @@ if __name__=='__main__':
             plt.close(fig_dg_dfrI)
             plt.close(fig_dg_dfrE)
             
-        ax_box[-1, 2].set_xlabel("Number of perturbed Is")
+        ax_box[-1, 2].set_xlabel("Proportion of perturbed neurons (%)")
         ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
+        
+        ax_box_g[-1, 2].set_xlabel("Proportion of perturbed neurons (%)")
+        ax_box_g[0, 0].set_ylabel(r"$\Delta g_I$")
+        ax_box_g[1, 0].set_ylabel(r"$\Delta g_E$")
+        
         fig_box.suptitle("Be={:.2f}".format(Be))
             
         fig_box.savefig(os.path.join(fig_path, "fr-diff-box-Be{}.pdf".format(Be)),
@@ -1301,6 +1308,10 @@ if __name__=='__main__':
     
     fig_posprop = propposfrchg(frchgdata)
     fig_posprop.savefig(os.path.join(fig_path, "propposfrchg.pdf"),
+                        format="pdf")
+    
+    fig_frchg = frchg(frchgdata)
+    fig_frchg.savefig(os.path.join(fig_path, "frchg.pdf"),
                         format="pdf")
     
     fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
