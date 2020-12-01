@@ -340,8 +340,7 @@ if __name__=='__main__':
     
     for ij1 in range(EE_probchg_comb.size):
         
-        sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac,
-                                                                 bkg_chg_comb[ij1],
+        sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1],
                                                                  E_extra_comb[ij1],
                                                                  EE_probchg_comb[ij1],
                                                                  EI_probchg_comb[ij1])

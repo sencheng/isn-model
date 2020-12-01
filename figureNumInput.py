@@ -765,24 +765,24 @@ class simdata():
     def plot_box_frdiff(self, ax, pert_val):
         
         pert_percent = int(pert_val/self.NI*100)
-        dist = np.diff(pert_percent)
+        #dist = np.diff(nn_stim_rng)
         
         ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_percent],
-                      widths=[dist[0]], flierprops={'marker': '.'})
+                      widths=[10], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_percent],
-                      widths=[dist[0]], flierprops={'marker': '.'})
+                      widths=[10], flierprops={'marker': '.'})
         
     def plot_box_conddiff(self, ax, pert_val):
         
         pert_percent = int(pert_val/self.NI*100)
-        dist = np.diff(pert_percent)
-        
+        #dist = np.diff(nn_stim_rng)
+
         ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_percent],
-                      widths=[dist[0]], flierprops={'marker': '.'})
+                      widths=[10], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_percent],
-                      widths=[dist[0]], flierprops={'marker': '.'})
+                      widths=[10], flierprops={'marker': '.'})
         
     def plot_fr_dist(self, ax, num_bins=20):
         
