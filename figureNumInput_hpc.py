@@ -43,7 +43,7 @@ def run_for_each_parset(sim_suffix):
         for ij2, Bi in enumerate(Bi_rng):
             
             os.chdir(os.path.join(cwd, res_dir + sim_suffix))
-            sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
+            sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
             print('Reading {} ...\n'.format(sim_name))
             # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
             

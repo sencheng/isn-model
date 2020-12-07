@@ -274,7 +274,7 @@ for ij1 in range(Be_rng_comb.size):
     sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
 
     os.chdir(res_path);
-    sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
+    sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
     fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
 
 t_end = time.time()

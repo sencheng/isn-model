@@ -39,8 +39,8 @@ Gl = 1./140e6
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
-Be_rng = np.arange(0.1, .81, 0.1)
+Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+#Be_rng = np.arange(0.1, .81, 0.1)
 # Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
