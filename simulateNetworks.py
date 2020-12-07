@@ -56,7 +56,9 @@ def _guasconn_(N1, N2, B12, conn_std, pr=1.):
 # -- runs a network simulation with a defined inh perturbation
 bw = 50.
 def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
-            rec_conn={'EtoE':1, 'EtoI':1, 'ItoE':1, 'ItoI':1}, nn_stim=0):
+            rec_conn={'EtoE':1, 'EtoI':1,
+                      'ItoE':1, 'ItoI':1,
+                      'E3toE':1, 'E3toI':1}, nn_stim=0):
 
     SPD = {}; CURR = {}
     # -- simulating network for N-trials
@@ -74,31 +76,49 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         myparams={'b':NE*[0.], 'a':NE*[0.]})
         inh_neurons = net_tools._make_neurons_(NI, neuron_model=cell_type, \
         myparams={'b':NE*[0.],'a':NE*[0.]})
+        
+        exc_neurons_ca3 = net_tools._make_neurons_(NE, neuron_model=cell_type, \
+        myparams={'b':NE*[0.], 'a':NE*[0.]})
+        inh_neurons_ca3 = net_tools._make_neurons_(NI, neuron_model=cell_type, \
+        myparams={'b':NE*[0.],'a':NE*[0.]})
 
-        all_neurons = exc_neurons + inh_neurons
+        ca1_neurons = exc_neurons + inh_neurons
+        ca3_neurons = exc_neurons_ca3 + inh_neurons_ca3
 
         # -- recurrent connectivity
         if rec_conn['EtoE']:
             net_tools._connect_pops_(exc_neurons, exc_neurons, W_EtoE)
+            net_tools._connect_pops_(exc_neurons_ca3, exc_neurons_ca3, W_EtoE)
         if rec_conn['EtoI']:
             net_tools._connect_pops_(exc_neurons, inh_neurons, W_EtoI)
+            net_tools._connect_pops_(exc_neurons_ca3, inh_neurons_ca3, W_EtoI)
         if rec_conn['ItoE']:
             net_tools._connect_pops_(inh_neurons, exc_neurons, W_ItoE)
+            net_tools._connect_pops_(inh_neurons_ca3, exc_neurons_ca3, W_ItoE)
         if rec_conn['ItoI']:
             net_tools._connect_pops_(inh_neurons, inh_neurons, W_ItoI)
+            net_tools._connect_pops_(inh_neurons_ca3, inh_neurons_ca3, W_ItoI)
+        if rec_conn['E3toE']:
+            net_tools._connect_pops_(exc_neurons_ca3, exc_neurons, W_E3toE)
+        if rec_conn['E3toI']:
+            net_tools._connect_pops_(exc_neurons_ca3, inh_neurons, W_E3toI)
 
         # -- recording spike data
-        spikes_all = net_tools._recording_spikes_(neurons=all_neurons)
+        spikes_all = net_tools._recording_spikes_(neurons=ca1_neurons)
 
         # -- recording inhibitory current data
         if rec_from_cond:
-            currents_all = net_tools._recording_gin_(neurons=all_neurons)
+            currents_all = net_tools._recording_gin_(neurons=ca1_neurons)
 
         # -- background input
         pos_inp = nest.Create("poisson_generator", N)
+        pos_inp_ca3 = nest.Create("poisson_generator", N)
 
         for ii in range(N):
-            nest.Connect([pos_inp[ii]], [all_neurons[ii]], \
+            nest.Connect([pos_inp[ii]], [ca1_neurons[ii]], \
+            syn_spec = {'weight':Be_bkg, 'delay':delay_default})
+                
+            nest.Connect([pos_inp_ca3[ii]], [ca3_neurons[ii]], \
             syn_spec = {'weight':Be_bkg, 'delay':delay_default})
         '''
         # -- simulating network for N-trials
@@ -109,16 +129,20 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         ## transient
         for ii in range(N):
             nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
+            nest.SetStatus([pos_inp_ca3[ii]], {'rate':rr1[N+ii]})
         net_tools._run_simulation_(Ttrans)
 
         ## baseline
         for ii in range(N):
             nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
+            nest.SetStatus([pos_inp_ca3[ii]], {'rate':rr1[N+ii]})
         net_tools._run_simulation_(Tblank)
 
         ## perturbing a subset of inh
         for ii in range(N):
             nest.SetStatus([pos_inp[ii]], {'rate':rr2[ii]})
+            nest.SetStatus([pos_inp_ca3[ii]], {'rate':rr2[N+ii]})
+            
         net_tools._run_simulation_(Tstim)
         # -- reading out spiking activity
         # spd = net_tools._reading_spikes_(spikes_all)
@@ -231,6 +255,9 @@ for ij1 in range(Be_rng_comb.size):
     W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+    
+    W_E3toE =  _mycon_(NE, NE, Be_bkg, Be_bkg/5, p_conn)
+    W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, p_conn)
     '''
     # Indegree with Guassian distribution
     p_conn = 0.15
@@ -249,12 +276,12 @@ for ij1 in range(Be_rng_comb.size):
         print('\n # -----> size of pert. inh: ', nn_stim)
 
         np.random.seed(2)
-        r_extra = np.zeros(N)
+        r_extra = np.zeros(N+N)
         #r_extra[NE:NE+int(nn_stim/2)] = r_stim
         #r_extra[NE+int(nn_stim/2):NE+nn_stim] = r_stim
-        r_extra[0:int(NE*nn_stim/NI)] = r_stim
+        r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
         #r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = r_stim
-        r_extra[NE:NE+nn_stim] = r_stim
+        r_extra[N+NE:N+NE+nn_stim] = r_stim
         #r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
         # r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
@@ -262,8 +289,10 @@ for ij1 in range(Be_rng_comb.size):
         #fr_inc_factor = fr_chg_comb[ij1]
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         #rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.random.uniform(0.9, 1.1, NI)))
-        rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
+        # rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         #rr1 = r_bkg*np.ones(N)
+        rr1 = np.hstack((r_bkg_ca1*np.ones(NE), r_bkg_ca1*np.ones(NI),
+                         r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         rr2 = rr1 + r_extra
 
         sim_res[nn_stim] = myRun(rr1, rr2, nn_stim=nn_stim)

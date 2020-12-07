@@ -81,6 +81,7 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
+r_bkg_ca1 = 8000.
 # rate of perturbation (sp/s)
 r_stim = -400.
 
