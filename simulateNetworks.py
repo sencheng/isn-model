@@ -251,10 +251,10 @@ for ij1 in range(Be_rng_comb.size):
     np.random.seed(1)
     # -- L23 recurrent connectivity
     p_conn = 0.15
-    W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
-    W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
-    W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
-    W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+    W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee/5, p_conn*EE_probchg_comb[ij1])
+    W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei/5, p_conn*EI_probchg_comb[ij1])
+    W_ItoE = _mycon_(NI, NE, Bie_ca3, Bie/5, 1.)
+    W_ItoI = _mycon_(NI, NI, Bii_ca3, Bii/5, 1.)
     
     W_E3toE =  _mycon_(NE, NE, Be_bkg, Be_bkg/5, p_conn)
     W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, p_conn)

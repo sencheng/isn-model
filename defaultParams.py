@@ -44,6 +44,8 @@ Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 # Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
+Bee_ca3, Bei_ca3, Bie_ca3, Bii_ca3 = 0.2, 0.2, -0.2, -0.2
+
 # background and stimulus conductances (nS)
 Be_bkg = .1
 Be_stim = .1
