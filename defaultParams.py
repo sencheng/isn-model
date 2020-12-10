@@ -6,7 +6,7 @@ import numpy as np; import pylab as pl; import time, sys, os
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 1
+n_cores = 4
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
