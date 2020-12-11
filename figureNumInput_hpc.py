@@ -145,11 +145,11 @@ def run_for_each_parset(sim_suffix):
                 # ff_i[ij1, ij2, ii, 1] = simdata_obj.base_ff[1, :].mean()
                 # ff_i[ij1, ij2, ii, 2] = simdata_obj.stim_ff[1, :].mean()
                 
-                # path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
-                # simdata_obj.plot_raster(nn_stim, ax_raster)
-                # fig_raster.savefig(os.path.join(path_raster_fig,
-                #                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
-                #                    format="png")
+                path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
+                simdata_obj.plot_raster(nn_stim, ax_raster)
+                fig_raster.savefig(os.path.join(path_raster_fig,
+                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                   format="png")
                 plt.close(fig_raster)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
@@ -339,10 +339,12 @@ if __name__=='__main__':
     bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
     
     for ij1 in range(EE_probchg_comb.size):
-        
+        '''
         sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1],
                                                                  E_extra_comb[ij1],
                                                                  EE_probchg_comb[ij1],
                                                                  EI_probchg_comb[ij1])
+        '''
+        sim_suffix = "-CA3eqpert-bi{:.2f}-be{:.2f}-bkgfac{:.2f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Be_ca3, Bi_ca3, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
                      
         run_for_each_parset(sim_suffix)

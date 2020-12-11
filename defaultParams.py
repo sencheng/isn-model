@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-EIeqpert-bkgfac1.00-Epertfac1.0-longersim-HEEcond-EE_probchg1.00-EI_probchg1.00"
+sim_suffix = "-CA3eqpert-bi0.20-be-0.20-ca1bkgfr4000-Epertfac1.0-EE_probchg0.90-EI_probchg2.00"
 
 #------------- neuron params
 
@@ -44,7 +44,7 @@ Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 # Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
-Bee_ca3, Bei_ca3, Bie_ca3, Bii_ca3 = 0.2, 0.2, -0.2, -0.2
+Be_ca3, Bi_ca3 = 0.2, -0.2
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
