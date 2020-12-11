@@ -115,7 +115,7 @@ nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
 cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
-rec_from_cond = True
+rec_from_cond = False
 
 # -- default settings for plotting figures
 # (comment out for conventional Python format)

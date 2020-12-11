@@ -183,9 +183,11 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         print('##########')
         '''
     if rec_from_cond:
-        return rout_blank, rout_stim, SPD, CURR
+        #return rout_blank, rout_stim, SPD, CURR
+        return SPD, CURR
     else:
-        return rout_blank, rout_stim, CURR
+        #return rout_blank, rout_stim, SPD
+        return SPD
 
 ################################################################################
 
