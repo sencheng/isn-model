@@ -184,10 +184,10 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         '''
     if rec_from_cond:
         #return rout_blank, rout_stim, SPD, CURR
-        return SPD, CURR
+        return [], [], SPD, CURR
     else:
         #return rout_blank, rout_stim, SPD
-        return SPD
+        return [], [], SPD
 
 ################################################################################
 
