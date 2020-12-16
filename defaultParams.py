@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-CA3eqpert-bi0.20-be-0.20-ca1bkgfr4000-Epertfac1.0-EE_probchg0.90-EI_probchg2.00"
+sim_suffix = "-CA3eqpert-bi0.20-be-0.20-ca1bkgfr5000-Epertfac1.0-EE_probchg0.90-EI_probchg2.00"
 
 #------------- neuron params
 
@@ -39,12 +39,12 @@ Gl = 1./140e6
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-# Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
+Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
-Be_ca3, Bi_ca3 = 0.2, -0.2
+Be_ca3, Bi_ca3 = 0.2, -0.3
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -83,7 +83,7 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
-r_bkg_ca1 = 5000.
+r_bkg_ca1 = 9000.
 # rate of perturbation (sp/s)
 r_stim = -400.
 

@@ -1131,7 +1131,8 @@ if __name__=='__main__':
                 
                 simdata_obj.get_fr_diff(nn_stim)
                 
-                if len(simdata_obj.sim_res[nn_stim])>3:
+                #if len(simdata_obj.sim_res[nn_stim])>3:
+                if rec_from_cond:
                     simdata_obj.get_cond_diff(nn_stim)
                 # simdata_obj.get_indegree()
                 # simdata_obj.plot_indeg_frdiff(ax[a_r, a_c])
@@ -1152,12 +1153,12 @@ if __name__=='__main__':
                 
                 simdata_obj.plot_basefr_frdiff(ax_base_frdiff[:, ii])
                 ax_base_frdiff[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+                if rec_from_cond:
+                    simdata_obj.plot_gdiff_frdiff(ax_dg_dfrI[:, ii], EI="I")
+                    ax_dg_dfrI[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
                 
-                simdata_obj.plot_gdiff_frdiff(ax_dg_dfrI[:, ii], EI="I")
-                ax_dg_dfrI[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
-                
-                simdata_obj.plot_gdiff_frdiff(ax_dg_dfrE[:, ii], EI="E")
-                ax_dg_dfrE[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+                    simdata_obj.plot_gdiff_frdiff(ax_dg_dfrE[:, ii], EI="E")
+                    ax_dg_dfrE[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
                 
                 simdata_obj.plot_inpfr_frdiff(ax_i_fr[:, ii])
                 ax_i_fr[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
