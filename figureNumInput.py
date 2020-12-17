@@ -476,6 +476,8 @@ class simdata():
         self.diff_exc = self.stim_exc - self.base_exc
         self.diff_inh = self.stim_inh - self.base_inh
         
+        self.get_ids_of_changing_units()
+        
         if 'NI_pv' in globals():
             
             self.base_inh_pv = self.base_inh[:NI_pv]
@@ -818,6 +820,102 @@ class simdata():
             
             ax.plot(sel_spks, (i+self.vis_E_ids.size+1)*np.ones_like(sel_spks),
                     color='blue', marker='|', markersize=1, linestyle='')
+            
+    # def plot_raster_tr_sep(self, ids, times, ax, sel_ids):
+        
+    #     if self.sel_ids.size != 0:
+        
+    #         for i, s_id in enumerate(sel_ids):
+                
+    #             sel_spks = times[ids==s_id]
+                
+    #             ax.plot(sel_spks, (i+1)*np.ones_like(sel_spks),
+    #                     color='red', marker='|', markersize=1, linestyle='')
+            
+    def get_ids_of_changing_units(self, th_prop_trials=0.5):
+        
+        pos_exc_bin = self.diff_exc>0
+        pos_inh_bin = self.diff_inh>0
+        
+        neg_exc_bin = self.diff_exc<0
+        neg_inh_bin = self.diff_inh<0
+        
+        pos_exc = pos_exc_bin.sum(axis=1)
+        pos_inh = pos_inh_bin.sum(axis=1)
+        
+        neg_exc = neg_exc_bin.sum(axis=1)
+        neg_inh = neg_inh_bin.sum(axis=1)
+        
+        self.pos_exc_ids = np.where(pos_exc>th_prop_trials*self.Ntrials)[0]
+        self.pos_inh_ids = np.where(pos_inh>th_prop_trials*self.Ntrials)[0]
+        
+        self.neg_exc_ids = np.where(neg_exc>th_prop_trials*self.Ntrials)[0]
+        self.neg_inh_ids = np.where(neg_inh>th_prop_trials*self.Ntrials)[0]
+        
+        self.pos_exc_tr  = np.zeros_like(self.pos_exc_ids)
+        self.pos_inh_tr  = np.zeros_like(self.pos_inh_ids)
+        
+        self.neg_exc_tr  = np.zeros_like(self.neg_exc_ids)
+        self.neg_inh_tr  = np.zeros_like(self.neg_inh_ids)
+        
+        for i, a in enumerate(self.diff_exc[self.pos_exc_ids]):
+            self.pos_exc_tr[i] = a.argmax()
+            
+        for i, a in enumerate(self.diff_inh[self.pos_inh_ids]):
+            self.pos_inh_tr[i] = a.argmax()
+            
+        for i, a in enumerate(self.diff_exc[self.neg_exc_ids]):
+            self.neg_exc_tr[i] = a.argmin()
+            
+        for i, a in enumerate(self.diff_inh[self.neg_inh_ids]):
+            self.neg_inh_tr[i] = a.argmin()
+            
+    def plot_raster_abs_chgs_all(self, pert_val, ax):
+        
+        if not hasattr(self, 'pos_exc_ids'):
+            self.get_ids_of_changing_units()
+        
+        self.plot_raster_abs_chgs(pert_val, ax[0, 0],
+                                  self.pos_exc_ids, self.pos_exc_tr, color='red')
+        
+        self.plot_raster_abs_chgs(pert_val, ax[0, 1],
+                                  self.pos_inh_ids, self.pos_inh_tr, color='blue')
+        
+        self.plot_raster_abs_chgs(pert_val, ax[1, 0],
+                                  self.neg_exc_ids, self.neg_exc_tr, color='red')
+        
+        self.plot_raster_abs_chgs(pert_val, ax[1, 1],
+                                  self.neg_inh_ids, self.neg_inh_tr, color='blue')
+        
+        
+        ax[1, 0].set_xlabel("Time (ms)")
+        ax[1, 1].set_xlabel("Time (ms)")
+        ax[0, 0].set_ylabel("Neuron ID")
+        ax[1, 0].set_ylabel("Neuron ID")
+        ax[0, 0].set_title("Excitatory")
+        ax[0, 1].set_title("Inhibitory")
+            
+    def plot_raster_abs_chgs(self, pert_val, ax, sel_ids, sel_tr, color):
+        
+        for i, tr in enumerate(sel_tr):
+            
+            if self.trial_type == 'SingleSim':
+            
+                spk_t = spk_times[(spk_times>=self.st_tr_time[tr]) & 
+                                  (spk_times<=self.end_tr_time[tr])] - self.st_tr_time[tr]
+                
+                spk_id = spk_ids[(spk_times>=self.st_tr_time[tr]) & 
+                                 (spk_times<=self.end_tr_time[tr])]
+                
+            else:
+                
+                spk_t = self.sim_res[pert_val][2][tr]['times']
+                spk_id = self.sim_res[pert_val][2][tr]['senders']
+                
+                sel_spks = spk_t[spk_id==sel_ids[i]]
+                
+                ax.plot(sel_spks, (i+1)*np.ones_like(sel_spks),
+                        color=color, marker='|', markersize=1, linestyle='')
         
     def plot_raster(self, pert_val, ax, prop=0.05):
         
@@ -1127,6 +1225,9 @@ if __name__=='__main__':
                 fig_raster, ax_raster = plt.subplots(nrows=Ntrials, ncols=1,
                                                      sharex=True, sharey=True)
                 
+                fig_raster_sep, ax_raster_sep = plt.subplots(nrows=2, ncols=2,
+                                                             sharex=True, sharey=True)
+                
                 a_r, a_c = ii//3, ii%3
                 
                 simdata_obj.get_fr_diff(nn_stim)
@@ -1201,6 +1302,14 @@ if __name__=='__main__':
                                     format="png")
                 '''
                 plt.close(fig_raster)
+                
+                
+                path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
+                simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                fig_raster.savefig(os.path.join(path_raster_fig,
+                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                    format="png")
+                plt.close(fig_raster_sep)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
