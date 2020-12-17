@@ -88,7 +88,7 @@ r_bkg_ca1 = 9000.
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 100.
+Ttrans = 500
 # simulation time before perturbation (ms)
 Tblank= 500.
 # simulation time of perturbation (ms)
