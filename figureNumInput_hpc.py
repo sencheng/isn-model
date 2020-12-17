@@ -86,6 +86,9 @@ def run_for_each_parset(sim_suffix):
                 fig_raster, ax_raster = plt.subplots(nrows=Ntrials, ncols=1,
                                                      sharex=True, sharey=True)
                 
+                fig_raster_sep, ax_raster_sep = plt.subplots(nrows=2, ncols=2,
+                                                             sharex=True)
+                
                 a_r, a_c = ii//3, ii%3
                 
                 simdata_obj.get_fr_diff(nn_stim)
@@ -151,6 +154,13 @@ def run_for_each_parset(sim_suffix):
                                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
                                    format="png")
                 plt.close(fig_raster)
+                
+                path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
+                simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                fig_raster_sep.savefig(os.path.join(path_raster_fig,
+                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                    format="png")
+                plt.close(fig_raster_sep)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
