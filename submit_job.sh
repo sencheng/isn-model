@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH -J ISN # A single job name for the array
-#SBATCH -n 1 # Number of cores
+#SBATCH -n 4 # Number of cores
 #SBATCH -N 1 # All cores on one Node
 #SBATCH --mem 5000 # Memory request
 #SBATCH -t 1-00:00 # Maximum execution time (D-HH:MM)

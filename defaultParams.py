@@ -6,7 +6,7 @@ import numpy as np; import pylab as pl; import time, sys, os
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 1
+n_cores = 4
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -44,7 +44,7 @@ Be, Bi = .1, -.2
 Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
 Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
-Be_ca3, Bi_ca3 = 0.2, -0.2
+Be_ca3, Bi_ca3 = 0.3, -0.2
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -83,7 +83,7 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
-r_bkg_ca1 = 4000.
+r_bkg_ca1 = 0.
 # rate of perturbation (sp/s)
 r_stim = -400.
 
