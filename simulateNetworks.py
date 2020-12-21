@@ -309,7 +309,7 @@ for ij1 in range(Be_rng_comb.size):
         rr2 = rr1 + r_extra
 
         tmp_out = myRun(rr1, rr2, nn_stim=nn_stim)
-        sim_res[nn_stim] = tmp_out[0:2]
+        sim_res[nn_stim] = tmp_out[0:3]
         sim_res_ca3[nn_stim] = [tmp_out[0], tmp_out[1], tmp_out[3]]
         
 
