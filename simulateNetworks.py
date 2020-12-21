@@ -60,7 +60,7 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
                       'ItoE':1, 'ItoI':1,
                       'E3toE':1, 'E3toI':1}, nn_stim=0):
 
-    SPD = {}; CURR = {}
+    SPD = {}; SPD_ca3 = {}; CURR = {}
     # -- simulating network for N-trials
     for tri in range(Ntrials):
         print('')
@@ -105,6 +105,7 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
 
         # -- recording spike data
         spikes_all = net_tools._recording_spikes_(neurons=ca1_neurons)
+        spikes_all_ca3 = net_tools._recording_spikes_(neurons=ca3_neurons)
 
         # -- recording inhibitory current data
         if rec_from_cond:
@@ -146,7 +147,8 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         net_tools._run_simulation_(Tstim)
         # -- reading out spiking activity
         # spd = net_tools._reading_spikes_(spikes_all)
-        SPD[tri] = net_tools._reading_spikes_(spikes_all)
+        SPD[tri] = net_tools._reading_spikes_(spikes_all, min(ca1_neurons))
+        SPD_ca3[tri] = net_tools._reading_spikes_(spikes_all_ca3, min(ca3_neurons))
         
         # -- reading out currents
         if rec_from_cond:
@@ -187,7 +189,7 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         return [], [], SPD, CURR
     else:
         #return rout_blank, rout_stim, SPD
-        return [], [], SPD
+        return [], [], SPD, SPD_ca3
 
 ################################################################################
 
@@ -280,7 +282,7 @@ for ij1 in range(Be_rng_comb.size):
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
     '''
     # -- running simulations
-    sim_res = {}
+    sim_res = {}; sim_res_ca3 = {}
 
     for nn_stim in nn_stim_rng:
 
@@ -306,16 +308,27 @@ for ij1 in range(Be_rng_comb.size):
                          r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         rr2 = rr1 + r_extra
 
-        sim_res[nn_stim] = myRun(rr1, rr2, nn_stim=nn_stim)
+        tmp_out = myRun(rr1, rr2, nn_stim=nn_stim)
+        sim_res[nn_stim] = tmp_out[0:2]
+        sim_res_ca3[nn_stim] = [tmp_out[0], tmp_out[1], tmp_out[3]]
+        
 
     sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials
     sim_res['N'], sim_res['NE'], sim_res['NI'] = N, NE, NI
     sim_res['Tblank'], sim_res['Tstim'], sim_res['Ttrans'] = Tblank, Tstim, Ttrans
     sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
-
+    
+    sim_res_ca3['nn_stim_rng'], sim_res_ca3['Ntrials'] = nn_stim_rng, Ntrials
+    sim_res_ca3['N'], sim_res_ca3['NE'], sim_res_ca3['NI'] = N, NE, NI
+    sim_res_ca3['Tblank'], sim_res_ca3['Tstim'], sim_res_ca3['Ttrans'] = Tblank, Tstim, Ttrans
+    sim_res_ca3['W_EtoE'], sim_res_ca3['W_EtoI'], sim_res_ca3['W_ItoE'], sim_res_ca3['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
+    
     os.chdir(res_path);
     sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
     fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
+    
+    sim_name = 'sim_res_ca3_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
+    fl = open(sim_name, 'wb'); pickle.dump(sim_res_ca3, fl); fl.close()
 
 t_end = time.time()
 print('took: ', np.round((t_end-t_init)/60), ' mins')

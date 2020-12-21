@@ -113,8 +113,9 @@ def _recording_voltages_(neurons, start=0., stop=np.inf):
     DivConnect(voltages, neurons)
     return voltages
 
-def _reading_spikes_(spikes):
+def _reading_spikes_(spikes, min_id):
     spike_data = nest.GetStatus(spikes)[0]['events']
+    spike_data['senders'] = spike_data['senders'] - min_id + 1
     return spike_data
 
 def _reading_currents_(currs):
