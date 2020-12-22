@@ -321,7 +321,7 @@ for ij1 in range(Be_rng_comb.size):
     sim_res_ca3['nn_stim_rng'], sim_res_ca3['Ntrials'] = nn_stim_rng, Ntrials
     sim_res_ca3['N'], sim_res_ca3['NE'], sim_res_ca3['NI'] = N, NE, NI
     sim_res_ca3['Tblank'], sim_res_ca3['Tstim'], sim_res_ca3['Ttrans'] = Tblank, Tstim, Ttrans
-    sim_res_ca3['W_EtoE'], sim_res_ca3['W_EtoI'], sim_res_ca3['W_ItoE'], sim_res_ca3['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
+    sim_res_ca3['W_EtoE'], sim_res_ca3['W_EtoI'], sim_res_ca3['W_ItoE'], sim_res_ca3['W_ItoI'] = W_EtoE_ca3, W_EtoI_ca3, W_ItoE_ca3, W_ItoI_ca3
     
     os.chdir(res_path);
     sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
