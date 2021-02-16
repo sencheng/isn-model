@@ -74,7 +74,15 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         myparams={'b':NE*[0.], 'a':NE*[0.]})
         inh_neurons = net_tools._make_neurons_(NI, neuron_model=cell_type, \
         myparams={'b':NE*[0.],'a':NE*[0.]})
-
+        '''     
+        np.random.seed(tri+1)
+        
+        p_conn = 0.15
+        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
+        W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
+        W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
+        W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+        '''
         all_neurons = exc_neurons + inh_neurons
 
         # -- recurrent connectivity
@@ -159,9 +167,11 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         print('##########')
         '''
     if rec_from_cond:
-        return rout_blank, rout_stim, SPD, CURR
+        #return rout_blank, rout_stim, SPD, CURR
+        return [], [], SPD, CURR
     else:
-        return rout_blank, rout_stim, CURR
+        #return rout_blank, rout_stim, SPD
+        return [], [], SPD
 
 ################################################################################
 
@@ -185,7 +195,7 @@ EIconn_chg_factor = np.arange(1.8, 2.21, 0.2)#np.array([2.0])
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
 bkg_chg_factor    = np.arange(1., 1.01, 0.05)
 '''
-Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
+Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb, C_rng_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor, C_rng)
 
 Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
@@ -195,6 +205,7 @@ II_condchg_comb = II_condchg_comb.flatten()[job_id::num_jobs]
 #fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
 E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
 bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
+C_rng_comb = C_rng_comb.flatten()[job_id::num_jobs]
 #pert_comb = pert_comb.flatten()[job_id::num_jobs]
 
 #E_pert_frac = 1.0
@@ -205,14 +216,14 @@ for ij1 in range(Be_rng_comb.size):
     #r_stim = pert_comb[ij1]
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
     Bee, Bei = Be, Be
-    Bie, Bii = Bi, Bi
+    Bie, Bii = Bi, Bi*II_scale
 
     #sim_suffix = "-pert{}".format(r_stim)
     #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
     #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
     #sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-    sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-CA1-Ntr{}-RNG{}-EIeq_unihet_pert-EPfrac{:.1f}-II{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Ntrials, C_rng_comb[ij1], E_pert_frac, II_scale, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #r_stim = -r_stim
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -224,7 +235,7 @@ for ij1 in range(Be_rng_comb.size):
 
     os.chdir(res_path)
     print('Resetting random seed ...')
-    np.random.seed(1)
+    np.random.seed(C_rng_comb[ij1]*2+1)
     # -- L23 recurrent connectivity
     p_conn = 0.15
     W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
@@ -248,16 +259,16 @@ for ij1 in range(Be_rng_comb.size):
 
         print('\n # -----> size of pert. inh: ', nn_stim)
 
-        np.random.seed(2)
+        np.random.seed((C_rng_comb[ij1]+1)*2)
         r_extra = np.zeros(N)
         #r_extra[NE:NE+int(nn_stim/2)] = r_stim
         #r_extra[NE+int(nn_stim/2):NE+nn_stim] = r_stim
-        r_extra[0:int(NE*nn_stim/NI)] = r_stim
+        #r_extra[0:int(NE*nn_stim/NI)] = r_stim
         #r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = r_stim
-        r_extra[NE:NE+nn_stim] = r_stim
-        #r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]
+        r_extra[NE:NE+nn_stim] = r_stim*np.random.uniform(0.8, 1.2, size=nn_stim)#np.random.normal(loc=1, scale=0.2, size=nn_stim)
+        r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]*np.random.uniform(0.8, 1.2, size=int(NE*nn_stim/NI))#*E_extra_comb[ij1]*np.random.normal(loc=1, scale=0.2, size=int(NE*nn_stim/NI))
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
-        # r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
+        #r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]*np.random.uniform(0.8, 1.2, size=int(NE*nn_stim/NI))
 
         #fr_inc_factor = fr_chg_comb[ij1]
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]

@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-EIeqpert-bkgfac1.00-Epertfac1.0-longersim-HEEcond-EE_probchg1.00-EI_probchg1.00"
+sim_suffix = "-CA1eqpert-bi0.20-be-0.20-ca1bkgfr9500-Epertfac1.0-EE_probchg0.90-EI_probchg2"
 
 #------------- neuron params
 
@@ -39,10 +39,10 @@ Gl = 1./140e6
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
+#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-# Be_rng = np.array([0.01, .05, .1, .15, .2, .25, .3, .35, .4, .45, .5, .55])
-Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
+Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
+Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -81,19 +81,21 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
+r_bkg_ca1 = 0.
 # rate of perturbation (sp/s)
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 100.
+Ttrans = 500
 # simulation time before perturbation (ms)
 Tblank= 500.
 # simulation time of perturbation (ms)
 Tstim = 500.
 
 # number of trials
-Ntrials = 5
-
+Ntrials = 20
+II_scale = 0.8
+#C_rng = 2
 # -- network params
 
 # fraction of Inh neurons
@@ -112,7 +114,7 @@ nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
 cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
-rec_from_cond = True
+rec_from_cond = False
 
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
