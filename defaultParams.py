@@ -94,7 +94,7 @@ Tstim = 500.
 
 # number of trials
 Ntrials = 20
-II_scale = 0.8
+II_scale = 1.0
 #C_rng = 2
 # -- network params
 
@@ -115,7 +115,7 @@ cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
-
+significance_test = False
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')

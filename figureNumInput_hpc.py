@@ -12,7 +12,7 @@ from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 import searchParams; reload(searchParams); from searchParams import *
-from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg
+from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg, significant_proportions
 
 def run_for_each_parset(sim_suffix):
     cwd = os.getcwd()
@@ -27,6 +27,10 @@ def run_for_each_parset(sim_suffix):
     
     pos_prop = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
     mean_fr  = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    
+    significant_inc = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    significant_dec = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    non_significant = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
     
     paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
     
@@ -77,6 +81,8 @@ def run_for_each_parset(sim_suffix):
             fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
             fig_dist_mean, ax_dist_mean = plt.subplots(nrows=2, ncols=3,
                                              sharex=True, sharey=True)
+            fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=2, ncols=3,
+                                                             sharex=True, sharey=True)
             fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
             fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
             fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
@@ -122,9 +128,12 @@ def run_for_each_parset(sim_suffix):
                 fig_raster_sep, ax_raster_sep = plt.subplots(nrows=2, ncols=2,
                                                              sharex=True)
                 
+                fig_raster_extremes, ax_raster_extremes = plt.subplots(nrows=2, ncols=2,
+                                                             sharex=True)
+                
                 a_r, a_c = ii//3, ii%3
                 
-                simdata_obj.get_fr_diff(nn_stim)
+                simdata_obj.get_fr_diff(nn_stim, significance_test=significance_test)
                 
                 # simdata_obj.get_cond_diff(nn_stim)
                 # simdata_obj.get_indegree()
@@ -136,6 +145,9 @@ def run_for_each_parset(sim_suffix):
 
                 simdata_obj.plot_frdiffmean_dist(ax_dist_mean[a_r, a_c])
                 ax_dist_mean[a_r, a_c].legend()
+                
+                simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[a_r, a_c])
+                ax_dist_mean_sample[a_r, a_c].legend()
                 
                 #simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
                 
@@ -174,6 +186,17 @@ def run_for_each_parset(sim_suffix):
                 mean_fr[ij1, ij2, ii, 0]  = simdata_obj.diff_exc.mean()
                 mean_fr[ij1, ij2, ii, 1]  = simdata_obj.diff_inh.mean()
                 
+                if significance_test:
+                
+                    sig_exc, sig_inh = simdata_obj.get_significant_changes()
+                    significant_dec[ij1, ij2, ii, 0] = sig_exc[0]/np.sum(sig_exc)
+                    significant_inc[ij1, ij2, ii, 0] = sig_exc[1]/np.sum(sig_exc)
+                    non_significant[ij1, ij2, ii, 0] = sig_exc[2]/np.sum(sig_exc)
+                    
+                    significant_dec[ij1, ij2, ii, 1] = sig_inh[0]/np.sum(sig_inh)
+                    significant_inc[ij1, ij2, ii, 1] = sig_inh[1]/np.sum(sig_inh)
+                    non_significant[ij1, ij2, ii, 1] = sig_inh[2]/np.sum(sig_inh)
+                
                 # cv_e[ij1, ij2, ii, 0] = simdata_obj.trans_cv[0, :].mean()
                 # cv_e[ij1, ij2, ii, 1] = simdata_obj.base_cv[0, :].mean()
                 # cv_e[ij1, ij2, ii, 2] = simdata_obj.stim_cv[0, :].mean()
@@ -198,15 +221,22 @@ def run_for_each_parset(sim_suffix):
                 plt.close(fig_raster)
                 
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
+                path_raster_fig_ext = simdata_obj.create_fig_subdir(fig_path, "raster_dir_extremes")
                 simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_extremes)
                 fig_raster_sep.savefig(os.path.join(path_raster_fig,
                                                 "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
+                fig_raster_extremes.savefig(os.path.join(path_raster_fig_ext,
+                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
+                                    format="png")
                 plt.close(fig_raster_sep)
+                plt.close(fig_raster_extremes)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist_mean[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_sample[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
                 
             
@@ -251,6 +281,9 @@ def run_for_each_parset(sim_suffix):
             fig_dist_mean.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-Be{}-Bi{}.pdf".format(Be, Bi)),
                                   format="pdf")
             
+            fig_dist_mean_sample.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-samples-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                         format="pdf")
+            
             fig_dist_g.savefig(os.path.join(other_fig, "g-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                                format="pdf")
             
@@ -271,6 +304,8 @@ def run_for_each_parset(sim_suffix):
             plt.close(fig_i_fr)
             plt.close(fig_e_fr)
             plt.close(fig_avg_fr)
+            plt.close(fig_dist_mean)
+            plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
         ax_box[-1, 2].set_xlabel("Percent of perturbed I neurons")
@@ -311,6 +346,8 @@ def run_for_each_parset(sim_suffix):
         plt.close(fig_box)
         plt.close(fig_box_mean)
         plt.close(fig_box_g)
+        plt.close(fig_violin_mean)
+        plt.close(fig_violin)
         
         
     frchgdata = {'E': {'proportion_increase': pos_prop[:,:,:,0],
@@ -332,6 +369,20 @@ def run_for_each_parset(sim_suffix):
     
     fig_frchg = frchg(frchgdata)
     fig_frchg.savefig(os.path.join(other_fig, "frchg.pdf"),
+                        format="pdf")
+    
+    fig_sig_exc = significant_proportions([significant_dec[:, :, :, 0],
+                                           significant_inc[:, :, :, 0],
+                                           non_significant[:, :, :, 0]])
+    
+    fig_sig_exc.savefig(os.path.join(other_fig, "change-fr-prop-exc.pdf"),
+                        format="pdf")
+    
+    fig_sig_inh = significant_proportions([significant_dec[:, :, :, 1],
+                                           significant_inc[:, :, :, 1],
+                                           non_significant[:, :, :, 1]])
+    
+    fig_sig_inh.savefig(os.path.join(other_fig, "change-fr-prop-inh.pdf"),
                         format="pdf")
     
     fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
