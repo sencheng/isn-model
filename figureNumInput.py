@@ -362,8 +362,8 @@ class simdata():
             
             for j in range(NUM_SHUF):
                 spks = spk_times_e[:, j]
-                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank
-                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim
+                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank/self.Ntrials
+                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim/self.Ntrials
                 fr_exc[i, j] = stim-base
                 
         for i in range(num_spks_i.shape[0]):
@@ -372,8 +372,8 @@ class simdata():
                                             size=(int(num_spks_i[i]), NUM_SHUF))
             for j in range(NUM_SHUF):
                 spks = spk_times_i[:, j]
-                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank
-                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim
+                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank/self.Ntrials
+                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim/self.Ntrials
                 fr_inh[i, j] = stim-base
             
         return fr_exc*1000, fr_inh*1000

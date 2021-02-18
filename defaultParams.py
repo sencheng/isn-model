@@ -41,8 +41,8 @@ Be, Bi = .1, -.2
 # range of Exc and Inh conductances (nS)
 #Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
-Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
+Be_rng = np.array([0.5, 0.55])
+Bi_rng = np.array([-0.1, -0.2])
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -115,7 +115,7 @@ cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
-significance_test = False
+significance_test = True
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')
