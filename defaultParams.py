@@ -44,7 +44,7 @@ Be, Bi = .1, -.2
 Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
 Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
 
-Be_ca3, Bi_ca3 = 0.05, -0.4
+Be_ca3, Bi_ca3 = 0.2, -0.2
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -83,7 +83,7 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
-r_bkg_ca1 = 3000
+r_bkg_ca1 = 7000
 # rate of perturbation (sp/s)
 r_stim = -400.
 
@@ -115,7 +115,7 @@ cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
-
+significance_test = False
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')

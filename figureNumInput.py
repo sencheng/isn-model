@@ -80,6 +80,11 @@ class simdata():
         self.base_ff  = np.zeros_like(self.trans_cv)
         self.stim_ff  = np.zeros_like(self.trans_cv)
         
+        self.data_violin = []
+        self.data_violin_mean = []
+        
+        self.max_diff = -np.inf
+        
     def get_trial_times(self):
         
         '''
@@ -336,6 +341,42 @@ class simdata():
                                                                  sel_g_e)
             
         return cond_exc, cond_inh
+    
+    def get_fr_surrogate(self, pert_val, interval, NUM_SHUF=1000):
+        
+        if not hasattr(self, 'st_tr_time'):
+            self.get_trial_times()
+        
+        fr_inh = np.zeros((self.NI, NUM_SHUF))
+        fr_exc = np.zeros((self.NE, NUM_SHUF))
+        
+        num_spks_e = self.base_exc.sum(axis=1)*self.Tblank/1000. + \
+                     self.stim_exc.sum(axis=1)*self.Tstim/1000.
+        num_spks_i = self.base_inh.sum(axis=1)*self.Tblank/1000. + \
+                     self.stim_inh.sum(axis=1)*self.Tstim/1000.
+        
+        for i in range(num_spks_e.shape[0]):
+            spk_times_e = np.random.uniform(low=interval[0],
+                                            high=interval[1],
+                                            size=(int(num_spks_e[i]), NUM_SHUF))
+            
+            for j in range(NUM_SHUF):
+                spks = spk_times_e[:, j]
+                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank/self.Ntrials
+                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim/self.Ntrials
+                fr_exc[i, j] = stim-base
+                
+        for i in range(num_spks_i.shape[0]):
+            spk_times_i = np.random.uniform(low=interval[0],
+                                            high=interval[1],
+                                            size=(int(num_spks_i[i]), NUM_SHUF))
+            for j in range(NUM_SHUF):
+                spks = spk_times_i[:, j]
+                base = (spks < interval[0] + self.Tblank).sum()/self.Tblank/self.Ntrials
+                stim = (spks >= interval[0] + self.Tblank).sum()/self.Tstim/self.Ntrials
+                fr_inh[i, j] = stim-base
+            
+        return fr_exc*1000, fr_inh*1000
         
     def get_fr(self, pert_val, interval):
         
@@ -443,8 +484,30 @@ class simdata():
         
         self.diff_exc_m = self.diff_e_cond.mean(axis=1)
         self.diff_inh_m = self.diff_i_cond.mean(axis=1)
+        
+    def get_fr_diff_mean(self):
+        
+        self.diff_exc_m = np.zeros(self.diff_exc.shape[0])
+        self.diff_inh_m = np.zeros(self.diff_inh.shape[0])
+        
+        self.diff_exc_m_include_per = np.zeros(self.diff_exc.shape[0])
+        self.diff_inh_m_include_per = np.zeros(self.diff_inh.shape[0])
+        
+        for i in range(self.base_exc.shape[0]):
             
-    def get_fr_diff(self, pert_val, exclude_inactives=True):
+            IND = (self.base_exc[i]!=0) | (self.stim_exc[i]!=0)
+            self.diff_exc_m[i] = np.mean(self.diff_exc[i][IND])
+            self.diff_exc_m_include_per[i] = IND.mean()*100
+            
+        for i in range(self.base_inh.shape[0]):
+            
+            IND = (self.base_inh[i]!=0) | (self.stim_inh[i]!=0)
+            self.diff_inh_m[i] = np.mean(self.diff_inh[i][IND])
+            self.diff_inh_m_include_per[i] = IND.mean()*100        
+            
+        
+        
+    def get_fr_diff(self, pert_val, exclude_inactives=True, significance_test=False):
         
         print("Computing firing rate changes for pert={}".format(pert_val))
         
@@ -463,6 +526,12 @@ class simdata():
         self.stim_exc, self.stim_inh = self.get_fr(pert_val,
                                                    [self.Ttrans+self.Tblank, 
                                                     self.Ttrans+self.Tblank+self.Tstim])
+        
+        if significance_test:
+            self.diff_exc_shuf, self.diff_inh_shuf = \
+                self.get_fr_surrogate(pert_val,
+                                      [self.Ttrans, 
+                                      self.Ttrans+self.Tblank+self.Tstim])
         '''
         self.trans_cv[0, :], self.trans_cv[1, :], self.trans_ff[0, :], self.trans_ff[1, :] = \
         self.get_cv(pert_val, [0, self.Ttrans])
@@ -494,8 +563,10 @@ class simdata():
             self.diff_inh_vip = self.diff_inh[NI-NI_vip:]
         
         
-        self.diff_exc_m = self.diff_exc.mean(axis=1)
-        self.diff_inh_m = self.diff_inh.mean(axis=1)
+        self.get_fr_diff_mean()
+        
+        # self.diff_exc_m = self.diff_exc.mean(axis=1)
+        # self.diff_inh_m = self.diff_inh.mean(axis=1)
         
         if exclude_inactives:
             
@@ -530,8 +601,44 @@ class simdata():
             else:
                 self.paradox_score = np.nan
 
-            self.diff_exc_m = self.diff_exc.mean()
-            self.diff_inh_m = self.diff_inh.mean()
+            # self.diff_exc_m = self.diff_exc.mean()
+            # self.diff_inh_m = self.diff_inh.mean()
+            
+    def get_significant_changes(self, pval=0.05):
+        
+        sig_dec_inh, sig_inc_inh, non_sig_inh = [0]*3        
+        sig_dec_exc, sig_inc_exc, non_sig_exc = [0]*3
+        
+        for i, v in enumerate(self.diff_inh_m):
+            p_val_dec = np.sum(self.diff_inh_shuf[i, :]<v)/self.diff_inh_shuf.shape[1]
+            p_val_inc = np.sum(self.diff_inh_shuf[i, :]>v)/self.diff_inh_shuf.shape[1]
+            
+            if (p_val_dec < pval) & (p_val_inc < pval):
+                print("strange!")
+            else:
+                if p_val_dec < pval:
+                    sig_dec_inh += 1
+                elif p_val_inc < pval:
+                    sig_inc_inh += 1
+                else:
+                    non_sig_inh += 1
+                
+        for i, v in enumerate(self.diff_exc_m):
+            p_val_dec = np.sum(self.diff_exc_shuf[i, :]<v)/self.diff_exc_shuf.shape[1]
+            p_val_inc = np.sum(self.diff_exc_shuf[i, :]>v)/self.diff_exc_shuf.shape[1]
+            
+            if (p_val_dec < pval) & (p_val_inc < pval):
+                print("strange!")
+            else:
+                if p_val_dec < pval:
+                    sig_dec_exc += 1
+                elif p_val_inc < pval:
+                    sig_inc_exc += 1
+                else:
+                    non_sig_exc += 1
+        INH = [sig_dec_inh, sig_inc_inh, non_sig_inh] 
+        EXC = [sig_dec_exc, sig_inc_exc, non_sig_exc]
+        return EXC, INH
         
     def get_avg_frs(self, pert_val):
         
@@ -739,6 +846,30 @@ class simdata():
         self.plot_reg_line(self.diff_exc.flatten(), sum_fr_i.flatten(), ax[0])
         self.plot_reg_line(self.diff_exc.flatten(), sum_fr_e.flatten(), ax[1])
         
+    def plot_frdiffmean_dist(self, ax, num_bins=20):
+        
+        edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        
+        if hasattr(self, 'diff_inh_pv'):
+            print('NotImplemented!')
+        else:
+            ax.hist([self.diff_inh_m.flatten(),
+                     self.diff_exc_m.flatten()], edges,
+                    color=['blue', 'red'],
+                    label=['I', 'E'])
+            
+    def plot_frdiffmean_samplesize_dist(self, ax, num_bins=20):
+        
+        # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        
+        if hasattr(self, 'diff_inh_pv'):
+            print('NotImplemented!')
+        else:
+            ax.hist([self.diff_inh_m_include_per.flatten(),
+                     self.diff_exc_m_include_per.flatten()], self.Ntrials,
+                    color=['blue', 'red'],
+                    label=['I', 'E'])
+        
     def plot_frdiff_dist(self, ax, num_bins=20):
         
         edges = np.linspace(self.diff_inh.min(), self.diff_inh.max(), num_bins)
@@ -767,24 +898,91 @@ class simdata():
     def plot_box_frdiff(self, ax, pert_val):
         
         pert_percent = int(pert_val/self.NI*100)
-        #dist = np.diff(nn_stim_rng)
         
-        ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_percent],
-                      widths=[10], flierprops={'marker': '.'})
+        if self.diff_inh.max()<50:
         
-        ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_percent],
-                      widths=[10], flierprops={'marker': '.'})
+            ax[0].boxplot(self.diff_inh.flatten(), positions=[pert_percent],
+                          widths=[10], flierprops={'marker': '.'})
+            
+        if self.diff_exc.max()<50:
+            
+            ax[1].boxplot(self.diff_exc.flatten(), positions=[pert_percent],
+                          widths=[10], flierprops={'marker': '.'})
+        
+    def plot_violin_frdiff(self, ax, pert_val):
+        
+        # pert_percent = int(pert_val/self.NI*100)
+        pos = np.where(nn_stim_rng==pert_val)[0]
+        
+        if self.diff_inh.max()<50:
+            
+            ax[0].violinplot([self.diff_inh.flatten()], positions=pos,
+                             showextrema=False, showmeans=True)
+            
+        if self.diff_exc.max()<50:
+            
+            ax[1].violinplot([self.diff_exc.flatten()], positions=pos,
+                             showextrema=False, showmeans=True)
+        
+        if pert_val == nn_stim_rng[-1]:
+            xlabels = np.arange(nn_stim_rng.size)
+            pert_percent = nn_stim_rng/self.NI*100
+            pert_percent = pert_percent.astype('int')
+            pert_perc_str = ['{:d}%'.format(pert) for pert in pert_percent]
+            
+            for a in ax:
+                a.set_xticks(xlabels)
+                a.set_xticklabels(pert_perc_str)
+                # a.set_axis_style(a, labels)
+        
+    def plot_box_frdiffmean(self, ax, pert_val):
+        
+        pert_percent = int(pert_val/self.NI*100)
+        
+        if self.diff_inh.max()<50:
+        
+            ax[0].boxplot(self.diff_inh_m[~np.isnan(self.diff_inh_m)], positions=[pert_percent],
+                           widths=[10], flierprops={'marker': '.'})
+                          
+        if self.diff_exc.max()<50:
+        
+            ax[1].boxplot(self.diff_exc_m[~np.isnan(self.diff_exc_m)], positions=[pert_percent],
+                           widths=[10], flierprops={'marker': '.'})
+        
+    def plot_violin_frdiffmean(self, ax, pert_val):
+        
+        # pert_percent = int(pert_val/self.NI*100)
+        pos = np.where(nn_stim_rng==pert_val)[0]
+        
+        if self.diff_inh.max()<50:
+            
+            ax[0].violinplot([self.diff_inh_m[~np.isnan(self.diff_inh_m)]], positions=pos,
+                         showextrema=False, showmeans=True)
+            
+        if self.diff_exc.max()<50:
+        
+            ax[1].violinplot([self.diff_exc_m[~np.isnan(self.diff_exc_m)]], positions=pos,
+                         showextrema=False, showmeans=True)
+            
+        if pert_val == nn_stim_rng[-1]:
+            xlabels = np.arange(nn_stim_rng.size)
+            pert_percent = nn_stim_rng/self.NI*100
+            pert_percent = pert_percent.astype('int')
+            pert_perc_str = ['{:d}%'.format(pert) for pert in pert_percent]
+            
+            for a in ax:
+                a.set_xticks(xlabels)
+                a.set_xticklabels(pert_perc_str)
         
     def plot_box_conddiff(self, ax, pert_val):
         
         pert_percent = int(pert_val/self.NI*100)
-        #dist = np.diff(nn_stim_rng)
 
         ax[0].boxplot(self.diff_i_cond.flatten(), positions=[pert_percent],
-                      widths=[10], flierprops={'marker': '.'})
+                       widths=[10], flierprops={'marker': '.'})
         
         ax[1].boxplot(self.diff_e_cond.flatten(), positions=[pert_percent],
-                      widths=[10], flierprops={'marker': '.'})
+                       widths=[10], flierprops={'marker': '.'})
         
     def plot_fr_dist(self, ax, num_bins=20):
         
@@ -846,6 +1044,12 @@ class simdata():
         neg_exc = neg_exc_bin.sum(axis=1)
         neg_inh = neg_inh_bin.sum(axis=1)
         
+        self.highest_pos_exc = pos_exc.argmax()+1
+        self.highest_pos_inh = pos_inh.argmax()+self.NE+1
+        
+        self.highest_neg_exc = neg_exc.argmax()+1
+        self.highest_neg_inh = neg_inh.argmax()+self.NE+1
+        
         self.pos_exc_ids = np.where(pos_exc>th_prop_trials*self.Ntrials)[0]
         self.pos_inh_ids = np.where(pos_inh>th_prop_trials*self.Ntrials)[0]
         
@@ -870,22 +1074,69 @@ class simdata():
         for i, a in enumerate(self.diff_inh[self.neg_inh_ids]):
             self.neg_inh_tr[i] = a.argmin()
             
+    def plot_raster_sample_high_chgs(self, pert_val, ax):
+        
+        if not hasattr(self, 'pos_exc_ids'):
+            self.get_ids_of_changing_units()
+        
+        self.plot_raster_sample_chgs(pert_val, ax[0, 0],
+                                     self.highest_pos_exc, color='red')
+        
+        self.plot_raster_sample_chgs(pert_val, ax[0, 1],
+                                     self.highest_pos_inh, color='blue')
+            
+        self.plot_raster_sample_chgs(pert_val, ax[1, 0],
+                                     self.highest_neg_exc, color='red')
+        
+        self.plot_raster_sample_chgs(pert_val, ax[1, 1],
+                                     self.highest_neg_inh, color='blue')
+        
+        
+        ax[1, 0].set_xlabel("Time (ms)")
+        ax[1, 1].set_xlabel("Time (ms)")
+        ax[0, 0].set_ylabel("Trial ID")
+        ax[1, 0].set_ylabel("Trial ID")
+        ax[0, 0].set_title("Excitatory")
+        ax[0, 1].set_title("Inhibitory")
+        
+    def plot_raster_sample_chgs(self, pert_val, ax, sel_ids, color):
+        
+        for tr in range(self.Ntrials):
+            
+            if self.trial_type == 'SingleSim':
+            
+                spk_t = spk_times[(spk_times>=self.st_tr_time[tr]) & 
+                                  (spk_times<=self.end_tr_time[tr])] - self.st_tr_time[tr]
+                
+                # spk_id = spk_ids[(spk_times>=self.st_tr_time[tr]) & 
+                #                   (spk_times<=self.end_tr_time[tr])]
+                
+            else:
+                
+                spk_t = self.sim_res[pert_val][2][tr]['times']
+                spk_id = self.sim_res[pert_val][2][tr]['senders']
+                
+                sel_spks = spk_t[spk_id==sel_ids]
+                
+                ax.plot(sel_spks, (tr+1)*np.ones_like(sel_spks),
+                        color=color, marker='|', markersize=1, linestyle='')
+            
     def plot_raster_abs_chgs_all(self, pert_val, ax):
         
         if not hasattr(self, 'pos_exc_ids'):
             self.get_ids_of_changing_units()
         
         self.plot_raster_abs_chgs(pert_val, ax[0, 0],
-                                  self.pos_exc_ids, self.pos_exc_tr, color='red')
+                                  self.pos_exc_ids+1, self.pos_exc_tr, color='red')
         
         self.plot_raster_abs_chgs(pert_val, ax[0, 1],
-                                  self.pos_inh_ids, self.pos_inh_tr, color='blue')
+                                  self.pos_inh_ids+1+self.NE, self.pos_inh_tr, color='blue')
         
         self.plot_raster_abs_chgs(pert_val, ax[1, 0],
-                                  self.neg_exc_ids, self.neg_exc_tr, color='red')
+                                  self.neg_exc_ids+1, self.neg_exc_tr, color='red')
         
         self.plot_raster_abs_chgs(pert_val, ax[1, 1],
-                                  self.neg_inh_ids, self.neg_inh_tr, color='blue')
+                                  self.neg_inh_ids+1+self.NE, self.neg_inh_tr, color='blue')
         
         
         ax[1, 0].set_xlabel("Time (ms)")
@@ -1031,6 +1282,18 @@ def frchg_vs_EtoI(data, ref_cond="E"):
         cax.set_ylabel('E conductance (nS)')
     elif ref_cond == "I":
         cax.set_ylabel('I conductance (nS)')
+    return fig
+
+def significant_proportions(data):
+    
+    fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True,  sharey=True, figsize=(7,8))
+    cax = fig.add_axes([.25, 0.92, 0.5, 0.02])
+    for i in range(Bi_rng.size):
+        for j in range(nn_stim_rng.size):
+            ax[i, j].plot(Be_rng, data[0][:, i, j], color='red')
+            ax[i, j].plot(Be_rng, data[1][:, i, j], color='blue')
+            ax[i, j].plot(Be_rng, data[2][:, i, j], color='black')
+            
     return fig
 
 def propposfrchg(data):
@@ -1180,6 +1443,8 @@ if __name__=='__main__':
                                              sharex=True, sharey=True)
             fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3,
                                              sharex=True, sharey=True)
+            fig_dist_mean, ax_dist_mean = plt.subplots(nrows=2, ncols=3,
+                                             sharex=True, sharey=True)
             fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3,
                                                  sharex=True, sharey=True)
             fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5,
@@ -1242,6 +1507,9 @@ if __name__=='__main__':
                 simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
                 ax_dist[a_r, a_c].legend()
                 
+                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[a_r, a_c])
+                ax_dist_mean[a_r, a_c].legend()
+                
                 #simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
                 
                 paradox_score[ij1, ij2, ii] = simdata_obj.paradox_score
@@ -1254,6 +1522,7 @@ if __name__=='__main__':
                 
                 simdata_obj.plot_basefr_frdiff(ax_base_frdiff[:, ii])
                 ax_base_frdiff[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+                
                 if rec_from_cond:
                     simdata_obj.plot_gdiff_frdiff(ax_dg_dfrI[:, ii], EI="I")
                     ax_dg_dfrI[0, ii].set_title("pert={:.0f}%".format(nn_stim/NI*100))
@@ -1305,7 +1574,8 @@ if __name__=='__main__':
                 
                 
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
-                simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                # simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_sep)
                 fig_raster.savefig(os.path.join(path_raster_fig,
                                                 "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
@@ -1313,6 +1583,7 @@ if __name__=='__main__':
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 ax_base[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 
             
@@ -1352,6 +1623,9 @@ if __name__=='__main__':
             
             fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                              format="pdf")
+            
+            fig_dist_mean.savefig(os.path.join(fig_path, "fr-diff-dist-mean-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                  format="pdf")
             
             fig_dist_g.savefig(os.path.join(fig_path, "g-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
                                format="pdf")

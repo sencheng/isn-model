@@ -244,7 +244,7 @@ for ij1 in range(Be_rng_comb.size):
     #sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-    sim_suffix = "-Lbkgca3toca1-CA3eqpert-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-Lbkgca3toca1-CA3eqpert-CA3EtoCA1eI-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -259,8 +259,8 @@ for ij1 in range(Be_rng_comb.size):
     np.random.seed(1)
     # -- L23 recurrent connectivity
     p_conn = 0.15
-    W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn*1.5)
-    W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn*0.5)
+    W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn)
+    W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn)
     W_ItoE_ca3 = _mycon_(NI, NE, Bie_ca3, Bie_ca3/5, 1.)
     W_ItoI_ca3 = _mycon_(NI, NI, Bii_ca3, Bii_ca3/5, 1.)
     
@@ -269,8 +269,9 @@ for ij1 in range(Be_rng_comb.size):
     W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
     W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
     
-    W_E3toE =  _mycon_(NE, NE, Be_bkg/2, Be_bkg/2/5, p_conn)
-    W_E3toI =  _mycon_(NE, NI, Be_bkg/2, Be_bkg/2/5, p_conn)
+    
+    W_E3toE =  _mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
+    W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
     '''
     # Indegree with Guassian distribution
     p_conn = 0.15
@@ -304,7 +305,7 @@ for ij1 in range(Be_rng_comb.size):
         #rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.random.uniform(0.9, 1.1, NI)))
         # rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         #rr1 = r_bkg*np.ones(N)
-        rr1 = np.hstack((r_bkg_ca1*np.ones(NE), r_bkg_ca1*np.ones(NI),
+        rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),
                          r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
         rr2 = rr1 + r_extra
 

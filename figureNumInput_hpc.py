@@ -12,10 +12,12 @@ from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 import searchParams; reload(searchParams); from searchParams import *
-from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg
+from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg, significant_proportions
 
-def run_for_each_parset(sim_suffix, fig_ca):
+def run_for_each_parset(sim_suffix, file_name, fig_ca):
     cwd = os.getcwd()
+    fig_path = os.path.join(cwd, fig_dir+sim_suffix, fig_ca)
+    os.makedirs(fig_path, exist_ok=True)
     
     cv_e = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 3))
     cv_i = np.zeros_like(cv_e)
@@ -26,26 +28,52 @@ def run_for_each_parset(sim_suffix, fig_ca):
     pos_prop = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
     mean_fr  = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
     
+    significant_inc = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    significant_dec = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    non_significant = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 2))
+    
     paradox_score = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size))
     
-    fig_path = os.path.join(cwd, fig_dir+sim_suffix, fig_ca)
-    os.makedirs(fig_path, exist_ok=True)
-    for ij1, Be in enumerate(Be_rng):
+    '''
+    Analysis directories
+    '''
+    
+    diff_dists = "Distribution_Of_Differences"
+    diff_boxs  = "Box_Of_Differences"
+    avg_plots  = "Average_FiringRates"
+    base_diff_rel = "Base_vs_Diff"
+    base_dist  = "Baseline_FiringRates_Dist"
+    other      = "Other_Analyses"
+    
+    if fig_ca == 'ca3':
+        BE = np.random.choice(Be_rng, 2, replace=False)
+    else:
+        BE = Be_rng
+    for ij1, Be in enumerate(BE):
         
         fig_box, ax_box = plt.subplots(nrows=2, ncols=Bi_rng.size,
                                        sharex=True, sharey=True,
                                        figsize=(6, 6))
         
+        fig_violin, ax_violin = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                             sharex=True, sharey=True,
+                                             figsize=(6, 6))
+        
+        fig_box_mean, ax_box_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                                 sharex=True, sharey=True,
+                                                 figsize=(6, 6))
+        
+        fig_violin_mean, ax_violin_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                                       sharex=True, sharey=True,
+                                                       figsize=(6, 6))
+        
         fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
-                                       sharex=True, sharey=True)
-        
-        
+                                           sharex=True, sharey=True)
         
         for ij2, Bi in enumerate(Bi_rng):
-        
+            
             os.chdir(os.path.join(cwd, res_dir + sim_suffix))
-            sim_name = sim_suf.format(Be, Bi)
-            # sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
+            sim_name = file_name.format(Be, Bi)
             print('Reading {} ...\n'.format(sim_name))
             # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
             
@@ -53,6 +81,10 @@ def run_for_each_parset(sim_suffix, fig_ca):
             fig_e, ax_e = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
             fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
             fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+            fig_dist_mean, ax_dist_mean = plt.subplots(nrows=2, ncols=3,
+                                             sharex=True, sharey=True)
+            fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=2, ncols=3,
+                                                             sharex=True, sharey=True)
             fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
             fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
             fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
@@ -61,6 +93,13 @@ def run_for_each_parset(sim_suffix, fig_ca):
             fig_avg_fr, ax_avg_fr = plt.subplots()
             
             simdata_obj = simdata(sim_name)
+            
+            diff_dists_fig = simdata_obj.create_fig_subdir(fig_path, diff_dists)
+            diff_boxs_fig = simdata_obj.create_fig_subdir(fig_path, diff_boxs)
+            avg_plots_fig = simdata_obj.create_fig_subdir(fig_path, avg_plots)
+            base_diff_rel_fig = simdata_obj.create_fig_subdir(fig_path, base_diff_rel)
+            base_dist_fig = simdata_obj.create_fig_subdir(fig_path, base_dist)
+            other_fig = simdata_obj.create_fig_subdir(fig_path, other)
             
             ax[0, 0].set_ylabel('E to I')
             ax[1, 0].set_ylabel('E to I')
@@ -91,9 +130,12 @@ def run_for_each_parset(sim_suffix, fig_ca):
                 fig_raster_sep, ax_raster_sep = plt.subplots(nrows=2, ncols=2,
                                                              sharex=True)
                 
+                fig_raster_extremes, ax_raster_extremes = plt.subplots(nrows=2, ncols=2,
+                                                             sharex=True)
+                
                 a_r, a_c = ii//3, ii%3
                 
-                simdata_obj.get_fr_diff(nn_stim)
+                simdata_obj.get_fr_diff(nn_stim, significance_test=significance_test)
                 
                 # simdata_obj.get_cond_diff(nn_stim)
                 # simdata_obj.get_indegree()
@@ -102,6 +144,12 @@ def run_for_each_parset(sim_suffix, fig_ca):
                 
                 simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
                 ax_dist[a_r, a_c].legend()
+
+                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[a_r, a_c])
+                ax_dist_mean[a_r, a_c].legend()
+                
+                simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[a_r, a_c])
+                ax_dist_mean_sample[a_r, a_c].legend()
                 
                 #simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
                 
@@ -110,6 +158,12 @@ def run_for_each_parset(sim_suffix, fig_ca):
                 simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
                 
                 simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
+
+                simdata_obj.plot_box_frdiffmean(ax_box_mean[:, ij2], nn_stim)
+                
+                simdata_obj.plot_violin_frdiff(ax_violin[:, ij2], nn_stim)
+
+                simdata_obj.plot_violin_frdiffmean(ax_violin_mean[:, ij2], nn_stim)
                 
                 #simdata_obj.plot_box_conddiff(ax_box_g[:, ij2], nn_stim)
                 
@@ -134,6 +188,17 @@ def run_for_each_parset(sim_suffix, fig_ca):
                 mean_fr[ij1, ij2, ii, 0]  = simdata_obj.diff_exc.mean()
                 mean_fr[ij1, ij2, ii, 1]  = simdata_obj.diff_inh.mean()
                 
+                if significance_test:
+                
+                    sig_exc, sig_inh = simdata_obj.get_significant_changes()
+                    significant_dec[ij1, ij2, ii, 0] = sig_exc[0]/np.sum(sig_exc)
+                    significant_inc[ij1, ij2, ii, 0] = sig_exc[1]/np.sum(sig_exc)
+                    non_significant[ij1, ij2, ii, 0] = sig_exc[2]/np.sum(sig_exc)
+                    
+                    significant_dec[ij1, ij2, ii, 1] = sig_inh[0]/np.sum(sig_inh)
+                    significant_inc[ij1, ij2, ii, 1] = sig_inh[1]/np.sum(sig_inh)
+                    non_significant[ij1, ij2, ii, 1] = sig_inh[2]/np.sum(sig_inh)
+                
                 # cv_e[ij1, ij2, ii, 0] = simdata_obj.trans_cv[0, :].mean()
                 # cv_e[ij1, ij2, ii, 1] = simdata_obj.base_cv[0, :].mean()
                 # cv_e[ij1, ij2, ii, 2] = simdata_obj.stim_cv[0, :].mean()
@@ -153,60 +218,84 @@ def run_for_each_parset(sim_suffix, fig_ca):
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
                 simdata_obj.plot_raster(nn_stim, ax_raster)
                 fig_raster.savefig(os.path.join(path_raster_fig,
-                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
                                    format="png")
                 plt.close(fig_raster)
                 
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
+                path_raster_fig_ext = simdata_obj.create_fig_subdir(fig_path, "raster_dir_extremes")
                 simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
+                simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_extremes)
                 fig_raster_sep.savefig(os.path.join(path_raster_fig,
-                                                "Be{}-Bi{}-P{}.png".format(Be, Bi, nn_stim)),
+                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
+                                    format="png")
+                fig_raster_extremes.savefig(os.path.join(path_raster_fig_ext,
+                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
                 plt.close(fig_raster_sep)
+                plt.close(fig_raster_extremes)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
+                ax_dist_mean[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_sample[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
                 
             
             ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
             ax_base_frdiff[1, 0].set_ylabel(r"$\Delta FR_E (sp/s)$")
             ax_base_frdiff[0, 0].set_ylabel(r"$\Delta FR_I (sp/s)$")
-            ax_box[0, ij2].set_title('Bi={}'.format(Bi))
+            
+            ax_box[0, ij2].set_title('Bi={:.2f}'.format(Bi))
             ax_box[1, ij2].xaxis.set_tick_params(rotation=90)
             
+            ax_box_mean[0, ij2].set_title('Bi={:.2f}'.format(Bi))
+            ax_box_mean[1, ij2].xaxis.set_tick_params(rotation=90)
+            
+            ax_violin[0, ij2].set_title('Bi={:.2f}'.format(Bi))
+            ax_violin[1, ij2].xaxis.set_tick_params(rotation=90)
+            
+            ax_violin_mean[0, ij2].set_title('Bi={:.2f}'.format(Bi))
+            ax_violin_mean[1, ij2].xaxis.set_tick_params(rotation=90)
+            
             simdata_obj.plot_avg_frs(ax_avg_fr)
-            ax_avg_fr.set_title("Be={}, Bi={}".format(Be, Bi))
+            ax_avg_fr.set_title("Be={:.2f}, Bi={:.2f}".format(Be, Bi))
             ax_avg_fr.set_xlabel("Time (ms)")
             ax_avg_fr.set_ylabel("Average firing rate (sp/s)")
             
-            fig.savefig(os.path.join(fig_path, "fr-Ninp-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig.savefig(os.path.join(other_fig, "fr-Ninp-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                         format="pdf")
             
-            fig_e.savefig(os.path.join(fig_path, "fre-Ninp-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_e.savefig(os.path.join(other_fig, "fre-Ninp-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                         format="pdf")
             
             fig_e_fr.suptitle("Excitatory neurons")
-            fig_e_fr.savefig(os.path.join(fig_path, "fre-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_e_fr.savefig(os.path.join(other_fig, "fre-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                              format="pdf")
             
             fig_i_fr.suptitle("Inhibitory neurons")
-            fig_i_fr.savefig(os.path.join(fig_path, "fr-fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_i_fr.savefig(os.path.join(other_fig, "fr-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                              format="pdf")
             
-            fig_dist.savefig(os.path.join(fig_path, "fr-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_dist.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                              format="pdf")
+
+            fig_dist_mean.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                  format="pdf")
             
-            fig_dist_g.savefig(os.path.join(fig_path, "g-diff-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_dist_mean_sample.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-samples-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                         format="pdf")
+            
+            fig_dist_g.savefig(os.path.join(other_fig, "g-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                                format="pdf")
             
-            fig_base.savefig(os.path.join(fig_path, "fr-base-dist-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_base.savefig(os.path.join(base_dist_fig, "fr-base-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                              format="pdf")
             
-            fig_avg_fr.savefig(os.path.join(fig_path, "avgfr-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_avg_fr.savefig(os.path.join(avg_plots_fig, "avgfr-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                                format="pdf")
             
-            fig_base_frdiff.savefig(os.path.join(fig_path, "basevsdiff-Be{}-Bi{}.pdf".format(Be, Bi)),
+            fig_base_frdiff.savefig(os.path.join(base_diff_rel_fig, "basevsdiff-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
                                format="pdf")
                     
             plt.close(fig)
@@ -217,21 +306,50 @@ def run_for_each_parset(sim_suffix, fig_ca):
             plt.close(fig_i_fr)
             plt.close(fig_e_fr)
             plt.close(fig_avg_fr)
+            plt.close(fig_dist_mean)
+            plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
-        ax_box[-1, 2].set_xlabel("Number of perturbed Is")
+        ax_box[-1, 2].set_xlabel("Percent of perturbed I neurons")
         ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_box.suptitle("Be={:.2f}".format(Be))
             
-        fig_box.savefig(os.path.join(fig_path, "fr-diff-box-Be{}.pdf".format(Be)),
+        fig_box.savefig(os.path.join(diff_boxs_fig, "fr-diff-box-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        fig_box_g.savefig(os.path.join(fig_path, "g-diff-box-Be{}.pdf".format(Be)),
+        ax_violin[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin[0, 0].set_ylabel(r"$\Delta FR_I$")
+        ax_violin[1, 0].set_ylabel(r"$\Delta FR_E$")
+        fig_violin.suptitle("Be={:.2f}".format(Be))
+            
+        fig_violin.savefig(os.path.join(diff_boxs_fig, "fr-diff-violin-Be{:.2f}.pdf".format(Be)),
+                         format="pdf")
+        
+        ax_box_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_box_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
+        ax_box_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
+        fig_box_mean.suptitle("Be={:.2f}".format(Be))
+            
+        fig_box_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-box-Be{:.2f}.pdf".format(Be)),
+                         format="pdf")
+        
+        ax_violin_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
+        ax_violin_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
+        fig_violin_mean.suptitle("Be={:.2f}".format(Be))
+            
+        fig_violin_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-violin-Be{:.2f}.pdf".format(Be)),
+                         format="pdf")
+        
+        fig_box_g.savefig(os.path.join(fig_path, "g-diff-box-Be{:.2f}.pdf".format(Be)),
                           format="pdf")
         
         plt.close(fig_box)
+        plt.close(fig_box_mean)
         plt.close(fig_box_g)
+        plt.close(fig_violin_mean)
+        plt.close(fig_violin)
         
         
     frchgdata = {'E': {'proportion_increase': pos_prop[:,:,:,0],
@@ -240,19 +358,33 @@ def run_for_each_parset(sim_suffix, fig_ca):
                        'mean_change': mean_fr[:,:,:,1]}}
     
     fig_frchg_ei_e = frchg_vs_EtoI(frchgdata)
-    fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-E.pdf"),
+    fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-E.pdf"),
                            format="pdf")
     
     fig_frchg_ei_e = frchg_vs_EtoI(frchgdata, "I")
-    fig_frchg_ei_e.savefig(os.path.join(fig_path, "frchg-EtoI-I.pdf"),
+    fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-I.pdf"),
                            format="pdf")
 
     fig_posprop = propposfrchg(frchgdata)
-    fig_posprop.savefig(os.path.join(fig_path, "propposfrchg.pdf"),
+    fig_posprop.savefig(os.path.join(other_fig, "propposfrchg.pdf"),
                         format="pdf")
     
     fig_frchg = frchg(frchgdata)
-    fig_frchg.savefig(os.path.join(fig_path, "frchg.pdf"),
+    fig_frchg.savefig(os.path.join(other_fig, "frchg.pdf"),
+                        format="pdf")
+    
+    fig_sig_exc = significant_proportions([significant_dec[:, :, :, 0],
+                                           significant_inc[:, :, :, 0],
+                                           non_significant[:, :, :, 0]])
+    
+    fig_sig_exc.savefig(os.path.join(other_fig, "change-fr-prop-exc.pdf"),
+                        format="pdf")
+    
+    fig_sig_inh = significant_proportions([significant_dec[:, :, :, 1],
+                                           significant_inc[:, :, :, 1],
+                                           non_significant[:, :, :, 1]])
+    
+    fig_sig_inh.savefig(os.path.join(other_fig, "change-fr-prop-inh.pdf"),
                         format="pdf")
     
     fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
@@ -292,7 +424,7 @@ def run_for_each_parset(sim_suffix, fig_ca):
     if "f" in locals():
         plt.colorbar(f, cax=bar_psc)
     
-    fig_psc.savefig(os.path.join(fig_path, "paradoxical-score.pdf"), format="pdf")
+    fig_psc.savefig(os.path.join(other_fig, "paradoxical-score.pdf"), format="pdf")
         
         # fig_cv, ax_cv = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         # fig_ff, ax_ff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
@@ -332,7 +464,8 @@ def run_for_each_parset(sim_suffix, fig_ca):
         
         # fig_cv.savefig(os.path.join(cv_ff_fig_path, "CV-P{}.pdf".format(nn_stim)))
         # fig_ff.savefig(os.path.join(cv_ff_fig_path, "FF-P{}.pdf".format(nn_stim)))
-    
+    with open("simres_obj.pkl", "wb") as obj_fl:
+        pickle.dump(simdata_obj, obj_fl, pickle.HIGHEST_PROTOCOL)
     os.chdir(cwd)
     
 if __name__=='__main__':
@@ -343,7 +476,7 @@ if __name__=='__main__':
         job_id = int(sys.argv[1])
         num_jobs = int(sys.argv[2])
         
-    sim_suffixes = ['sim_res_ca3_Be{:.2f}_Bi{:.2f}', 'sim_res_Be{:.2f}_Bi{:.2f}']
+    file_names = ['sim_res_Be{:.2f}_Bi{:.2f}', 'sim_res_ca3_Be{:.2f}_Bi{:.2f}']
     
     EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
     EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
@@ -360,13 +493,12 @@ if __name__=='__main__':
                                                                  EI_probchg_comb[ij1])
         '''
         
-        for sim_suf in sim_suffixes:  
-            print('sim_suf={}'.format(sim_suf))        
-            if 'ca3' in sim_suf:
+        for file_name in file_names:  
+            print('sim_suf={}'.format(file_name))        
+            if 'ca3' in file_name:
                 fig_ca = 'ca3'
             else:
                 fig_ca = 'ca1'
         
-            sim_suffix = "-Lbkgca3toca1-CA3eqpert-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-                     
-            run_for_each_parset(sim_suffix, fig_ca)
+            sim_suffix = "-Lbkgca3toca1-CA3eqpert-CA3EtoCA1eI-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])                    
+            run_for_each_parset(sim_suffix, file_name, fig_ca)
