@@ -923,7 +923,7 @@ class simdata():
             
             ax[1].violinplot([self.diff_exc.flatten()], positions=pos,
                              showextrema=False, showmeans=True)
-        
+                                     
         if pert_val == nn_stim_rng[-1]:
             xlabels = np.arange(nn_stim_rng.size)
             pert_percent = nn_stim_rng/self.NI*100
@@ -1287,13 +1287,20 @@ def frchg_vs_EtoI(data, ref_cond="E"):
 def significant_proportions(data):
     
     fig, ax = plt.subplots(nrows=5, ncols=5, sharex=True,  sharey=True, figsize=(7,8))
-    cax = fig.add_axes([.25, 0.92, 0.5, 0.02])
+
+    # cax = fig.add_axes([.25, 0.92, 0.5, 0.02])
     for i in range(Bi_rng.size):
         for j in range(nn_stim_rng.size):
-            ax[i, j].plot(Be_rng, data[0][:, i, j], color='red')
-            ax[i, j].plot(Be_rng, data[1][:, i, j], color='blue')
-            ax[i, j].plot(Be_rng, data[2][:, i, j], color='black')
+            ax[i, j].plot(Be_rng, data[0][:, i, j], color='red', label='sig. decreasing')
+            ax[i, j].plot(Be_rng, data[1][:, i, j], color='blue', label='sig. increasing')
+            ax[i, j].plot(Be_rng, data[2][:, i, j], color='black', label='not sig. changing')
             
+    ax[-1, 2].set_xlabel(r'$E conductance (nS)$')
+    ax[2, 0].set_ylabel('Proportion')
+    # ax[1, 0].set_xticks(np.array([0., 1., 2.5]))
+    for j, nn in enumerate(nn_stim_rng):
+        ax[0, j].set_title('pert={:.0f}%'.format(nn/nn_stim_rng.max()*100))
+    ax[0, -1].legend()       
     return fig
 
 def propposfrchg(data):
