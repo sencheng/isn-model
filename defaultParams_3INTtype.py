@@ -6,7 +6,7 @@ import numpy as np; import pylab as pl; import time, sys, os
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 4
+n_cores = 6
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-CA3eqpert-bi0.20-be-0.20-ca1bkgfr4000-Epertfac1.0-EE_probchg0.90-EI_probchg2"
+sim_suffix = "-3INT-pertE_VIP-Eqfrac"
 
 #------------- neuron params
 
@@ -40,11 +40,8 @@ Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
 #Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
-#Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
-Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
-
-Be_ca3, Bi_ca3 = 0.2, -0.2
+Be_rng = np.array([.05, .1, .15, .2, .25])
+Bi_rng = np.array([-.1, -.2, -.3, -.4, -.5])
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -83,12 +80,11 @@ dt = .1
 
 # background rate (sp/s)
 r_bkg = 10000.-400.
-r_bkg_ca1 = 7000
 # rate of perturbation (sp/s)
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 500
+Ttrans = 150.
 # simulation time before perturbation (ms)
 Tblank= 500.
 # simulation time of perturbation (ms)
@@ -101,21 +97,25 @@ Ntrials = 5
 
 # fraction of Inh neurons
 frac = .2
+frac_pv = .5
+frac_som = .25
+frac_vip = .25
 # total population size (Exc + Inh)
 N = 2000
 # size of Inh population
 NI = int(frac*N)
+NI_pv = int(frac_pv*NI)
+NI_som = int(frac_som*NI)
+NI_vip = int(frac_vip*NI)
 # size of Exc population
 NE = N - NI
 
 # range of the size of Inh perturbations
 nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
+
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
-# record from conductances?
-rec_from_cond = False
-significance_test = False
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')
