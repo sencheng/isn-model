@@ -1008,15 +1008,13 @@ class simdata():
         for i, e_id in enumerate(self.vis_E_ids):
             
             sel_spks = times[ids==e_id]
-            
-            ax.plot(sel_spks, (i+1)*np.ones_like(sel_spks),
+            ax.plot(sel_spks-self.Ttrans, (i+1)*np.ones_like(sel_spks),
                     color='red', marker='|', markersize=1, linestyle='')
             
         for i, i_id in enumerate(self.vis_I_ids):
             
             sel_spks = times[ids==i_id]
-            
-            ax.plot(sel_spks, (i+self.vis_E_ids.size+1)*np.ones_like(sel_spks),
+            ax.plot(sel_spks-self.Ttrans, (i+self.vis_E_ids.size+1)*np.ones_like(sel_spks),
                     color='blue', marker='|', markersize=1, linestyle='')
             
     # def plot_raster_tr_sep(self, ids, times, ax, sel_ids):
@@ -1101,6 +1099,10 @@ class simdata():
         
     def plot_raster_sample_chgs(self, pert_val, ax, sel_ids, color):
         
+        spk_times = np.array([])
+        T_vec = np.arange(self.Ttrans, self.Texp+1)
+        T = (T_vec[1:]+T_vec[0:-1])/2
+        
         for tr in range(self.Ntrials):
             
             if self.trial_type == 'SingleSim':
@@ -1115,11 +1117,16 @@ class simdata():
                 
                 spk_t = self.sim_res[pert_val][2][tr]['times']
                 spk_id = self.sim_res[pert_val][2][tr]['senders']
-                
                 sel_spks = spk_t[spk_id==sel_ids]
-                
-                ax.plot(sel_spks, (tr+1)*np.ones_like(sel_spks),
-                        color=color, marker='|', markersize=1, linestyle='')
+                spk_times = np.concatenate((spk_times, sel_spks[sel_spks>self.Tstim]))
+                ax.plot(sel_spks-self.Ttrans, (tr+1)*np.ones_like(sel_spks),
+                        color=color, marker='|',
+                        markersize=1, linestyle='', zorder=1)
+                        
+        ax.axvspan(self.Tblank, self.Tblank+self.Tstim,\
+				   zorder=0, color=[0.7, 0.7, 0.7])
+        ax.set_xlim((0, self.Tblank*2+self.Tstim))	
+        cnts = np.histogram(np.array(spk_times), T_vec)[0]/self.Ntrials*1000
             
     def plot_raster_abs_chgs_all(self, pert_val, ax):
         

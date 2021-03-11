@@ -223,7 +223,7 @@ for ij1 in range(Be_rng_comb.size):
     #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
     #sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-    sim_suffix = "-CA1-Ntr{}-RNG{}-EIeq_unihet_pert-EPfrac{:.1f}-II{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Ntrials, C_rng_comb[ij1], E_pert_frac, II_scale, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+    sim_suffix = "-CA3-Ntr{}-RNG{}-EIeq-EPfrac{:.1f}-II{:.1f}-bkgfac{:.2f}-Ipertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Ntrials, C_rng_comb[ij1], E_pert_frac, II_scale, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #r_stim = -r_stim
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -265,8 +265,8 @@ for ij1 in range(Be_rng_comb.size):
         #r_extra[NE+int(nn_stim/2):NE+nn_stim] = r_stim
         #r_extra[0:int(NE*nn_stim/NI)] = r_stim
         #r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = r_stim
-        r_extra[NE:NE+nn_stim] = r_stim*np.random.uniform(0.8, 1.2, size=nn_stim)#np.random.normal(loc=1, scale=0.2, size=nn_stim)
-        r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]*np.random.uniform(0.8, 1.2, size=int(NE*nn_stim/NI))#*E_extra_comb[ij1]*np.random.normal(loc=1, scale=0.2, size=int(NE*nn_stim/NI))
+        r_extra[NE:NE+nn_stim] = r_stim*E_pert_frac#np.random.uniform(0.8, 1.2, size=nn_stim)#np.random.normal(loc=1, scale=0.2, size=nn_stim)
+        r_extra[0:int(NE*nn_stim/NI)] = r_stim#*E_extra_comb[ij1]*np.random.uniform(0.8, 1.2, size=int(NE*nn_stim/NI))#*E_extra_comb[ij1]*np.random.normal(loc=1, scale=0.2, size=int(NE*nn_stim/NI))
         #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
         #r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]*np.random.uniform(0.8, 1.2, size=int(NE*nn_stim/NI))
 

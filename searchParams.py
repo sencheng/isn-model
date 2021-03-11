@@ -7,9 +7,9 @@ import matplotlib
 from defaultParams import *
 
 fr_chg_factor = np.array([1.0])#np.arange(0.5, 1, .1)
-E_extra_stim_factor = np.arange(0.2, .9, 0.9)#np.array([0.8])
-EEconn_chg_factor = np.array([0.9])#np.arange(0.7, 1.4, 0.3)#n11rray([0.9])p.array([0.9])
-EIconn_chg_factor = np.array([2.0])#np.arange(0.6, 3, 0.2)#np.array([2.0])
+E_extra_stim_factor = np.array([0.2])#np.arange(0.2, .9, 0.9)#np.array([0.8])
+EEconn_chg_factor = np.array([3.])#np.arange(1.4, 2.61, 0.4)#n11rray([0.9])p.array([0.9])
+EIconn_chg_factor = np.array([1.0])#np.arange(0.6, 3, 0.2)#np.array([2.0])
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
 bkg_chg_factor    = np.array([1.0])#np.arange(1.05, 1.11, 0.05)
 C_rng = np.arange(1, 1.9, 1).astype(int)

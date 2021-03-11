@@ -489,5 +489,5 @@ if __name__=='__main__':
                                                                  EI_probchg_comb[ij1])
         '''
         #sim_suffix = "-CA1-EIeqpert-moretrs-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-        sim_suffix = "-CA1-Ntr{}-RNG{}-EIeq_unihet_pert-EPfrac{:.1f}-II{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Ntrials, C_rng_comb[ij1], E_pert_frac, II_scale, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+        sim_suffix = "-CA3-Ntr{}-RNG{}-EIeq-EPfrac{:.1f}-II{:.1f}-bkgfac{:.2f}-Ipertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(Ntrials, C_rng_comb[ij1], E_pert_frac, II_scale, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
         run_for_each_parset(sim_suffix)

@@ -39,10 +39,11 @@ Gl = 1./140e6
 Be, Bi = .1, -.2
 
 # range of Exc and Inh conductances (nS)
-#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
-#Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.5, 0.55])
-Bi_rng = np.array([-0.1, -0.2])
+#Be_rng = np.array([0.1, 0.2, .3, .4, .5])
+Be_rng = np.array([0.01, 0.03, 0.05, 0.07])
+Bi_rng = np.arange(-0.5, -.09, 0.1)
+#Be_rng = np.array([0.5, 0.55])
+#Bi_rng = np.array([-0.1, -0.2])
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -93,7 +94,7 @@ Tblank= 500.
 Tstim = 500.
 
 # number of trials
-Ntrials = 20
+Ntrials = 5
 II_scale = 1.0
 #C_rng = 2
 # -- network params
@@ -115,7 +116,7 @@ cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
-significance_test = True
+significance_test = False
 # -- default settings for plotting figures
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')
