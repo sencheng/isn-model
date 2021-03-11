@@ -2,7 +2,8 @@
 # -- Default set of parameters
 ################################################################################
 
-import numpy as np; import pylab as pl; import time, sys, os
+import numpy as np; import time, sys, os
+import matplotlib.pylab as pl
 import matplotlib
 
 ## the number of cores to be used for simulations
@@ -41,8 +42,8 @@ Be, Bi = .1, -.2
 # range of Exc and Inh conductances (nS)
 #Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
-Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
+Be_rng = np.array([0.55])
+Bi_rng = np.array([-0.3])
 
 Be_ca3, Bi_ca3 = 0.2, -0.2
 
@@ -88,14 +89,16 @@ r_bkg_ca1 = 7000
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 500
+Ttrans = 1000
 # simulation time before perturbation (ms)
-Tblank= 500.
+Tblank= 1000.
 # simulation time of perturbation (ms)
-Tstim = 500.
+Tstim = 1000.
+# simulation time after perturbation (ms)
+Tstim = 1000.
 
 # number of trials
-Ntrials = 5
+Ntrials = 50
 
 # -- network params
 
@@ -109,7 +112,7 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
+nn_stim_rng = (np.array([0.1, .25, 0.5, .75, 1])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
@@ -120,7 +123,7 @@ significance_test = False
 # (comment out for conventional Python format)
 matplotlib.rc('font', serif='sans-serif')
 
-SIZE = 10
+SIZE = 12
 pl.rc('font', size=SIZE)  # controls default text sizes
 pl.rc('axes', titlesize=SIZE)  # fontsize of the axes title
 pl.rc('axes', labelsize=SIZE)  # fontsize of the x and y labels

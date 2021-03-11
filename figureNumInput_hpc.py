@@ -46,7 +46,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
     other      = "Other_Analyses"
     
     if fig_ca == 'ca3':
-        BE = np.random.choice(Be_rng, 2, replace=False)
+        BE = np.random.choice(Be_rng, 1, replace=False)
     else:
         BE = Be_rng
     for ij1, Be in enumerate(BE):
@@ -131,6 +131,9 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                                                              sharex=True)
                 
                 fig_raster_extremes, ax_raster_extremes = plt.subplots(nrows=2, ncols=2,
+                                                             sharex=True)
+                                                             
+                fig_rate_extremes, ax_rate_extremes = plt.subplots(nrows=2, ncols=2,
                                                              sharex=True)
                 
                 a_r, a_c = ii//3, ii%3
@@ -225,15 +228,19 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
                 path_raster_fig_ext = simdata_obj.create_fig_subdir(fig_path, "raster_dir_extremes")
                 simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
-                simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_extremes)
+                simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_extremes, ax_rate_extremes)
                 fig_raster_sep.savefig(os.path.join(path_raster_fig,
                                                 "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
                 fig_raster_extremes.savefig(os.path.join(path_raster_fig_ext,
                                                 "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
                                     format="png")
+                fig_rate_extremes.savefig(os.path.join(path_raster_fig_ext,
+                                          "Avgfr-Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
+                                          format="png")
                 plt.close(fig_raster_sep)
                 plt.close(fig_raster_extremes)
+                plt.close(fig_rate_extremes)
                 
                 ax[a_r, a_c].set_title('P={}'.format(nn_stim))
                 ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))

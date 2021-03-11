@@ -2,7 +2,7 @@
 # -- Simulating Exc-Inh spiking networks in response to inhibitory perturbation
 ################################################################################
 
-import numpy as np; import pylab as pl; import time, os, sys, pickle
+import numpy as np; import time, os, sys, pickle
 from scipy.stats import norm
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *;
@@ -145,6 +145,12 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
             nest.SetStatus([pos_inp_ca3[ii]], {'rate':rr2[N+ii]})
             
         net_tools._run_simulation_(Tstim)
+        
+        ## baseline
+        for ii in range(N):
+            nest.SetStatus([pos_inp[ii]], {'rate':rr1[ii]})
+            nest.SetStatus([pos_inp_ca3[ii]], {'rate':rr1[N+ii]})
+        net_tools._run_simulation_(Tblank)
         # -- reading out spiking activity
         # spd = net_tools._reading_spikes_(spikes_all)
         SPD[tri] = net_tools._reading_spikes_(spikes_all, min(ca1_neurons))
