@@ -854,9 +854,10 @@ class simdata():
             print('NotImplemented!')
         else:
             ax.hist([self.diff_inh_m.flatten(),
-                     self.diff_exc_m.flatten()], edges,
-                    color=['blue', 'red'],
-                    label=['I', 'E'])
+                     self.diff_exc_m.flatten()],
+                     edges,
+                     color=['blue', 'red'],
+                     label=['I', 'E'])
             
     def plot_frdiffmean_samplesize_dist(self, ax, num_bins=20):
         

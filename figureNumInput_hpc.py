@@ -70,6 +70,13 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
                                            sharex=True, sharey=True)
         
+        if Bi_rng.size == 1:
+            ax_box = ax_box.reshape(-1, 1)
+            ax_violin = ax_violin.reshape(-1, 1)
+            ax_box_mean = ax_box_mean.reshape(-1, 1)
+            ax_violin_mean = ax_violin_mean.reshape(-1, 1)
+            ax_box_g = ax_box_g.reshape(-1, 1)
+        
         for ij2, Bi in enumerate(Bi_rng):
             
             os.chdir(os.path.join(cwd, res_dir + sim_suffix))
@@ -77,18 +84,23 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             print('Reading {} ...\n'.format(sim_name))
             # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
             
-            fig, ax = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_e, ax_e = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_base, ax_base = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_dist, ax_dist = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_dist_mean, ax_dist_mean = plt.subplots(nrows=2, ncols=3,
-                                             sharex=True, sharey=True)
-            fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=2, ncols=3,
-                                                             sharex=True, sharey=True)
-            fig_dist_g, ax_dist_g = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-            fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
-            fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=5, sharex=True, sharey='row')
-            fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=5, sharex=True, sharey=True)
+            fig, ax = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                   sharex=True, sharey=True, figsize=(6, 3))
+            fig_e, ax_e = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                       sharex=True, sharey=True, figsize=(6, 3))
+            fig_base, ax_base = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                             sharex=True, sharey=True, figsize=(6, 3))
+            fig_dist, ax_dist = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                             sharex=True, sharey=True, figsize=(6, 4))
+            fig_dist_mean, ax_dist_mean = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                                       sharex=True, sharey=True, figsize=(6, 4))
+            fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                                                     sharex=True, sharey=True, figsize=(6, 3))
+            fig_dist_g, ax_dist_g = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                                 sharex=True, sharey=True, figsize=(6, 3))
+            fig_i_fr, ax_i_fr = plt.subplots(nrows=2, ncols=nn_stim_rng.size, sharex=True, sharey='row')
+            fig_e_fr, ax_e_fr = plt.subplots(nrows=2, ncols=nn_stim_rng.size, sharex=True, sharey='row')
+            fig_base_frdiff, ax_base_frdiff = plt.subplots(nrows=2, ncols=nn_stim_rng.size, sharex=True, sharey=True)
             
             fig_avg_fr, ax_avg_fr = plt.subplots()
             
@@ -101,8 +113,8 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             base_dist_fig = simdata_obj.create_fig_subdir(fig_path, base_dist)
             other_fig = simdata_obj.create_fig_subdir(fig_path, other)
             
-            ax[0, 0].set_ylabel('E to I')
-            ax[1, 0].set_ylabel('E to I')
+            ax[0].set_ylabel('E to I')
+            ax[0].set_ylabel('E to I')
             
             ax_i_fr[0, 0].set_ylabel(r'$\sum (spikes_I)$ to I')
             ax_i_fr[1, 0].set_ylabel(r'$\sum (spikes_E)$ to I')
@@ -110,17 +122,17 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             ax_e_fr[0, 0].set_ylabel(r'$\sum (spikes_I)$ to E')
             ax_e_fr[1, 0].set_ylabel(r'$\sum (spikes_E)$ to E')
             
-            ax_e[0, 0].set_ylabel('E to E')
-            ax_e[1, 0].set_ylabel('E to E')
+            ax_e[0].set_ylabel('E to E')
+            ax_e[0].set_ylabel('E to E')
             
-            ax[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
-            ax_e[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
+            ax[int(nn_stim_rng.size/2)].set_xlabel(r'$\Delta FR (sp/s)$')
+            ax_e[int(nn_stim_rng.size/2)].set_xlabel(r'$\Delta FR (sp/s)$')
             ax_i_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
             ax_e_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
             
-            ax_base[1, 1].set_xlabel('Firing rate (sp/s)')
+            ax_base[int(nn_stim_rng.size/2)].set_xlabel('Firing rate (sp/s)')
             
-            ax_dist[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
+            ax_dist[int(nn_stim_rng.size/2)].set_xlabel(r'$\Delta FR (sp/s)$')
             
             for ii, nn_stim in enumerate(nn_stim_rng):
                 
@@ -136,7 +148,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 fig_rate_extremes, ax_rate_extremes = plt.subplots(nrows=2, ncols=2,
                                                              sharex=True)
                 
-                a_r, a_c = ii//3, ii%3
+#                a_r, a_c = ii//3, ii%3
                 
                 simdata_obj.get_fr_diff(nn_stim, significance_test=significance_test)
                 
@@ -145,20 +157,20 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 # simdata_obj.plot_indeg_frdiff(ax[a_r, a_c])
                 # simdata_obj.plot_indeg_frdiff_e(ax_e[a_r, a_c])
                 
-                simdata_obj.plot_frdiff_dist(ax_dist[a_r, a_c])
-                ax_dist[a_r, a_c].legend()
+                simdata_obj.plot_frdiff_dist(ax_dist[ii])
+                ax_dist[ii].legend()
 
-                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[a_r, a_c])
-                ax_dist_mean[a_r, a_c].legend()
+                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[ii])
+                ax_dist_mean[-1].legend()
                 
-                simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[a_r, a_c])
-                ax_dist_mean_sample[a_r, a_c].legend()
+                simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[ii])
+                ax_dist_mean_sample[ii].legend()
                 
                 #simdata_obj.plot_conddiff_dist(ax_dist_g[a_r, a_c])
                 
                 paradox_score[ij1, ij2, ii] = simdata_obj.paradox_score
                 
-                simdata_obj.plot_fr_dist(ax_base[a_r, a_c])
+                simdata_obj.plot_fr_dist(ax_base[ii])
                 
                 simdata_obj.plot_box_frdiff(ax_box[:, ij2], nn_stim)
 
@@ -221,8 +233,8 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir")
                 simdata_obj.plot_raster(nn_stim, ax_raster)
                 fig_raster.savefig(os.path.join(path_raster_fig,
-                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
-                                   format="png")
+                                                "Be{:.2f}-Bi{:.2f}-P{}.pdf".format(Be, Bi, nn_stim)),
+                                   format="pdf")
                 plt.close(fig_raster)
                 
                 path_raster_fig = simdata_obj.create_fig_subdir(fig_path, "raster_dir_sep")
@@ -230,23 +242,26 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 simdata_obj.plot_raster_abs_chgs_all(nn_stim, ax_raster_sep)
                 simdata_obj.plot_raster_sample_high_chgs(nn_stim, ax_raster_extremes, ax_rate_extremes)
                 fig_raster_sep.savefig(os.path.join(path_raster_fig,
-                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
-                                    format="png")
+                                                "Be{:.2f}-Bi{:.2f}-P{}.pdf".format(Be, Bi, nn_stim)),
+                                    format="pdf")
                 fig_raster_extremes.savefig(os.path.join(path_raster_fig_ext,
-                                                "Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
-                                    format="png")
+                                                "Be{:.2f}-Bi{:.2f}-P{}.pdf".format(Be, Bi, nn_stim)),
+                                    format="pdf")
                 fig_rate_extremes.savefig(os.path.join(path_raster_fig_ext,
-                                          "Avgfr-Be{:.2f}-Bi{:.2f}-P{}.png".format(Be, Bi, nn_stim)),
-                                          format="png")
+                                          "Avgfr-Be{:.2f}-Bi{:.2f}-P{}.pdf".format(Be, Bi, nn_stim)),
+                                          format="pdf")
                 plt.close(fig_raster_sep)
                 plt.close(fig_raster_extremes)
                 plt.close(fig_rate_extremes)
                 
-                ax[a_r, a_c].set_title('P={}'.format(nn_stim))
-                ax_dist[a_r, a_c].set_title('P={}'.format(nn_stim))
-                ax_dist_mean[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
-                ax_dist_mean_sample[a_r, a_c].set_title('P={:.0f}%'.format(nn_stim/NI*100))
-                ax_base[a_r, a_c].set_title('P={}'.format(nn_stim))
+                ax[ii].set_title('P={}'.format(nn_stim))
+                ax_dist[ii].set_title('P={}'.format(nn_stim))
+                ax_dist_mean[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_sample[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_base[ii].set_title('P={}'.format(nn_stim))
+                
+                ax_dist_mean[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
+                ax_dist_mean[0].set_ylabel("Count")
                 
             
             ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
@@ -317,7 +332,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
-        ax_box[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_box[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
         ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_box.suptitle("Be={:.2f}".format(Be))
@@ -325,7 +340,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box.savefig(os.path.join(diff_boxs_fig, "fr-diff-box-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_violin[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
         ax_violin[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_violin[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_violin.suptitle("Be={:.2f}".format(Be))
@@ -333,7 +348,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_violin.savefig(os.path.join(diff_boxs_fig, "fr-diff-violin-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_box_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_box_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
         ax_box_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_box_mean.suptitle("Be={:.2f}".format(Be))
@@ -341,7 +356,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-box-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_violin_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
         ax_violin_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_violin_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_violin_mean.suptitle("Be={:.2f}".format(Be))
