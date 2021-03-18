@@ -41,10 +41,11 @@ Be, Bi = .1, -.2
 # range of Exc and Inh conductances (nS)
 #Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.01, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4, 0.45, 0.5, 0.55])
+Be_rng = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55])
 Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
 
-Be_ca3, Bi_ca3 = 0.2, -0.2
+Be_ca3, Bi_ca3 = 0.03, -0.3
+EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
