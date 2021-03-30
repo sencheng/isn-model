@@ -110,12 +110,17 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([0.1, .25, .5, .75, 1])*NI).astype('int')
+nn_stim_rng = (np.array([.5, .55, .6, .65, .7])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
+
+# perturbation type
+het_pert = True
+
+# perform significance test on 
 significance_test = False
 # -- default settings for plotting figures
 # (comment out for conventional Python format)

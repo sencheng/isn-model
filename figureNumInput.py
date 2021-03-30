@@ -59,7 +59,7 @@ class simdata():
         
         self.sim_res = sim_res
         
-        if len(sim_res[400][2]) == self.Ntrials:
+        if len(sim_res[nn_stim_rng[-1]][2]) == self.Ntrials:
             self.trial_type = 'MultipleSim'
         else:
             self.trial_type = 'SingleSim'

@@ -16,7 +16,7 @@ E3E1_cond_chg     = 0.2
 E3I1_cond_chg     = 1.0
 EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = \
     np.meshgrid(EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
-extra_bkg_e = 2500.0
+extra_bkg_e = 4000.0
 #pert_comb = pert_comb.flatten()[job_id::num_jobs]
 
 E_pert_frac = 1.0
