@@ -4,6 +4,8 @@ This repository contains a balanced network of inhibitory and excitatory neurons
 
 The model is setup and run using NEST simulation tool. Therefore, installing NEST is necessary for running the simulations. Possible methods for installing NEST and their detailed instructions and dependencies can be found under https://nest-simulator.readthedocs.io/en/nest-2.20.1/installation/index.html. 
 
+Python=3.8.5 is used for this repository. Required packages and their versions are in `requirements.txt` and can be used as inputs to `pip` package manager by `pip install -r requirements.txt`.
+
 **Running simulations**
 
 ```bash
