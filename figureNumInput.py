@@ -12,6 +12,27 @@ from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 
+def boxoff(ax):
+    if type(ax) is list:
+        for ax_ in ax:
+            ax_.spines['top'].set_visible(False)
+            ax_.spines['right'].set_visible(False)
+    else:
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+        
+def to_square_plots(ax):
+
+    if len(ax.shape)>1:
+        for i in range(ax.shape[0]):            
+            for j in range(ax.shape[1]):
+                ratio = ax[i, j].get_data_ratio()
+                ax[i, j].set_aspect(1.0/ratio)
+    else:
+        for i in range(ax.shape[0]):
+            ratio = ax[i].get_data_ratio()
+            ax[i].set_aspect(1.0/ratio)
+
 class simdata():
     
     '''
@@ -565,6 +586,8 @@ class simdata():
         
         self.get_fr_diff_mean()
         
+        
+        
         # self.diff_exc_m = self.diff_exc.mean(axis=1)
         # self.diff_inh_m = self.diff_inh.mean(axis=1)
         
@@ -846,18 +869,78 @@ class simdata():
         self.plot_reg_line(self.diff_exc.flatten(), sum_fr_i.flatten(), ax[0])
         self.plot_reg_line(self.diff_exc.flatten(), sum_fr_e.flatten(), ax[1])
         
-    def plot_frdiffmean_dist(self, ax, num_bins=20):
+    def plot_frdiffmean_dist(self, ax, pert_num, num_bins=20):
         
-        edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        
+        c_inh, e_inh = np.histogram(self.diff_inh_m, num_bins)
+        e_inh = (e_inh[0:-1]+e_inh[1:])/2
+        c_exc, e_exc = np.histogram(self.diff_exc_m, num_bins)
+        e_exc = (e_exc[0:-1]+e_exc[1:])/2
         
         if hasattr(self, 'diff_inh_pv'):
             print('NotImplemented!')
         else:
-            ax.hist([self.diff_inh_m.flatten(),
-                     self.diff_exc_m.flatten()],
-                     edges,
-                     color=['blue', 'red'],
-                     label=['I', 'E'])
+            ax.plot(e_inh, c_inh, color='blue', label=r'$I$')
+            ax.plot(e_exc, c_exc, color='red', label=r'$E$')
+            # ax.hist([self.diff_inh_m,
+            #          self.diff_exc_m],
+            #          num_bins,
+            #          color=['blue', 'red'],
+            #          label=[r'$I$', r'$E$'])
+
+    def plot_frdiffmean_dist_pertdistinct_line(self, ax, pert_num, num_bins=100):
+        
+        # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        
+        inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num], self.diff_inh_m[pert_num:]
+        exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)], self.diff_exc_m[int(pert_num*NE/NI):]
+        
+        inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
+        
+        max_ = -np.inf
+        min_ = np.inf
+        for d in inh_exc:
+            if d.size > 0:
+                max_ = max(max_, d.max())
+                min_ = min(min_, d.min())
+    
+        # max_ = max((inh_pert.max(), inh_nonpert.max(), exc_pert.max(), exc_nonpert.max()))
+        # min_ = min((inh_pert.min(), inh_nonpert.min(), exc_pert.min(), exc_nonpert.min()))
+        edges = np.linspace(min_, max_, num=num_bins)
+        mid_points = (edges[1:] + edges[:-1])/2
+        
+        c_inh_pert = np.histogram(inh_pert, edges)[0]
+        c_inh_nonpert = np.histogram(inh_nonpert, edges)[0]
+        c_exc_pert = np.histogram(exc_pert, edges)[0]
+        c_exc_nonpert = np.histogram(exc_nonpert, edges)[0]
+        
+        C = [c_inh_pert, c_inh_nonpert, c_exc_pert, c_exc_nonpert]
+        L = [r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$']
+        Col = ['blue', 'skyblue', 'red', 'lightsalmon']
+        
+        if hasattr(self, 'diff_inh_pv'):
+            print('NotImplemented!')
+        else:
+            for i, c in enumerate(C):
+                ax.plot(mid_points, c,
+                        color=Col[i],
+                        label=L[i])
+            
+    def plot_frdiffmean_dist_pertdistinct(self, ax, pert_num, num_bins=20):
+        
+        # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        
+        if hasattr(self, 'diff_inh_pv'):
+            print('NotImplemented!')
+        else:
+            ax.hist([self.diff_inh_m[0:pert_num],
+                     self.diff_inh_m[pert_num:],
+                     self.diff_exc_m[0:int(pert_num*NE/NI)],
+                     self.diff_exc_m[int(pert_num*NE/NI):]],
+                     num_bins,
+                     color=['blue', 'skyblue', 'red', 'lightsalmon'],
+                     label=[r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$'])
             
     def plot_frdiffmean_samplesize_dist(self, ax, num_bins=20):
         
@@ -1136,6 +1219,8 @@ class simdata():
         #ax_rate.set_xlim((0, self.Tblank*2+self.Tstim))
         ax_rate.axvspan(self.Tblank, self.Tblank+self.Tstim,\
                         zorder=0, color=[0.7, 0.7, 0.7])
+        ax_rate.set_xlim((0, self.Tstim+2*self.Tblank))
+        boxoff([ax_rate, ax])
     def plot_raster_abs_chgs_all(self, pert_val, ax):
         
         if not hasattr(self, 'pos_exc_ids'):

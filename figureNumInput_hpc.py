@@ -14,6 +14,46 @@ import defaultParams; reload(defaultParams); from defaultParams import *
 import searchParams; reload(searchParams); from searchParams import *
 from figureNumInput import simdata, frchg_vs_EtoI,propposfrchg, frchg, significant_proportions
 
+def boxoff(ax):
+    
+    """
+    Removes the top and right spines of the axes given as inputs, similar to
+    boxoff function of MATLAB. Nothing is returned and it works through reference.
+    
+    Args:
+        Axis or array of axes returned for example from plt.subplots().
+    """
+    
+    if len(ax.shape)>1:
+        for i in range(ax.shape[0]):            
+            for j in range(ax.shape[1]):
+                ax[i, j].spines['top'].set_visible(False)
+                ax[i, j].spines['right'].set_visible(False)
+    else:
+        for i in range(ax.shape[0]):
+            ax[i].spines['top'].set_visible(False)
+            ax[i].spines['right'].set_visible(False)
+
+def to_square_plots(ax):
+    
+    """
+    Make the aspect ratio of xy-axis of a given axes to one, so that they appear
+    in square shape.
+    
+    Args:
+        Axis or array of axes returned for example from plt.subplots().
+    """
+
+    if len(ax.shape)>1:
+        for i in range(ax.shape[0]):            
+            for j in range(ax.shape[1]):
+                ratio = ax[i, j].get_data_ratio()
+                ax[i, j].set_aspect(1.0/ratio)
+    else:
+        for i in range(ax.shape[0]):
+            ratio = ax[i].get_data_ratio()
+            ax[i].set_aspect(1.0/ratio)
+
 def run_for_each_parset(sim_suffix, file_name, fig_ca):
     cwd = os.getcwd()
     fig_path = os.path.join(cwd, fig_dir+sim_suffix, fig_ca)
@@ -93,7 +133,11 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             fig_dist, ax_dist = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
                                              sharex=True, sharey=True, figsize=(10, 4))
             fig_dist_mean, ax_dist_mean = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
-                                                       sharex=True, sharey=True, figsize=(6, 4))
+                                                       sharex=False, sharey=True, figsize=(10, 4))
+            fig_dist_mean_pert, ax_dist_mean_pert = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                                       sharex=False, sharey=True, figsize=(10, 4))
+            fig_dist_mean_pert_line, ax_dist_mean_pert_line = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
+                                                       sharex=False, sharey=True, figsize=(10, 4))
             fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
                                                                      sharex=True, sharey=True, figsize=(6, 3))
             fig_dist_g, ax_dist_g = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
@@ -127,8 +171,8 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             
             ax[int(nn_stim_rng.size/2)].set_xlabel(r'$\Delta FR (sp/s)$')
             ax_e[int(nn_stim_rng.size/2)].set_xlabel(r'$\Delta FR (sp/s)$')
-            ax_i_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
-            ax_e_fr[1, 2].set_xlabel(r'$\Delta FR (sp/s)$')
+            ax_i_fr[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
+            ax_e_fr[1, 1].set_xlabel(r'$\Delta FR (sp/s)$')
             
             ax_base[int(nn_stim_rng.size/2)].set_xlabel('Firing rate (sp/s)')
             
@@ -160,8 +204,18 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 simdata_obj.plot_frdiff_dist(ax_dist[ii])
                 ax_dist[ii].legend()
 
-                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[ii])
+                simdata_obj.plot_frdiffmean_dist(ax_dist_mean[ii], nn_stim)
                 ax_dist_mean[-1].legend()
+                
+                simdata_obj.plot_frdiffmean_dist_pertdistinct(ax_dist_mean_pert[ii], nn_stim)
+                ax_dist_mean_pert[-1].legend(bbox_to_anchor=(1., 1),
+                                             loc='upper left',
+                                             borderaxespad=0.)
+                
+                simdata_obj.plot_frdiffmean_dist_pertdistinct_line(ax_dist_mean_pert_line[ii], nn_stim)
+                ax_dist_mean_pert_line[-1].legend(bbox_to_anchor=(1., 1),
+                                                  loc='upper left',
+                                                  borderaxespad=0.)
                 
                 simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[ii])
                 ax_dist_mean_sample[ii].legend()
@@ -257,14 +311,27 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 ax[ii].set_title('P={}'.format(nn_stim))
                 ax_dist[ii].set_title('P={}'.format(nn_stim))
                 ax_dist_mean[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_pert[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_pert_line[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 ax_dist_mean_sample[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
                 ax_base[ii].set_title('P={}'.format(nn_stim))
                 
                 ax_dist_mean[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
                 ax_dist_mean[0].set_ylabel("Count")
                 
+                ax_dist_mean_pert[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
+                ax_dist_mean_pert[0].set_ylabel("Count")
+                
+                ax_dist_mean_pert_line[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
+                ax_dist_mean_pert_line[0].set_ylabel("Count")
+                
+                to_square_plots(ax_dist_mean_pert)
+                boxoff(ax_dist_mean_pert)
+                
+                to_square_plots(ax_dist_mean_pert_line)
+                boxoff(ax_dist_mean_pert_line)
             
-            ax_base_frdiff[1, 2].set_xlabel("Baseline firing rate (sp/s)")
+            ax_base_frdiff[1, 1].set_xlabel("Baseline firing rate (sp/s)")
             ax_base_frdiff[1, 0].set_ylabel(r"$\Delta FR_E (sp/s)$")
             ax_base_frdiff[0, 0].set_ylabel(r"$\Delta FR_I (sp/s)$")
             
@@ -305,6 +372,12 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             fig_dist_mean.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-Be{}-Bi{}.pdf".format(Be, Bi)),
                                   format="pdf")
             
+            fig_dist_mean_pert.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-pert-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                       format="pdf")
+            
+            fig_dist_mean_pert_line.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-pert-line-Be{}-Bi{}.pdf".format(Be, Bi)),
+                                            format="pdf")
+            
             fig_dist_mean_sample.savefig(os.path.join(diff_dists_fig, "fr-diff-dist-mean-samples-Be{}-Bi{}.pdf".format(Be, Bi)),
                                          format="pdf")
             
@@ -329,6 +402,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             plt.close(fig_e_fr)
             plt.close(fig_avg_fr)
             plt.close(fig_dist_mean)
+            plt.close(fig_dist_mean_pert)
             plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
