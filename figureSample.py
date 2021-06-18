@@ -13,7 +13,7 @@ import defaultParams; reload(defaultParams); from defaultParams import *
 cwd = os.getcwd()
 
 # -- reading the results
-os.chdir(cwd+'/SimulationResults')
+os.chdir(os.path.join(cwd, res_dir + sim_suffix))
 sim_name = 'sim_res_Be'+str(Be)+'_Bi'+str(Bi)
 fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
 
@@ -28,7 +28,7 @@ plot_population_rates = 1
 plot_rates_avg = 1
 plot_differential = 1
 
-fig_path = cwd+'/Figures/'
+fig_path = os.path.join(cwd, fig_dir + sim_suffix)
 if not os.path.exists(fig_path): os.mkdir(fig_path)
 os.chdir(fig_path)
 
