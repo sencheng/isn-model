@@ -111,6 +111,7 @@ NE = N - NI
 
 # range of the size of Inh perturbations
 nn_stim_rng = (np.array([0.1, .25, 0.5, .75, 1])*NI).astype('int')
+#nn_stim_rng = (np.array([0.5, 0.6, 0.65, 0.7, .75])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
