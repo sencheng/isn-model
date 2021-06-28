@@ -207,12 +207,12 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 simdata_obj.plot_frdiffmean_dist(ax_dist_mean[ii], nn_stim)
                 ax_dist_mean[-1].legend()
                 
-                simdata_obj.plot_frdiffmean_dist_pertdistinct(ax_dist_mean_pert[ii], nn_stim)
+                simdata_obj.plot_frdiffmean_dist_pertdistinct(ax_dist_mean_pert[ii], nn_stim, fig_ca)
                 ax_dist_mean_pert[-1].legend(bbox_to_anchor=(1., 1),
                                              loc='upper left',
                                              borderaxespad=0.)
                 
-                simdata_obj.plot_frdiffmean_dist_pertdistinct_line(ax_dist_mean_pert_line[ii], nn_stim)
+                simdata_obj.plot_frdiffmean_dist_pertdistinct_line(ax_dist_mean_pert_line[ii], nn_stim, fig_ca)
                 ax_dist_mean_pert_line[-1].legend(bbox_to_anchor=(1., 1),
                                                   loc='upper left',
                                                   borderaxespad=0.)

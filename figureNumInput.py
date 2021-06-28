@@ -889,12 +889,16 @@ class simdata():
             #          color=['blue', 'red'],
             #          label=[r'$I$', r'$E$'])
 
-    def plot_frdiffmean_dist_pertdistinct_line(self, ax, pert_num, num_bins=100):
+    def plot_frdiffmean_dist_pertdistinct_line(self, ax, pert_num, fig_ca, num_bins=100):
         
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
         
-        inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num], self.diff_inh_m[pert_num:]
-        exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)], self.diff_exc_m[int(pert_num*NE/NI):]
+        if fig_ca == 'ca3':
+            inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num], self.diff_inh_m[pert_num:]
+            exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)], self.diff_exc_m[int(pert_num*NE/NI):]
+        elif fig_ca == 'ca1':
+            inh_pert, inh_nonpert = np.array([]), self.diff_inh_m
+            exc_pert, exc_nonpert = np.array([]), self.diff_exc_m
         
         inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
         
@@ -910,37 +914,56 @@ class simdata():
         edges = np.linspace(min_, max_, num=num_bins)
         mid_points = (edges[1:] + edges[:-1])/2
         
-        c_inh_pert = np.histogram(inh_pert, edges)[0]
-        c_inh_nonpert = np.histogram(inh_nonpert, edges)[0]
-        c_exc_pert = np.histogram(exc_pert, edges)[0]
-        c_exc_nonpert = np.histogram(exc_nonpert, edges)[0]
+        c_inh_exc = []
         
-        C = [c_inh_pert, c_inh_nonpert, c_exc_pert, c_exc_nonpert]
+        for c in inh_exc:
+            if fig_ca=='ca1':
+                if c.size > 0:
+                    c_inh_exc.append(np.histogram(c, edges)[0])
+                else:
+                    c_inh_exc.append(np.array([]))
+            else:
+                c_inh_exc.append(np.histogram(c, edges)[0])
+        
+        # c_inh_pert = np.histogram(inh_pert, edges)[0]
+        # c_inh_nonpert = np.histogram(inh_nonpert, edges)[0]
+        # c_exc_pert = np.histogram(exc_pert, edges)[0]
+        # c_exc_nonpert = np.histogram(exc_nonpert, edges)[0]
+        
+        # C = [c_inh_pert, c_inh_nonpert, c_exc_pert, c_exc_nonpert]
         L = [r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$']
         Col = ['blue', 'skyblue', 'red', 'lightsalmon']
         
         if hasattr(self, 'diff_inh_pv'):
             print('NotImplemented!')
         else:
-            for i, c in enumerate(C):
-                ax.plot(mid_points, c,
-                        color=Col[i],
-                        label=L[i])
+            for i, c in enumerate(c_inh_exc):
+                if c.size > 0:
+                    ax.plot(mid_points, c,
+                            color=Col[i],
+                            label=L[i])
             
-    def plot_frdiffmean_dist_pertdistinct(self, ax, pert_num, num_bins=20):
+    def plot_frdiffmean_dist_pertdistinct(self, ax, pert_num, fig_ca, num_bins=20):
         
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
         
         if hasattr(self, 'diff_inh_pv'):
             print('NotImplemented!')
         else:
-            ax.hist([self.diff_inh_m[0:pert_num],
-                     self.diff_inh_m[pert_num:],
-                     self.diff_exc_m[0:int(pert_num*NE/NI)],
-                     self.diff_exc_m[int(pert_num*NE/NI):]],
-                     num_bins,
-                     color=['blue', 'skyblue', 'red', 'lightsalmon'],
-                     label=[r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$'])
+            if fig_ca == 'ca1':
+                ax.hist([self.diff_inh_m,
+                         self.diff_exc_m],
+                         num_bins,
+                         color=['skyblue', 'lightsalmon'],
+                         label=[r'$I$', r'$E$'])
+            elif fig_ca == 'ca3':
+                ax.hist([self.diff_inh_m[0:pert_num],
+                         self.diff_inh_m[pert_num:],
+                         self.diff_exc_m[0:int(pert_num*NE/NI)],
+                         self.diff_exc_m[int(pert_num*NE/NI):]],
+                         num_bins,
+                         color=['blue', 'skyblue', 'red', 'lightsalmon'],
+                         label=[r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$'])
             
     def plot_frdiffmean_samplesize_dist(self, ax, num_bins=20):
         

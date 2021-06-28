@@ -93,9 +93,7 @@ r_stim = -400.
 Ttrans = 1000
 # simulation time before perturbation (ms)
 Tblank= 1000.
-# simulation time of perturbation (ms)
-Tstim = 1000.
-# simulation time after perturbation (ms)
+# simulation time of and after perturbation (ms)
 Tstim = 1000.
 
 # number of trials
