@@ -14,4 +14,4 @@ source /home/mohagmnr/projects/CoBeL-spike/packages/set_vars.sh
 
 echo "running simulation for task ID ${SLURM_ARRAY_TASK_ID}"
     
-python simulateNetworks.py ${SLURM_ARRAY_TASK_ID} 60
+python simulateNetworks.py ${SLURM_ARRAY_TASK_ID} 1

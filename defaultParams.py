@@ -46,6 +46,7 @@ Be_rng = np.array([0.55])
 Bi_rng = np.array([-0.3])
 
 Be_ca3, Bi_ca3 = 0.03, -0.3
+EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -94,6 +95,8 @@ Ttrans = 1000
 Tblank= 1000.
 # simulation time of perturbation (ms)
 Tstim = 1000.
+# simulation time after perturbation (ms)
+Tstim = 1000.
 
 # number of trials
 Ntrials = 50
@@ -117,10 +120,12 @@ cell_type = 'aeif_cond_alpha'
 
 # record from conductances?
 rec_from_cond = False
+
+# perturbation type
+het_pert = False
+
+# perform significance test on 
 significance_test = False
-# -- default settings for plotting figures
-# (comment out for conventional Python format)
-matplotlib.rc('font', serif='sans-serif')
 
 SIZE = 12
 pl.rc('font', size=SIZE)  # controls default text sizes

@@ -13,7 +13,7 @@ EIconn_chg_factor = np.array([3.0])#np.arange(0.6, 3, 0.2)#np.array([2.0])
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
 bkg_chg_factor    = np.array([1.])#np.arange(1.05, 1.11, 0.05)
 E3E1_cond_chg     = 0.2
-
+E3I1_cond_chg     = 1.0
 EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = \
     np.meshgrid(EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
 extra_bkg_e = 2500.0
