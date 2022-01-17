@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_dir = "Figures"
-sim_suffix = "-CA3eqpert-bi0.20-be-0.20-ca1bkgfr4000-Epertfac1.0-EE_probchg0.90-EI_probchg2"
+sim_suffix = "-ISCA3ISN-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
 
 #------------- neuron params
 
@@ -45,7 +45,8 @@ Be, Bi = .1, -.2
 Be_rng = np.array([0.55])
 Bi_rng = np.array([-0.3])
 
-Be_ca3, Bi_ca3 = 0.03, -0.3
+Be_ca3 = 0.03
+Bi_ca3 = 0#-0.3
 EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
 
 # background and stimulus conductances (nS)
@@ -97,8 +98,8 @@ Tblank= 1000.
 Tstim = 1000.
 
 # number of trials
-Ntrials = 50
-
+Ntrials = 10
+rng_conn = np.arange(1, 10)
 # -- network params
 
 # fraction of Inh neurons
@@ -112,7 +113,7 @@ NE = N - NI
 
 # range of the size of Inh perturbations
 nn_stim_rng = (np.array([0.1, .25, 0.5, .75, 1])*NI).astype('int')
-#nn_stim_rng = (np.array([0.5, 0.6, 0.65, 0.7, .75])*NI).astype('int')
+#nn_stim_rng = (np.array([0.05, 0.1, 0.15, 0.2, .25])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 

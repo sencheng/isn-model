@@ -148,7 +148,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             
             fig_avg_fr, ax_avg_fr = plt.subplots()
             
-            simdata_obj = simdata(sim_name)
+            simdata_obj = simdata(file_name, Be, Bi)
             
             diff_dists_fig = simdata_obj.create_fig_subdir(fig_path, diff_dists)
             diff_boxs_fig = simdata_obj.create_fig_subdir(fig_path, diff_boxs)
@@ -180,7 +180,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             
             for ii, nn_stim in enumerate(nn_stim_rng):
                 
-                fig_raster, ax_raster = plt.subplots(nrows=Ntrials, ncols=1,
+                fig_raster, ax_raster = plt.subplots(nrows=simdata_obj.Ntrials, ncols=1,
                                                      sharex=True, sharey=True)
                 
                 fig_raster_sep, ax_raster_sep = plt.subplots(nrows=2, ncols=2,
@@ -216,6 +216,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 ax_dist_mean_pert_line[-1].legend(bbox_to_anchor=(1., 1),
                                                   loc='upper left',
                                                   borderaxespad=0.)
+                simdata_obj.plot_frdiffmean_dist_pertdistinct_line_by_model(nn_stim, fig_ca, diff_dists_fig)
                 
                 simdata_obj.plot_frdiffmean_samplesize_dist(ax_dist_mean_sample[ii])
                 ax_dist_mean_sample[ii].legend()
@@ -308,12 +309,12 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 plt.close(fig_raster_extremes)
                 plt.close(fig_rate_extremes)
                 
-                ax[ii].set_title('P={}'.format(nn_stim))
-                ax_dist[ii].set_title('P={}'.format(nn_stim))
-                ax_dist_mean[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
-                ax_dist_mean_pert[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
-                ax_dist_mean_pert_line[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
-                ax_dist_mean_sample[ii].set_title('P={:.0f}%'.format(nn_stim/NI*100))
+                ax[ii].set_title('Pert={}'.format(nn_stim))
+                ax_dist[ii].set_title('Pert={}'.format(nn_stim))
+                ax_dist_mean[ii].set_title('Pert={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_pert[ii].set_title('Pert={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_pert_line[ii].set_title('Pert={:.0f}%'.format(nn_stim/NI*100))
+                ax_dist_mean_sample[ii].set_title('Pert={:.0f}%'.format(nn_stim/NI*100))
                 ax_base[ii].set_title('P={}'.format(nn_stim))
                 
                 ax_dist_mean[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
@@ -323,7 +324,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                 ax_dist_mean_pert[0].set_ylabel("Count")
                 
                 ax_dist_mean_pert_line[int(nn_stim_rng.size/2)].set_xlabel(r"$\Delta FR (sp/s)$")
-                ax_dist_mean_pert_line[0].set_ylabel("Count")
+                ax_dist_mean_pert_line[0].set_ylabel("Proportion")
                 
                 to_square_plots(ax_dist_mean_pert)
                 boxoff(ax_dist_mean_pert)
@@ -596,5 +597,5 @@ if __name__=='__main__':
             else:
                 fig_ca = 'ca1'
         
-            sim_suffix = "-Lbkgca3toca1-CA3eqpert-CA3EtoCA1eI-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])                    
+            sim_suffix = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])                    
             run_for_each_parset(sim_suffix, file_name, fig_ca)

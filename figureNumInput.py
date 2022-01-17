@@ -13,8 +13,12 @@ from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 
 def boxoff(ax):
-    if type(ax) is list:
+    if isinstance(ax, list):
         for ax_ in ax:
+            ax_.spines['top'].set_visible(False)
+            ax_.spines['right'].set_visible(False)
+    elif isinstance(ax, np.ndarray):
+        for ax_ in ax.flatten():
             ax_.spines['top'].set_visible(False)
             ax_.spines['right'].set_visible(False)
     else:
@@ -57,14 +61,17 @@ class simdata():
     
     '''
     
-    def __init__(self, fl_path):
-        
+    def __init__(self, fl_path, Be, Bi):
+        fl_path = fl_path.format(Be, Bi)
         fl = open(fl_path, 'rb'); sim_res = pickle.load(fl); fl.close()
         
         self.Ntrials = sim_res['Ntrials']
+        self.num_models = rng_conn.size
         self.NE = sim_res['NE']
         self.NI = sim_res['NI']
         self.Nall = sim_res['N']
+        self.Be = Be
+        self.Bi = Bi
         
         self.Ttrans = sim_res['Ttrans']
         self.Tstim  = sim_res['Tstim']
@@ -508,23 +515,29 @@ class simdata():
         
     def get_fr_diff_mean(self):
         
-        self.diff_exc_m = np.zeros(self.diff_exc.shape[0])
-        self.diff_inh_m = np.zeros(self.diff_inh.shape[0])
-        
-        self.diff_exc_m_include_per = np.zeros(self.diff_exc.shape[0])
-        self.diff_inh_m_include_per = np.zeros(self.diff_inh.shape[0])
+        Ntrials_per_model = Ntrials
+        self.diff_exc_m = np.zeros((self.diff_exc.shape[0], self.num_models))
+        self.diff_inh_m = np.zeros((self.diff_inh.shape[0], self.num_models))
+        self.diff_exc_m_include_per = np.zeros((self.diff_exc.shape[0], self.num_models))
+        self.diff_inh_m_include_per = np.zeros((self.diff_exc.shape[0], self.num_models))
         
         for i in range(self.base_exc.shape[0]):
-            
-            IND = (self.base_exc[i]!=0) | (self.stim_exc[i]!=0)
-            self.diff_exc_m[i] = np.mean(self.diff_exc[i][IND])
-            self.diff_exc_m_include_per[i] = IND.mean()*100
+            for mdl_i in range(self.num_models):
+                base_exc = self.base_exc[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                stim_exc = self.stim_exc[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                diff_exc = self.diff_exc[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                IND = (base_exc!=0) | (stim_exc!=0)
+                self.diff_exc_m[i, mdl_i] = np.mean(diff_exc[IND])
+                self.diff_exc_m_include_per[i, mdl_i] = IND.mean()*100
             
         for i in range(self.base_inh.shape[0]):
-            
-            IND = (self.base_inh[i]!=0) | (self.stim_inh[i]!=0)
-            self.diff_inh_m[i] = np.mean(self.diff_inh[i][IND])
-            self.diff_inh_m_include_per[i] = IND.mean()*100        
+            for mdl_i in range(self.num_models):
+                base_inh = self.base_inh[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                stim_inh = self.stim_inh[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                diff_inh = self.diff_inh[i][mdl_i*Ntrials_per_model:(mdl_i+1)*Ntrials_per_model]
+                IND = (base_inh!=0) | (stim_inh!=0)
+                self.diff_inh_m[i, mdl_i] = np.mean(diff_inh[IND])
+                self.diff_inh_m_include_per[i, mdl_i] = IND.mean()*100        
             
         
         
@@ -888,20 +901,94 @@ class simdata():
             #          num_bins,
             #          color=['blue', 'red'],
             #          label=[r'$I$', r'$E$'])
+            
+    def plot_frdiffmean_dist_pertdistinct_line_by_model(self, pert_val,
+                                                        fig_ca, fig_dir,
+                                                        num_bins=20):
+        fig_dir = self.create_fig_subdir(fig_dir, "dist-line-bymodel-{:.2f}-{:.2}".format(self.Be, self.Bi))
+        # fig_dir = self.create_fig_subdir(fig_dir, "{:.0f}".format(pert_num))
+        # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
+        fig, ax = plt.subplots(nrows = 3, ncols = self.num_models//3,
+                               sharey=True)
+        
+        for mdl_i in range(self.num_models):
+            row = mdl_i//3
+            col = mdl_i%3
+            diff_inh_m = self.diff_inh_m[:, mdl_i]
+            diff_exc_m = self.diff_exc_m[:, mdl_i]
+        
+            if fig_ca == 'ca3':
+                inh_pert = diff_inh_m[0:pert_val]
+                inh_nonpert = diff_inh_m[pert_val:]
+                exc_pert = diff_exc_m[0:int(pert_val*NE/NI)]
+                exc_nonpert = diff_exc_m[int(pert_val*NE/NI):]
+            elif fig_ca == 'ca1':
+                inh_pert, inh_nonpert = np.array([]), diff_inh_m
+                exc_pert, exc_nonpert = np.array([]), diff_exc_m
+        
+            inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
+            num_neurons = (NI, NI, NE, NE)
+            
+            max_ = -np.inf
+            min_ = np.inf
+            for d in inh_exc:
+                if d.size > 0:
+                    max_ = max(max_, d.max())
+                    min_ = min(min_, d.min())
+        
+            edges = np.linspace(min_, max_, num=num_bins)
+            mid_points = (edges[1:] + edges[:-1])/2
+            
+            c_inh_exc = []
+            
+            for i, c in enumerate(inh_exc):
+                if fig_ca=='ca1':
+                    if c.size > 0:
+                        c_inh_exc.append(np.histogram(c, edges)[0]/num_neurons[i])
+                    else:
+                        c_inh_exc.append(np.array([]))
+                else:
+                    c_inh_exc.append(np.histogram(c, edges)[0]/num_neurons[i])
+            
+            L = [r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$']
+            Col = ['blue', 'skyblue', 'red', 'lightsalmon']
+            
+            if hasattr(self, 'diff_inh_pv'):
+                print('NotImplemented!')
+            else:
+                for i, c in enumerate(c_inh_exc):
+                    if c.size > 0:
+                        ax[row, col].plot(mid_points, c,
+                                          color=Col[i],
+                                          label=L[i])
+            if row == 2:
+                ax[row, col].set_xlabel(r'$\Delta FR(spk/s)$')
+            if col == 0:
+                ax[row, col].set_ylabel('Proportion')
+        ax[-1, -1].legend(bbox_to_anchor=(1., 1),
+                      loc='upper left',
+                      borderaxespad=0.)
+        #to_square_plots(ax)
+        boxoff(ax)
+        fig.suptitle("Photoinhibiting {:.0f}% of CA3 neurons".format(pert_val/self.NI*100))
+        fig.tight_layout()
+        fig.savefig(os.path.join(fig_dir, "{:.0f}.pdf".format(pert_val)),
+                                 format="pdf")
+        plt.close(fig)
 
-    def plot_frdiffmean_dist_pertdistinct_line(self, ax, pert_num, fig_ca, num_bins=100):
+    def plot_frdiffmean_dist_pertdistinct_line(self, ax, pert_num, fig_ca, num_bins=20):
         
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
         
         if fig_ca == 'ca3':
-            inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num], self.diff_inh_m[pert_num:]
-            exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)], self.diff_exc_m[int(pert_num*NE/NI):]
+            inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+            exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
         elif fig_ca == 'ca1':
-            inh_pert, inh_nonpert = np.array([]), self.diff_inh_m
-            exc_pert, exc_nonpert = np.array([]), self.diff_exc_m
+            inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
+            exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()
         
         inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
-        
+        num_neurons = (NI*self.num_models, NI*self.num_models, NE*self.num_models, NE*self.num_models)
         max_ = -np.inf
         min_ = np.inf
         for d in inh_exc:
@@ -916,14 +1003,14 @@ class simdata():
         
         c_inh_exc = []
         
-        for c in inh_exc:
+        for i, c in enumerate(inh_exc):
             if fig_ca=='ca1':
                 if c.size > 0:
-                    c_inh_exc.append(np.histogram(c, edges)[0])
+                    c_inh_exc.append(np.histogram(c, edges)[0]/num_neurons[i])
                 else:
                     c_inh_exc.append(np.array([]))
             else:
-                c_inh_exc.append(np.histogram(c, edges)[0])
+                c_inh_exc.append(np.histogram(c, edges)[0]/num_neurons[i])
         
         # c_inh_pert = np.histogram(inh_pert, edges)[0]
         # c_inh_nonpert = np.histogram(inh_nonpert, edges)[0]
@@ -951,16 +1038,16 @@ class simdata():
             print('NotImplemented!')
         else:
             if fig_ca == 'ca1':
-                ax.hist([self.diff_inh_m,
-                         self.diff_exc_m],
+                ax.hist([self.diff_inh_m.flatten(),
+                         self.diff_exc_m.flatten()],
                          num_bins,
                          color=['skyblue', 'lightsalmon'],
                          label=[r'$I$', r'$E$'])
             elif fig_ca == 'ca3':
-                ax.hist([self.diff_inh_m[0:pert_num],
-                         self.diff_inh_m[pert_num:],
-                         self.diff_exc_m[0:int(pert_num*NE/NI)],
-                         self.diff_exc_m[int(pert_num*NE/NI):]],
+                ax.hist([self.diff_inh_m[0:pert_num].flatten(),
+                         self.diff_inh_m[pert_num:].flatten(),
+                         self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(),
+                         self.diff_exc_m[int(pert_num*NE/NI):].flatten()],
                          num_bins,
                          color=['blue', 'skyblue', 'red', 'lightsalmon'],
                          label=[r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$'])
