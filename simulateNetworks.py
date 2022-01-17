@@ -205,52 +205,28 @@ if len(sys.argv) == 1:
 else:
     job_id = int(sys.argv[1])
     num_jobs = int(sys.argv[2])
-    
-# simulate(job_id, num_jobs)
 
 os.chdir(cwd)
 
-# def simulate(job_id, num_jobs):
-'''
-#pert_fr = np.arange(-400, -2100, -400)
-fr_chg_factor = np.arange(0.5, 1, .1)
-E_extra_stim_factor = np.arange(0.2, 1.1, 0.2)#np.array([0.8])
-EEconn_chg_factor = np.arange(0.9, 1.11, 0.1)#np.array([0.9])
-EIconn_chg_factor = np.arange(1.8, 2.21, 0.2)#np.array([2.0])
-IIconn_chg_factor = np.arange(1, 1.1, 0.2)
-bkg_chg_factor    = np.arange(1., 1.01, 0.05)
-'''
-Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
+Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb, C_rng_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor, C_rng)
 
 Be_rng_comb = Be_rng_comb.flatten()[job_id::num_jobs]
 Bi_rng_comb = Bi_rng_comb.flatten()[job_id::num_jobs]
 EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
 EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
 II_condchg_comb = II_condchg_comb.flatten()[job_id::num_jobs]
-#fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
 E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
 bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
-#pert_comb = pert_comb.flatten()[job_id::num_jobs]
-
-#E_pert_frac = 1.0
-
+C_rng_comb = C_rng_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
     
-    #r_stim = pert_comb[ij1]
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
     Bee, Bei = Be, Be
     Bie, Bii = Bi, Bi
 
     Bee_ca3, Bei_ca3 = Be_ca3, Be_ca3
     Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3
-
-    #sim_suffix = "-pert{}".format(r_stim)
-    #sim_suffix = "-EIincfac{:.3f}".format(fr_chg_comb[ij1])
-    #sim_suffix = "-Iincfac{:.3f}-Ered{:.1f}".format(fr_chg_comb[ij1], E_extra_comb[ij1])
-    #sim_suffix = "-Epertfrac{:.1f}-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-    #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-    #sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     sim_suffix = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
 
     print('####################')
@@ -270,86 +246,62 @@ for ij1 in range(Be_rng_comb.size):
         
         print('\n # -----> size of pert. inh: ', nn_stim)
         
-        for rng_c in rng_conn:
-    
-            np.random.seed(rng_c)
-            # -- L23 recurrent connectivity
-            p_conn = 0.15
-            W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn*EE3_prob_chg_factor)
-            W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn*EI3_prob_chg_factor)
-            W_ItoE_ca3 = _mycon_(NI, NE, Bie_ca3, Bie_ca3/5, 1.)
-            W_ItoI_ca3 = _mycon_(NI, NI, Bii_ca3, Bii_ca3/5, 1.)
-            
-            W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
-            W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
-            W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
-            W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
-            
-            
-            W_E3toE =  _mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
-            W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
-            '''
-            # Indegree with Guassian distribution
-            p_conn = 0.15
-            p_conn_ee = p_conn*EE_probchg_comb[ij1]
-            p_conn_ei = p_conn*EI_probchg_comb[ij1]
-            W_EtoE = _guasconn_(NE, NE, Bee, np.sqrt(NE*p_conn_ee*(1-p_conn_ee))*1, p_conn_ee)
-            W_EtoI = _guasconn_(NE, NI, Bei, np.sqrt(NI*p_conn_ei*(1-p_conn_ei))*3, p_conn_ei)
-            W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
-            W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
-            '''
-            np.random.seed(100)
-            r_extra = np.zeros(N+N)
-            #r_extra[NE:NE+int(nn_stim/2)] = r_stim
-            #r_extra[NE+int(nn_stim/2):NE+nn_stim] = r_stim
-            #r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
-            #r_extra[int(NE*nn_stim/NI/2):int(NE*nn_stim/NI)] = r_stim
-            #r_extra[N+NE:N+NE+nn_stim] = r_stim
-            #r_extra[0:int(NE*nn_stim/NI)] = r_stim*E_extra_comb[ij1]
-            #r_extra[0:NE] = r_stim*E_extra_comb[ij1]
-            # r_extra[0:int(NE*E_pert_frac)] = r_stim*E_extra_comb[ij1]
-            
-            if het_pert:
-                r_extra[N+0:N+NE] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NE)
-                r_extra[N+NE:N+NE+NI] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NI)
-            else:
-                r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
-                r_extra[N+NE:N+NE+nn_stim] = r_stim
-    
-            #fr_inc_factor = fr_chg_comb[ij1]
-            r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
-            #rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.random.uniform(0.9, 1.1, NI)))
-            # rr1 = np.hstack((r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
-            #rr1 = r_bkg*np.ones(N)
-            rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),
-                             r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
-            rr2 = rr1 + r_extra
-    
-            tmp_out = myRun(rr1, rr2, nn_stim=nn_stim)
-            if rng_c == rng_conn[0]:
-                sim_res[nn_stim] = [tmp_out[0], tmp_out[1], {}]
-                sim_res_ca3[nn_stim] = [tmp_out[0], tmp_out[1], {}]
-            for tr in tmp_out[2].keys():
-                print(tr, tmp_out[2][tr])
-                sim_res[nn_stim][2][tr] = copy.copy(tmp_out[2][tr])
-                sim_res_ca3[nn_stim][2][tr] = copy.copy(tmp_out[3][tr])
-            
+        rng_c = C_rng_comb[ij1]
+        np.random.seed(rng_c)
+        # -- L23 recurrent connectivity
+        p_conn = 0.15
+        W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn*EE3_prob_chg_factor)
+        W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn*EI3_prob_chg_factor)
+        W_ItoE_ca3 = _mycon_(NI, NE, Bie_ca3, Bie_ca3/5, 1.)
+        W_ItoI_ca3 = _mycon_(NI, NI, Bii_ca3, Bii_ca3/5, 1.)
+        
+        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn*EE_probchg_comb[ij1])
+        W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn*EI_probchg_comb[ij1])
+        W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
+        W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
+        
+        W_E3toE =  _mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
+        W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
+        
+        np.random.seed(100)
+        r_extra = np.zeros(N+N)
+        
+        if het_pert:
+            r_extra[N+0:N+NE] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NE)
+            r_extra[N+NE:N+NE+NI] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NI)
+        else:
+            r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
+            r_extra[N+NE:N+NE+nn_stim] = r_stim
 
-    sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials*rng_conn.size
+        r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
+        rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),
+                         r_bkg_e*np.ones(NE), r_bkg_i*np.ones(NI)))
+        rr2 = rr1 + r_extra
+        tmp_out = myRun(rr1, rr2, nn_stim=nn_stim)
+        #if rng_c == rng_conn[0]:
+        sim_res[nn_stim] = [tmp_out[0], tmp_out[1], {}]
+        sim_res_ca3[nn_stim] = [tmp_out[0], tmp_out[1], {}]
+        for tr in tmp_out[2].keys():
+            print(tr, tmp_out[2][tr])
+            sim_res[nn_stim][2][tr] = copy.copy(tmp_out[2][tr])
+            sim_res_ca3[nn_stim][2][tr] = copy.copy(tmp_out[3][tr])
+        
+
+    sim_res['nn_stim_rng'], sim_res['Ntrials'] = nn_stim_rng, Ntrials
     sim_res['N'], sim_res['NE'], sim_res['NI'] = N, NE, NI
     sim_res['Tblank'], sim_res['Tstim'], sim_res['Ttrans'] = Tblank, Tstim, Ttrans
     sim_res['W_EtoE'], sim_res['W_EtoI'], sim_res['W_ItoE'], sim_res['W_ItoI'] = W_EtoE, W_EtoI, W_ItoE, W_ItoI
     
-    sim_res_ca3['nn_stim_rng'], sim_res_ca3['Ntrials'] = nn_stim_rng, Ntrials*rng_conn.size
+    sim_res_ca3['nn_stim_rng'], sim_res_ca3['Ntrials'] = nn_stim_rng, Ntrials
     sim_res_ca3['N'], sim_res_ca3['NE'], sim_res_ca3['NI'] = N, NE, NI
     sim_res_ca3['Tblank'], sim_res_ca3['Tstim'], sim_res_ca3['Ttrans'] = Tblank, Tstim, Ttrans
     sim_res_ca3['W_EtoE'], sim_res_ca3['W_EtoI'], sim_res_ca3['W_ItoE'], sim_res_ca3['W_ItoI'] = W_EtoE_ca3, W_EtoI_ca3, W_ItoE_ca3, W_ItoI_ca3
     
     os.chdir(res_path);
-    sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
+    sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}_Mo{}'.format(Be, Bi, rng_c)
     fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
     
-    sim_name = 'sim_res_ca3_Be{:.2f}_Bi{:.2f}'.format(Be, Bi)
+    sim_name = 'sim_res_ca3_Be{:.2f}_Bi{:.2f}_Mo{}'.format(Be, Bi, rng_c)
     fl = open(sim_name, 'wb'); pickle.dump(sim_res_ca3, fl); fl.close()
 
 t_end = time.time()

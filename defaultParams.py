@@ -7,7 +7,7 @@ import matplotlib.pylab as pl
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 4
+n_cores = 1
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -99,7 +99,7 @@ Tstim = 1000.
 
 # number of trials
 Ntrials = 10
-rng_conn = np.arange(1, 10)
+rng_conn = np.arange(1, 10.1).astype(int)
 # -- network params
 
 # fraction of Inh neurons
