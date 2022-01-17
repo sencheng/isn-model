@@ -41,8 +41,8 @@ Be, Bi = .1, -.2
 # range of Exc and Inh conductances (nS)
 #Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
 #Be_rng = np.arange(0.1, .81, 0.1)
-Be_rng = np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55])
-Bi_rng = np.array([-0.1, -0.2, -0.3, -0.4, -.5])
+Be_rng = np.array([0.55])#np.array([0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55])#np.array([0.55])
+Bi_rng = np.array([-0.3])#np.array([-0.1, -0.2, -0.3, -0.4, -.5])#np.array([-0.3])
 
 Be_ca3, Bi_ca3 = 0.03, -0.3
 EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
@@ -96,7 +96,7 @@ Tblank= 500.
 Tstim = 500.
 
 # number of trials
-Ntrials = 5
+Ntrials = 20
 
 # -- network params
 
@@ -110,7 +110,7 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([.5, .55, .6, .65, .7])*NI).astype('int')
+nn_stim_rng = (np.array([.1, .2, .3, .4, .5])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 

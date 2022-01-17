@@ -45,7 +45,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
     base_dist  = "Baseline_FiringRates_Dist"
     other      = "Other_Analyses"
     
-    if fig_ca == 'ca3':
+    if (fig_ca == 'ca3') & (Be_rng.size>1):
         BE = np.random.choice(Be_rng, 2, replace=False)
     else:
         BE = Be_rng
@@ -70,6 +70,12 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
                                            sharex=True, sharey=True)
         
+        if Bi_rng.size == 1:
+            ax_box = ax_box.reshape(-1, 1)
+            ax_violin = ax_violin.reshape(-1, 1)
+            ax_box_mean = ax_box_mean.reshape(-1, 1)
+            ax_violin_mean = ax_violin_mean.reshape(-1, 1)
+            ax_box_g = ax_box_g.reshape(-1, 1)
         for ij2, Bi in enumerate(Bi_rng):
             
             os.chdir(os.path.join(cwd, res_dir + sim_suffix))
@@ -310,7 +316,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
-        ax_box[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_box[-1, Bi_rng.size//2].set_xlabel("Percent of perturbed I neurons")
         ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_box.suptitle("Be={:.2f}".format(Be))
@@ -318,7 +324,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box.savefig(os.path.join(diff_boxs_fig, "fr-diff-box-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_violin[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin[-1, Bi_rng.size//2].set_xlabel("Percent of perturbed I neurons")
         ax_violin[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_violin[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_violin.suptitle("Be={:.2f}".format(Be))
@@ -326,7 +332,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_violin.savefig(os.path.join(diff_boxs_fig, "fr-diff-violin-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_box_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_box_mean[-1, Bi_rng.size//2].set_xlabel("Percent of perturbed I neurons")
         ax_box_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_box_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_box_mean.suptitle("Be={:.2f}".format(Be))
@@ -334,7 +340,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         fig_box_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-box-Be{:.2f}.pdf".format(Be)),
                          format="pdf")
         
-        ax_violin_mean[-1, 2].set_xlabel("Percent of perturbed I neurons")
+        ax_violin_mean[-1, Bi_rng.size//2].set_xlabel("Percent of perturbed I neurons")
         ax_violin_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
         ax_violin_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
         fig_violin_mean.suptitle("Be={:.2f}".format(Be))

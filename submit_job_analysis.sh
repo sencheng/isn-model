@@ -8,10 +8,13 @@
 #SBATCH -e ./job_files/ANALYZE_ISN_%A_%a.err # Standard error
 #SBATCH --mail-type FAIL
 #SBATCH --mail-user m.mohagheghi@ini.rub.de
-module restore cobel-spike
+#module restore cobel-spike
 #conda init
-source /home/mohagmnr/projects/CoBeL-spike/packages/set_vars.sh
+#source /home/mohagmnr/projects/CoBeL-spike/packages/set_vars.sh
+module restore 5HT2A
 
+# Set NEST paths
+source /home/mohagmnr/projects/5HT2A/packages/nest-install/bin/nest_vars.sh
 echo "running simulation for task ID ${SLURM_ARRAY_TASK_ID}"
     
 python figureNumInput_hpc.py ${SLURM_ARRAY_TASK_ID} 1

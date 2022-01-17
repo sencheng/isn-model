@@ -245,7 +245,7 @@ for ij1 in range(Be_rng_comb.size):
     #sim_suffix = "-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(E_pert_frac, bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     #sim_suffix = "-EIeqpert-bkgfac{:.2f}-Epertfac{:.1f}-longersim-HEEcond-EE_probchg{:.2f}-EI_probchg{:.2f}".format(bkg_chg_comb[ij1], E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     sim_suffix = "-Lbkgca3toca1-CA3eq_randomuni_pert-CA3EtoCA1eI-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}".format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-
+    print("\nSimulation outputs are stored in {}\n".format(sim_suffix))
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
     print('####################')
