@@ -56,7 +56,7 @@ def to_square_plots(ax):
 
 def run_for_each_parset(sim_suffix, file_name, fig_ca):
     cwd = os.getcwd()
-    fig_path = os.path.join(cwd, fig_dir+sim_suffix, fig_ca)
+    fig_path = os.path.join(fig_dir, fig_dir+sim_suffix, fig_ca)
     os.makedirs(fig_path, exist_ok=True)
     
     cv_e = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 3))

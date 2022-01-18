@@ -16,7 +16,7 @@ if os.path.exists(nest_path):
     
 # Result directory
 res_dir = "SimulationFiles"
-fig_dir = "Figures"
+fig_initial = "Figures"
 sim_suffix = "-ISCA3ISN-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
 data_dir = "./"#"/local2/mohammad/data/5HT2A"
 fig_dir  = data_dir

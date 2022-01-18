@@ -11,6 +11,7 @@ from scipy.interpolate import interp1d
 from scipy.stats import linregress
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
+import searchParams; reload(searchParams); from searchParams import C_rng
 
 def boxoff(ax):
     if isinstance(ax, list):
@@ -65,8 +66,8 @@ class simdata():
         fl_path = fl_path.format(Be, Bi)
         fl = open(fl_path, 'rb'); sim_res = pickle.load(fl); fl.close()
         
-        self.Ntrials = sim_res['Ntrials']
-        self.num_models = rng_conn.size
+        self.Ntrials = sim_res['Ntrials']*C_rng.size
+        self.num_models = C_rng.size
         self.NE = sim_res['NE']
         self.NI = sim_res['NI']
         self.Nall = sim_res['N']
@@ -908,12 +909,13 @@ class simdata():
         fig_dir = self.create_fig_subdir(fig_dir, "dist-line-bymodel-{:.2f}-{:.2}".format(self.Be, self.Bi))
         # fig_dir = self.create_fig_subdir(fig_dir, "{:.0f}".format(pert_num))
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
-        fig, ax = plt.subplots(nrows = 3, ncols = self.num_models//3,
+        num_rows = 2
+        fig, ax = plt.subplots(nrows = num_rows, ncols = self.num_models//num_rows,
                                sharey=True)
         
         for mdl_i in range(self.num_models):
-            row = mdl_i//3
-            col = mdl_i%3
+            row = mdl_i%num_rows
+            col = mdl_i//num_rows
             diff_inh_m = self.diff_inh_m[:, mdl_i]
             diff_exc_m = self.diff_exc_m[:, mdl_i]
         
