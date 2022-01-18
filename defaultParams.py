@@ -7,7 +7,7 @@ import matplotlib.pylab as pl
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 1
+n_cores = 4
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -48,7 +48,7 @@ Be_rng = np.array([0.55])
 Bi_rng = np.array([-0.3])
 
 Be_ca3 = 0.03
-Bi_ca3 = 0#-0.3
+Bi_ca3 = -0.3
 EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
 
 # background and stimulus conductances (nS)
@@ -101,7 +101,7 @@ Tstim = 1000.
 
 # number of trials
 Ntrials = 10
-rng_conn = np.arange(1, 10.1).astype(int)
+#rng_conn = np.arange(1, 10.1).astype(int)
 # -- network params
 
 # fraction of Inh neurons

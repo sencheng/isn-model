@@ -26,11 +26,14 @@ def _read_data(reg, be, bi, res_path):
                 sim_res[nn_stim][2][tr] = copy.copy(tmp_out[nn_stim][2][tr])
     return sim_res
 
-def _remove_data(res_path):
+def _remove_data(reg, res_path):
     for be in Be_rng:
         for bi in Bi_rng:
             for rng_c in C_rng:
-                sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}_Mo{:d}'.format(be, bi, rng_c)
+                if reg == 'ca3':
+                    sim_name = 'sim_res_{}_Be{:.2f}_Bi{:.2f}_Mo{:d}'.format(reg, be, bi, rng_c)
+                else:
+                    sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}_Mo{:d}'.format(be, bi, rng_c)
                 if os.path.exists(os.path.join(res_path, sim_name)):
                     print('\nDeleting {} ...'.format(sim_name))                    
                     os.remove(os.path.join(res_path, sim_name))
@@ -62,4 +65,4 @@ for reg in ['ca3']:
                 print('\nWriting {}'.format(sim_name))
                 with open(os.path.join(res_path, sim_name), 'wb') as fl:
                     pickle.dump(data, fl)
-        _remove_data(res_path)
+        #_remove_data(reg, res_path)

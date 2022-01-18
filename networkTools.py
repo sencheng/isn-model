@@ -12,7 +12,7 @@ import nest
 def _nest_start_(n_cores=n_cores):
     nest.ResetKernel()
     nest.SetKernelStatus({"resolution": dt,
-                        "print_time": True,
+                        "print_time": False,
                         "overwrite_files": True,
                         'local_num_threads': n_cores})
     nest.set_verbosity("M_WARNING")
