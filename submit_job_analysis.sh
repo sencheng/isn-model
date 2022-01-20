@@ -17,4 +17,4 @@ source /home/mohagmnr/projects/5HT2A/packages/nest-install/bin/nest_vars.sh
 
 echo "running simulation for task ID ${SLURM_ARRAY_TASK_ID}"
     
-python figureNumInput_hpc.py ${SLURM_ARRAY_TASK_ID} 1
+python figureNumInput_hpc.py ${SLURM_ARRAY_TASK_ID} 2

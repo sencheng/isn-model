@@ -17,7 +17,7 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
-sim_suffix = "-ISCA3ISN-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
+sim_suffix = "-NONISN-CA3CPfac{:.1f}-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
 data_dir = "./"#"/local2/mohammad/data/5HT2A"
 fig_dir  = data_dir
 
@@ -48,7 +48,7 @@ Be_rng = np.array([0.55])
 Bi_rng = np.array([-0.3])
 
 Be_ca3 = 0.03
-Bi_ca3 = -0.3
+Bi_ca3 = 0.#-0.3
 EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
 
 # background and stimulus conductances (nS)
@@ -100,7 +100,7 @@ Tblank= 1000.
 Tstim = 1000.
 
 # number of trials
-Ntrials = 10
+Ntrials = 2
 #rng_conn = np.arange(1, 10.1).astype(int)
 # -- network params
 

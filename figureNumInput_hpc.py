@@ -581,6 +581,7 @@ if __name__=='__main__':
     #fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
     E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
     bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
+    CA3_CP_comb = CA3_CP_comb.flatten()[job_id::num_jobs]
     
     for ij1 in range(EE_probchg_comb.size):
         '''
@@ -597,5 +598,5 @@ if __name__=='__main__':
             else:
                 fig_ca = 'ca1'
         
-            sim_suffix = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])                    
-            run_for_each_parset(sim_suffix, file_name, fig_ca)
+            sim_suffix_comp = sim_suffix.format(CA3_CP_comb[ij1], extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+            run_for_each_parset(sim_suffix_comp, file_name, fig_ca)
