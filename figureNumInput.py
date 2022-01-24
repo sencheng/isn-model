@@ -886,10 +886,13 @@ class simdata():
     def plot_frdiffmean_dist(self, ax, pert_num, num_bins=20):
         
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
-        
-        c_inh, e_inh = np.histogram(self.diff_inh_m, num_bins)
+        dim_not_nan = self.diff_inh_m[np.logical_not(np.isnan(self.diff_inh_m))]
+        c_inh, e_inh = np.histogram(self.diff_inh_m, num_bins,
+                                    range=(dim_not_nan.min(), dim_not_nan.max()))
         e_inh = (e_inh[0:-1]+e_inh[1:])/2
-        c_exc, e_exc = np.histogram(self.diff_exc_m, num_bins)
+        dem_not_nan = self.diff_exc_m[np.logical_not(np.isnan(self.diff_exc_m))]
+        c_exc, e_exc = np.histogram(self.diff_exc_m, num_bins,
+                                    range=(dem_not_nan.min(), dem_not_nan.max()))
         e_exc = (e_exc[0:-1]+e_exc[1:])/2
         
         if hasattr(self, 'diff_inh_pv'):
