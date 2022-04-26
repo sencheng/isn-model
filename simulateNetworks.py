@@ -298,12 +298,12 @@ for ij1 in range(Be_rng_comb.size):
     
     res_path = os.path.join(data_dir, res_dir+sim_suffix_comp)
     if not os.path.exists(res_path): os.makedirs(res_path, exist_ok=True)
-    os.chdir(res_path);
+    #os.chdir(res_path);
     sim_name = 'sim_res_Be{:.2f}_Bi{:.2f}_Mo{}'.format(Be, Bi, rng_c)
-    fl = open(sim_name, 'wb'); pickle.dump(sim_res, fl); fl.close()
+    fl = open(os.path.join(res_path, sim_name), 'wb'); pickle.dump(sim_res, fl); fl.close()
     
     sim_name = 'sim_res_ca3_Be{:.2f}_Bi{:.2f}_Mo{}'.format(Be, Bi, rng_c)
-    fl = open(sim_name, 'wb'); pickle.dump(sim_res_ca3, fl); fl.close()
+    fl = open(os.path.join(res_path, sim_name), 'wb'); pickle.dump(sim_res_ca3, fl); fl.close()
 
 t_end = time.time()
 print('took: ', np.round((t_end-t_init)/60), ' mins')
