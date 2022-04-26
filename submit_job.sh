@@ -1,20 +1,18 @@
-#!/bin/bash -l
-#SBATCH -J ISN # A single job name for the array
-#SBATCH -n 4 # Number of cores
-#SBATCH -N 1 # All cores on one Node
-#SBATCH --mem 10000 # Memory request
-#SBATCH -t 1-00:00 # Maximum execution time (D-HH:MM)
-#SBATCH -o ./job_files/ISN_%A_%a.out # Standard output
-#SBATCH -e ./job_files/ISN_%A_%a.err # Standard error
-#SBATCH --mail-type FAIL
-#SBATCH --mail-user m.mohagheghi@ini.rub.de
+#!/bin/bash
+#SBATCH -N 1
+#SBATCH -J ISN
+#SBATCH -A hpc-prf-c+ # Account
+#SBATCH -p short # Partition: short, batch, long
+#SBATCH -t 00:30:00 # Walltime
+#SBATCH --mail-type all #FAIL
+#SBATCH --mail-user mohammadreza.mohagheghinejad@rub.de
 
 # Load necessary modules
-module restore 5HT2A
+module restore ISN
 
 # Set NEST paths
-source /home/mohagmnr/projects/5HT2A/packages/nest-install/bin/nest_vars.sh
+source /upb/departments/pc2/users/c/clbbs001/ISN/packages/nest-install/bin/nest_vars.sh
 
 echo "running simulation for task ID ${SLURM_ARRAY_TASK_ID}"
     
-python simulateNetworks.py ${SLURM_ARRAY_TASK_ID} 8
+./run_multiple_sims.sh 40
