@@ -7,18 +7,13 @@ import matplotlib.pylab as pl
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 8
-
-# define the NEST path if it's needed
-nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
-if os.path.exists(nest_path):
-    sys.path.append(nest_path)
+n_cores = 1
     
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_dir = "/local2/mohammad/data/ISN/CA3-ISNTest"
+data_dir = "/local2/mohammad/data/ISN/CA3-ISNTest/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -92,15 +87,15 @@ r_bkg_ca1 = 7000
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 1000
+Ttrans = 1000.
 # simulation time before perturbation (ms)
 Tblank= 1000.
 # simulation time of and after perturbation (ms)
 Tstim = 1000.
 
 # number of trials
-Ntrials = 1
-#rng_conn = np.arange(1, 10.1).astype(int)
+Ntrials = 5
+
 # -- network params
 
 # fraction of Inh neurons
