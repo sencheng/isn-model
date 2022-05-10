@@ -57,7 +57,7 @@ def _set_rate_(neurons, rates):
         nest.SetStatus([nn], {'rate':rates[ii]})
 
 # --- Setting the rates of background inputs and conencting them
-def _bkg_inp_(neurons, bkg_rates, bkg_w = Be*1e9):
+def _bkg_inp_(neurons, bkg_rates, bkg_w = Be_bkg*1e9):
     N = len(neurons)
     bkg_inp = nest.Create("poisson_generator", N)
     for ii in range(N):
@@ -73,7 +73,7 @@ def _copy_to_parrots_(pre_pop):
     return parrots
 
 # --- Defining synapse types
-def _define_synapse_(syn_type='static_synapse', name='exc', w=Be*1e9, d=delay_default):
+def _define_synapse_(syn_type='static_synapse', name='exc', w=Be_bkg*1e9, d=delay_default):
     nest.CopyModel(syn_type, name, {"weight":w, "delay":d})
 
 # --- Recording and reading spikes and voltages

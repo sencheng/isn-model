@@ -7,7 +7,7 @@ import matplotlib.pylab as pl
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 4
+n_cores = 8
 
 # define the NEST path if it's needed
 nest_path = '/Users/sadra/NEST/nest/ins/lib/python3.4/site-packages/'
@@ -17,8 +17,8 @@ if os.path.exists(nest_path):
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
-sim_suffix = "-NONISN-CA3CPfac{:.1f}-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_dir = "./"#"/local2/mohammad/data/5HT2A"
+sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
+data_dir = "/local2/mohammad/data/ISN/CA3-ISNTest"
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -38,18 +38,17 @@ Ureset = -60.e-3
 C = 120e-12
 # leak conductance (S)
 Gl = 1./140e6
-# sample Exc and Inh conductances (nS)
-Be, Bi = .1, -.2
 
-# range of Exc and Inh conductances (nS)
-#Be_rng = np.array([0.01, .05, .1, .15, .2, .25])
-#Be_rng = np.arange(0.1, .81, 0.1)
+# Connections parameters
+
 Be_rng = np.array([0.55])
 Bi_rng = np.array([-0.3])
+p_conn_EE = 0.14#np.array([0.9])
+p_conn_EI = 0.45#np.array([3.0])
 
 Be_ca3 = 0.03
-Bi_ca3 = 0.#-0.3
-EE3_prob_chg_factor, EI3_prob_chg_factor = 2.6, 1.0
+Bi_ca3 = -0.3
+p_conn_EE3, p_conn_EI3 = 0.4, 0.15
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -100,7 +99,7 @@ Tblank= 1000.
 Tstim = 1000.
 
 # number of trials
-Ntrials = 2
+Ntrials = 1
 #rng_conn = np.arange(1, 10.1).astype(int)
 # -- network params
 
