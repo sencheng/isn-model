@@ -13,7 +13,7 @@ n_cores = 1
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_dir = "/local2/mohammad/data/ISN/CA3-ISNTest/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+data_dir = "./"#"/local2/mohammad/data/ISN/CA3-ISNTest/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 fig_dir  = data_dir
 
 #------------- neuron params
