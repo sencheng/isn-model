@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 from imp import reload
 import defaultParams; reload(defaultParams); from defaultParams import *
 import searchParams; reload(searchParams); from searchParams import *
+from mpl_toolkits.axes_grid1.inset_locator import inset_axes
 from analysis import simdata
 
 def create_fig_subdir(path, dir_name):
@@ -59,19 +60,57 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
     sim_name = file_name.format(Be_rng[0], Bi_rng[0])
     print('Reading {} ...\n'.format(sim_name))
     analyze = simdata(os.path.join(data_dir, res_dir + sim_suffix, sim_name))
-    fr_exc, fr_inh = analyze.get_fr(nn_stim_rng[0], analyze.base_interval)
+    fr_exc, fr_inh = analyze.get_fr(nn_stim_rng[0], analyze.stim_interval)
     return [fr_exc.max(), fr_exc.mean(axis=1).max(), fr_exc.mean()],\
            [fr_inh.max(), fr_inh.mean(axis=1).max(), fr_inh.mean()]
            
-def plot(exc, inh, x, y, ax, fig):
+def plot_all(exc, inh, x, y, ax, fig):
     
     for c in range(len(exc)):
+        ax[0, c].set_aspect("equal")
         p = ax[0, c].pcolor(x, y, exc[c].reshape(x.size, y.size),
                             vmin=exc[c].min(), vmax=exc[c].max())
-        fig.colorbar(p, ax=ax[0, c])
+        axins = inset_axes(ax[0, c],
+                   width="5%",  # width = 5% of parent_bbox width
+                   height="100%",  # height : 50%
+                   loc='lower left',
+                   bbox_to_anchor=(1.05, 0., 1, 1),
+                   bbox_transform=ax[0, c].transAxes,
+                   borderpad=0)
+        cbar = fig.colorbar(p, cax=axins)
+        if c == len(exc)-1:
+            cbar.set_label("Firing rate (spk/s)", rotation=270, labelpad=10)
+        ax[0, c].set_yticks(y[::2])
+        ax[1, c].set_aspect("equal")
         p = ax[1, c].pcolor(x, y, inh[c].reshape(x.size, y.size),
                             vmin=inh[c].min(), vmax=inh[c].max())
-        fig.colorbar(p, ax=ax[1, c])
+        axins = inset_axes(ax[1, c],
+                   width="5%",  # width = 5% of parent_bbox width
+                   height="100%",  # height : 50%
+                   loc='lower left',
+                   bbox_to_anchor=(1.05, 0., 1, 1),
+                   bbox_transform=ax[1, c].transAxes,
+                   borderpad=0)
+        cbar = fig.colorbar(p, cax=axins)
+        if c == len(exc)-1:
+            cbar.set_label("Firing rate (spk/s)", rotation=270, labelpad=15)
+            
+def plot_one(exc, x, y, ax, fig):
+    ax.set_aspect("equal")
+    p = ax.pcolor(x, y, exc.reshape(x.size, y.size),
+                  vmin=exc.min(), vmax=exc.max())
+    axins = inset_axes(ax,
+               width="5%",  # width = 5% of parent_bbox width
+               height="100%",  # height : 50%
+               loc='lower left',
+               bbox_to_anchor=(1.05, 0., 1, 1),
+               bbox_transform=ax.transAxes,
+               borderpad=0)
+    cbar = fig.colorbar(p, cax=axins)
+    cbar.set_label("Firing rate (spk/s)", rotation=270, labelpad=10)
+    ax.set_yticks(y[::2])
+    
+    
 if __name__=='__main__':
     
     fig_path = os.path.join(fig_dir, fig_initial+sim_suffix)
@@ -90,6 +129,21 @@ if __name__=='__main__':
     fr_meanmax_i = np.zeros(EE_probchg_comb.size)
     fr_mean_e = np.zeros(EE_probchg_comb.size)
     fr_mean_i = np.zeros(EE_probchg_comb.size)
+    fig_ca = 'ca3'
+    file_name = file_names[0]
+    for ij1 in range(EE_probchg_comb.size):
+        # sim_suffix_comp = sim_suffix.format(CA3_CP_comb[ij1], extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+        sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+        frs_e, frs_i = run_for_each_parset(sim_suffix_comp, file_name, fig_ca)
+        fr_max_e[ij1], fr_meanmax_e[ij1], fr_mean_e[ij1] = frs_e
+        fr_max_i[ij1], fr_meanmax_i[ij1], fr_mean_i[ij1] = frs_i
+    fig, ax = plt.subplots(nrows=1, ncols=1, figsize=(2, 2))
+    fig.tight_layout()
+    plot_one(fr_mean_e, EEconn_chg_factor, EIconn_chg_factor, ax, fig)
+    ax.set_xlabel(r"$E\rightarrow E$ connection probability factor")
+    ax.set_ylabel(r"$I\rightarrow E$ connection probability factor")
+    fig.savefig(fig_ca+'.pdf', bbox_inches='tight')
+    """
     for file_name in file_names:  
         print('sim_suf={}'.format(file_name))        
         if 'ca3' in file_name:
@@ -102,9 +156,16 @@ if __name__=='__main__':
             frs_e, frs_i = run_for_each_parset(sim_suffix_comp, file_name, fig_ca)
             fr_max_e[ij1], fr_meanmax_e[ij1], fr_mean_e[ij1] = frs_e
             fr_max_i[ij1], fr_meanmax_i[ij1], fr_mean_i[ij1] = frs_i
-        fig, ax = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+        fig, ax = plt.subplots(nrows=1, ncols=3, sharex=True, sharey=True,
+                               figsize=(6, 4),
+                               gridspec_kw={'wspace': 0.4, 'hspace': 0.01})
+        fig.tight_layout()
         plot((fr_max_e, fr_meanmax_e, fr_mean_e),
              (fr_max_i, fr_meanmax_i, fr_mean_i),
              EEconn_chg_factor, 
              EIconn_chg_factor,
              ax, fig)
+        ax[-1, 1].set_xlabel(r"$E\rightarrow E$ connection probability factor")
+        ax[0, 0].set_ylabel(r"$I\rightarrow E$ connection probability factor")
+        fig.savefig(fig_ca+'.pdf')
+        """
