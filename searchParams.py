@@ -8,8 +8,8 @@ from defaultParams import *
 
 fr_chg_factor = np.array([1])#np.arange(0.5, 1, .1)
 E_extra_stim_factor = np.array([1.0])#np.arange(0.2, 0.3, 0.2)#np.array([0.8])
-EEconn_chg_factor = np.arange(1.5, 1.51, 0.25)# np.arange(1.2, 2.1, 0.2)#np.array([0.9])
-EIconn_chg_factor = np.arange(1.5, 1.51, 0.25)#np.arange(0.6, 3, 0.2)#np.array([2.0])
+EEconn_chg_factor = np.arange(.1, 1.11, 0.1)# np.arange(1.2, 2.1, 0.2)#np.array([0.9])
+EIconn_chg_factor = np.array([0.0])#np.arange(.1, 1.01, 0.1)#np.arange(0.6, 3, 0.2)#np.array([2.0])
 IIconn_chg_factor = np.arange(1, 1.1, 0.2)
 # CA3_conn_prob_fac = np.array([0.7, 0.3])
 bkg_chg_factor    = np.array([1.])#np.arange(1.05, 1.11, 0.05)
