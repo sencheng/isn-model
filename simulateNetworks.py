@@ -158,9 +158,9 @@ def myRun(rr1, rr2, Tstim=Tstim, Tblank=Tblank, Ntrials=Ntrials, bw = bw, \
         SPD_ca3[tri] = net_tools._reading_spikes_(spikes_all_ca3, min(ca3_neurons))
         
         # -- reading out currents
-        if rec_from_cond:
+        # if rec_from_cond:
             # curr = net_tools._reading_currents_(currents_all)
-            CURR[tri] = net_tools._reading_currents_(currents_all)
+        #    CURR[tri] = net_tools._reading_currents_(currents_all)
         '''
         # -- computes the rates out of spike data in a given time interval
         def _rate_interval_(spikedata, T1, T2, bw=bw):
@@ -259,8 +259,8 @@ for ij1 in range(Be_rng_comb.size):
         W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
         W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
         
-        W_E3toE =  _mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
-        W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
+        W_E3toE =  np.zeros((NE, NE))#_mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
+        W_E3toI =  np.zeros((NE, NI))#_mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
         
         np.random.seed(100)
         r_extra = np.zeros(N+N)
@@ -269,8 +269,12 @@ for ij1 in range(Be_rng_comb.size):
             r_extra[N+0:N+NE] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NE)
             r_extra[N+NE:N+NE+NI] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NI)
         else:
-            r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
-            r_extra[N+NE:N+NE+nn_stim] = r_stim
+            if pert_pop == 'ca1':
+                r_extra[0:int(NE*nn_stim/NI)] = r_stim
+                r_extra[NE:NE+nn_stim] = r_stim
+            else:
+                r_extra[N:N+int(NE*nn_stim/NI)] = r_stim
+                r_extra[N+NE:N+NE+nn_stim] = r_stim
 
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),

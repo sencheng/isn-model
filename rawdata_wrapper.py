@@ -40,7 +40,7 @@ def _remove_data(reg, res_path):
                 else:
                   print("The file does not exist")
                 
-Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb, C_rng_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor, C_rng)
+Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor)
 # Be_rng_comb, Bi_rng_comb, EE_probchg_comb, EI_probchg_comb, II_condchg_comb, E_extra_comb, bkg_chg_comb, CA3_CP_comb = np.meshgrid(Be_rng, Bi_rng, EEconn_chg_factor, EIconn_chg_factor, IIconn_chg_factor, E_extra_stim_factor, bkg_chg_factor, CA3_conn_prob_fac)
 
 Be_rng_comb = Be_rng_comb.flatten()
@@ -50,7 +50,7 @@ EI_probchg_comb = EI_probchg_comb.flatten()
 II_condchg_comb = II_condchg_comb.flatten()
 E_extra_comb = E_extra_comb.flatten()
 bkg_chg_comb = bkg_chg_comb.flatten()
-C_rng_comb = C_rng_comb.flatten()
+# C_rng_comb = C_rng_comb.flatten()
 # CA3_CP_comb = CA3_CP_comb.flatten()
 
 for reg in ['ca1', 'ca3']:

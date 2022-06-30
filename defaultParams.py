@@ -14,7 +14,7 @@ n_cores = 1
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_dir = "/local2/mohammad/data/ISN/CA3-ISNTest-cond/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+data_dir = "/local2/mohammad/data/ISN/CA1-both-photoinhibition-Fig1-exp-CA3included/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -37,8 +37,8 @@ Gl = 1./140e6
 
 # Connections parameters
 
-Be_rng = np.array([0.0])#np.array([0.55])
-Bi_rng = np.array([0.0])#np.array([-0.3])
+Be_rng = np.array([0.55])
+Bi_rng = np.array([-0.3])
 p_conn_EE = 0.14#np.array([0.9])
 p_conn_EI = 0.45#np.array([3.0])
 
@@ -88,11 +88,11 @@ r_bkg_ca1 = 7000
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 100.
+Ttrans = 1000.
 # simulation time before perturbation (ms)
-Tblank= 1500.
+Tblank= 1000.
 # simulation time of and after perturbation (ms)
-Tstim = 100.
+Tstim = 1000.
 
 # number of trials
 Ntrials = 5
@@ -109,10 +109,12 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([0.0])*NI).astype('int')
-#nn_stim_rng = (np.array([0.05, 0.1, 0.15, 0.2, .25])*NI).astype('int')
+#nn_stim_rng = (np.array([0.0])*NI).astype('int')nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
+#nn_stim_rng = (np.array([0.1, 0.2, 0.25, 0.3, .5])*NI).astype('int')
+nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
+pert_pop = 'ca1'
 
 # record from conductances?
 rec_from_cond = False

@@ -4,7 +4,7 @@ log_dir="LOG"
 #rm -r $log_dir
 mkdir $log_dir
 
-for sim in {0..3}
+for sim in {0..4}
 do
     echo $sim
     rm "$log_dir/$sim.log" "$log_dir/$sim.err"

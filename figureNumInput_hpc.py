@@ -137,7 +137,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             fig_dist_mean_pert, ax_dist_mean_pert = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
                                                        sharex=False, sharey=True, figsize=(10, 4))
             fig_dist_mean_pert_line, ax_dist_mean_pert_line = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
-                                                       sharex=False, sharey=True, figsize=(10, 4))
+                                                       sharex=False, sharey=True)#, figsize=(10, 4))
             fig_dist_mean_sample, ax_dist_mean_sample = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
                                                                      sharex=True, sharey=True, figsize=(6, 3))
             fig_dist_g, ax_dist_g = plt.subplots(nrows=1, ncols=nn_stim_rng.size,
@@ -573,7 +573,7 @@ if __name__=='__main__':
         job_id = int(sys.argv[1])
         num_jobs = int(sys.argv[2])
         
-    file_names = ['sim_res_ca3_Be{:.2f}_Bi{:.2f}', 'sim_res_Be{:.2f}_Bi{:.2f}']
+    file_names = ['sim_res_Be{:.2f}_Bi{:.2f}', 'sim_res_ca3_Be{:.2f}_Bi{:.2f}']
     
     EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
     EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]

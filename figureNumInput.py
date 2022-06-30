@@ -989,8 +989,12 @@ class simdata():
             inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
             exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
         elif fig_ca == 'ca1':
-            inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
-            exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()
+            if pert_pop == 'ca1':
+                inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+                exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
+            else:
+                inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
+                exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()
         
         inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
         num_neurons = (NI*self.num_models, NI*self.num_models, NE*self.num_models, NE*self.num_models)
@@ -1009,7 +1013,7 @@ class simdata():
         c_inh_exc = []
         
         for i, c in enumerate(inh_exc):
-            if fig_ca=='ca1':
+            if (fig_ca=='ca1') & (pert_pop!='ca1'):
                 if c.size > 0:
                     c_inh_exc.append(np.histogram(c, edges)[0]/num_neurons[i])
                 else:
