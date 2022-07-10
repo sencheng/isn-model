@@ -56,7 +56,7 @@ def to_square_plots(ax):
 
 def run_for_each_parset(sim_suffix, file_name, fig_ca):
     cwd = os.getcwd()
-    fig_path = os.path.join(fig_dir, fig_dir+sim_suffix, fig_ca)
+    fig_path = os.path.join(fig_dir, fig_dir+fig_initial+sim_suffix, fig_ca)
     os.makedirs(fig_path, exist_ok=True)
     
     cv_e = np.zeros((Be_rng.size, Bi_rng.size, nn_stim_rng.size, 3))
@@ -119,7 +119,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         
         for ij2, Bi in enumerate(Bi_rng):
             
-            os.chdir(os.path.join(cwd, res_dir + sim_suffix))
+            os.chdir(os.path.join(data_dir, res_dir + sim_suffix))
             sim_name = file_name.format(Be, Bi)
             print('Reading {} ...\n'.format(sim_name))
             # fl = open(sim_name, 'rb'); sim_res = pickle.load(fl); fl.close()
@@ -581,7 +581,7 @@ if __name__=='__main__':
     #fr_chg_comb = fr_chg_comb.flatten()[job_id::num_jobs]
     E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
     bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
-    CA3_CP_comb = CA3_CP_comb.flatten()[job_id::num_jobs]
+    # CA3_CP_comb = CA3_CP_comb.flatten()[job_id::num_jobs]
     
     for ij1 in range(EE_probchg_comb.size):
         '''
@@ -598,5 +598,7 @@ if __name__=='__main__':
             else:
                 fig_ca = 'ca1'
         
-            sim_suffix_comp = sim_suffix.format(CA3_CP_comb[ij1], extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+            # sim_suffix_comp = sim_suffix.format(CA3_CP_comb[ij1], extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+            sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+
             run_for_each_parset(sim_suffix_comp, file_name, fig_ca)

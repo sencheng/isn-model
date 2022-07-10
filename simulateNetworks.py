@@ -216,17 +216,17 @@ EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
 EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
 II_condchg_comb = II_condchg_comb.flatten()[job_id::num_jobs]
 E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
-bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
+bkg_chg_comb = bkg_chg_comb.flatten()[job_id:num_jobs]
 C_rng_comb = C_rng_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
     
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
-    Bee, Bei = Be, Be
-    Bie, Bii = Bi, Bi
+    Bee, Bei = Be*EI_probchg_comb[ij1], Be*EI_probchg_comb[ij1] #Be*EE_probchg_comb[ij1], Be*EI_probchg_comb[ij1]
+    Bie, Bii = Bi, Bi#*EE_probchg_comb[ij1], Bi*EE_probchg_comb[ij1]#Bi*EI_probchg_comb[ij1], Bi*EI_probchg_comb[ij1]
 
-    Bee_ca3, Bei_ca3 = Be_ca3*EE_probchg_comb[ij1], Be_ca3*EI_probchg_comb[ij1]
-    Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3
+    Bee_ca3, Bei_ca3 = Be_ca3*EE_probchg_comb[ij1], Be_ca3*EE_probchg_comb[ij1]#Be_ca3*EE_probchg_comb[ij1], Be_ca3*EI_probchg_comb[ij1]
+    Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3#*EE_probchg_comb[ij1], Bi_ca3*EE_probchg_comb[ij1]
     sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
@@ -270,6 +270,8 @@ for ij1 in range(Be_rng_comb.size):
         else:
             r_extra[N+0:N+int(NE*nn_stim/NI)] = r_stim
             r_extra[N+NE:N+NE+nn_stim] = r_stim
+            #r_extra[0:int(NE*nn_stim/NI)] = r_stim
+            #r_extra[NE:NE+nn_stim] = r_stim
 
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),

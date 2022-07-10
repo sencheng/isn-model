@@ -4,16 +4,23 @@
 
 import numpy as np; import time, sys, os
 import matplotlib.pylab as pl
+from matplotlib import rc
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 1
-
+n_cores = 40
+check_isn_in_ca = False#'ca1'
+inh = True
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_dir = "/scratch/hpc-prf-clbbs/CA3-ISNTest-cond"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+if check_isn_in_ca == 'ca1':
+    data_dir = "/scratch/hpc-prf-clbbs/CA1-BalTest-conn"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+elif check_isn_in_ca == 'ca3':
+    data_dir = "/scratch/hpc-prf-clbbs/CA3-BalTest-conn"
+else:
+    data_dir = "/scratch/hpc-prf-clbbs/CA3-CA1-cond-investigation/up-down-scale-e/verylong-simulation/"
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -36,13 +43,29 @@ Gl = 1./140e6
 
 # Connections parameters
 
-Be_rng = np.array([0.])#np.array([0.55])
-Bi_rng = np.array([0.])#np.array([-0.3])
+if check_isn_in_ca == 'ca1':
+    Be_rng = np.array([0.55])
+    if inh:
+        Bi_rng = np.array([-0.3])
+    else:
+        Bi_rng = np.array([0.0])
+elif check_isn_in_ca == 'ca3':
+    Be_rng = np.array([0.])
+    Bi_rng = np.array([0.])
+else:
+    Be_rng = np.array([0.55])#np.arange(0.1, 0.55, 0.1)
+    Bi_rng = np.array([-0.3])
+
 p_conn_EE = 0.14#np.array([0.9])
 p_conn_EI = 0.45#np.array([3.0])
 
+
 Be_ca3 = 0.03
 Bi_ca3 = -0.3
+if (check_isn_in_ca == 'ca3') & inh:
+    Bi_ca3 = -0.3
+elif (check_isn_in_ca == 'ca3') & (not inh):
+    Bi_ca3 = 0.0
 p_conn_EE3, p_conn_EI3 = 0.4, 0.15
 
 # background and stimulus conductances (nS)
@@ -87,15 +110,15 @@ r_bkg_ca1 = 7000
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 100.
+Ttrans = 10000.
 # simulation time before perturbation (ms)
-Tblank= 1500.
+Tblank= 1000.
 # simulation time of and after perturbation (ms)
-Tstim = 100.
+Tstim = 1000.
 
 # number of trials
-Ntrials = 5
-#rng_conn = np.arange(1, 10.1).astype(int)
+Ntrials = 20
+
 # -- network params
 
 # fraction of Inh neurons
@@ -108,8 +131,8 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([0.0])*NI).astype('int')
-#nn_stim_rng = (np.array([0.05, 0.1, 0.15, 0.2, .25])*NI).astype('int')
+#nn_stim_rng = (np.array([0.0])*NI).astype('int')
+nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
@@ -122,7 +145,7 @@ het_pert = False
 # perform significance test on 
 significance_test = False
 
-SIZE = 12
+SIZE = 8
 pl.rc('font', size=SIZE)  # controls default text sizes
 pl.rc('axes', titlesize=SIZE)  # fontsize of the axes title
 pl.rc('axes', labelsize=SIZE)  # fontsize of the x and y labels
@@ -130,6 +153,7 @@ pl.rc('xtick', labelsize=SIZE)  # fontsize of the tick labels
 pl.rc('ytick', labelsize=SIZE)  # fontsize of the tick labels
 pl.rc('legend', fontsize=SIZE)  # legend fontsize
 pl.rc('figure', titlesize=SIZE)  # fontsize of the figure title
+rc('font',**{'family':'serif','serif':['Arial']})
 
 # half-frame axes
 def HalfFrame(ax):
