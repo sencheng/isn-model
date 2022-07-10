@@ -3,10 +3,11 @@
 log_dir="LOG"
 #rm -r $log_dir
 mkdir $log_dir
-
-for sim in {0..4}
-do
-    echo $sim
-    rm "$log_dir/$sim.log" "$log_dir/$sim.err"
-    python simulateNetworks.py $sim $1>"$log_dir/$sim.log" 2>"$log_dir/$sim.err" &
-done
+LO_BND=$(($1-1))
+UP_BND=$(($2-1))
+for (( sim=$LO_BND; sim<=$UP_BND; sim++))
+    do
+        echo $sim
+        rm "$log_dir/$sim.out" "$log_dir/$sim.err"
+        python simulateNetworks.py $sim $3>"$log_dir/$sim.out" 2>"$log_dir/$sim.err" &
+    done

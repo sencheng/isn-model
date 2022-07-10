@@ -248,11 +248,11 @@ class simdata():
             
         # edges = np.arange(st_time, st_time+self.Tstim+self.Ttrans+self.Tblank)
         
-        fr_e = np.histogram(exc_times, edges)[0]/exc_num*c_factor
-        fr_i = np.histogram(inh_times, edges)[0]/inh_num*c_factor
+        fr_e = np.histogram(exc_times, edges)[0]/exc_num*c_factor/np.diff(edges)[0]
+        fr_i = np.histogram(inh_times, edges)[0]/inh_num*c_factor/np.diff(edges)[0]
         
-        fr_e = self.smooth(fr_e)
-        fr_i = self.smooth(fr_i)
+        fr_e = self.smooth(fr_e, win_size=10)
+        fr_i = self.smooth(fr_i, win_size=10)
         
         return fr_e, fr_i
     
@@ -446,7 +446,7 @@ class simdata():
         if not hasattr(self, 'st_tr_time'):
             self.get_trial_times()
             
-        bin_size = 1
+        bin_size = 10
         T_edges_def = np.arange(interval[0],
                                 interval[1],
                                 bin_size)

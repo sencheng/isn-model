@@ -216,19 +216,18 @@ EE_probchg_comb = EE_probchg_comb.flatten()[job_id::num_jobs]
 EI_probchg_comb = EI_probchg_comb.flatten()[job_id::num_jobs]
 II_condchg_comb = II_condchg_comb.flatten()[job_id::num_jobs]
 E_extra_comb = E_extra_comb.flatten()[job_id::num_jobs]
-bkg_chg_comb = bkg_chg_comb.flatten()[job_id::num_jobs]
+bkg_chg_comb = bkg_chg_comb.flatten()[job_id:num_jobs]
 C_rng_comb = C_rng_comb.flatten()[job_id::num_jobs]
 
 for ij1 in range(Be_rng_comb.size):
     
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
-    Bee, Bei = Be, Be
-    Bie, Bii = Bi, Bi
+    Bee, Bei = Be*EI_probchg_comb[ij1], Be*EI_probchg_comb[ij1] #Be*EE_probchg_comb[ij1], Be*EI_probchg_comb[ij1]
+    Bie, Bii = Bi, Bi#*EE_probchg_comb[ij1], Bi*EE_probchg_comb[ij1]#Bi*EI_probchg_comb[ij1], Bi*EI_probchg_comb[ij1]
 
-    Bee_ca3, Bei_ca3 = Be_ca3, Be_ca3
-    Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3
+    Bee_ca3, Bei_ca3 = Be_ca3*EE_probchg_comb[ij1], Be_ca3*EE_probchg_comb[ij1]#Be_ca3*EE_probchg_comb[ij1], Be_ca3*EI_probchg_comb[ij1]
+    Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3#*EE_probchg_comb[ij1], Bi_ca3*EE_probchg_comb[ij1]
     sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-
     print('####################')
     print('### (Be, Bi): ', Be, Bi)
     print('####################')
@@ -249,13 +248,13 @@ for ij1 in range(Be_rng_comb.size):
         np.random.seed(rng_c)
         # -- L23 recurrent connectivity
         p_conn = 0.15
-        W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn_EE3*EE_probchg_comb[ij1])
-        W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn_EI3*EI_probchg_comb[ij1])
+        W_EtoE_ca3 = _mycon_(NE, NE, Bee_ca3, Bee_ca3/5, p_conn_EE3)#*EE_probchg_comb[ij1])
+        W_EtoI_ca3 = _mycon_(NE, NI, Bei_ca3, Bei_ca3/5, p_conn_EI3)#*EI_probchg_comb[ij1])
         W_ItoE_ca3 = _mycon_(NI, NE, Bie_ca3, Bie_ca3/5, 1.)
         W_ItoI_ca3 = _mycon_(NI, NI, Bii_ca3, Bii_ca3/5, 1.)
         
-        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn_EE)
-        W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn_EI)
+        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn_EE)#*EE_probchg_comb[ij1])
+        W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn_EI)#*EI_probchg_comb[ij1])
         W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
         W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
         
