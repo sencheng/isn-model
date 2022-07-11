@@ -15,14 +15,13 @@ inh = True
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_main_path = "/local2/mohammad/data/ISN/" #"/scratch/hpc-prf-clbbs/"
-data_dir = "/local2/mohammad/data/ISN/CA1-both-photoinhibition-Fig1-exp-CA3included/"#"/scratch/hpc-prf-clbbs"#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+data_main_path = "/home/mohammad/Projects/ISN/inhibition-stabilized-network-of-spiking-neurons/"#"/local2/mohammad/data/ISN/" #"/scratch/hpc-prf-clbbs/"
 if check_isn_in_ca == 'ca1':
     data_dir = os.path.join(data_main_path, "CA1-BalTest-conn/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
     data_dir = os.path.join(data_main_path, "CA3-BalTest-conn/")
 else:
-    data_dir = os.path.join(data_main_path, "/CA3-CA1-cond-investigation/up-down-scale-e/verylong-simulation/")
+    data_dir = os.path.join(data_main_path, "longsim/")
 fig_dir  = data_dir
 
 #------------- neuron params
