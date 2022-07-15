@@ -8,20 +8,20 @@ from matplotlib import rc
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 40
+n_cores = 1
 check_isn_in_ca = False#'ca1'
 inh = True
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_main_path = "/home/mohammad/Projects/ISN/inhibition-stabilized-network-of-spiking-neurons/"#"/local2/mohammad/data/ISN/" #"/scratch/hpc-prf-clbbs/"
+data_main_path = "/scratch/hpc-prf-clbbs"
 if check_isn_in_ca == 'ca1':
     data_dir = os.path.join(data_main_path, "CA1-BalTest-conn/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
     data_dir = os.path.join(data_main_path, "CA3-BalTest-conn/")
 else:
-    data_dir = os.path.join(data_main_path, "longsim/")
+    data_dir = os.path.join(data_main_path, "CA3-CA1-cond-investigation/up-down-scale-e/")
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -111,7 +111,7 @@ r_bkg_ca1 = 7000
 r_stim = -400.
 
 # transitent time to discard the data (ms)
-Ttrans = 10000.
+Ttrans = 1000.
 # simulation time before perturbation (ms)
 Tblank= 1000.
 # simulation time of and after perturbation (ms)

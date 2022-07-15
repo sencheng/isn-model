@@ -93,7 +93,7 @@ class raster():
         else:
             self.trial_type = 'SingleSim'
             
-    def plot_by_trial(self, ax, n=100, interval=[9000, 12000]):
+    def plot_by_trial(self, ax, n=100, interval=[0, 3000]):
         sel_tr = np.random.choice(self.Ntrials+1)
         sel_ids = np.sort(np.random.choice(np.arange(1, self.N), n))
         for pert_idx, pert in enumerate(nn_stim_rng):

@@ -69,6 +69,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
     for ij1, Be in enumerate(BE):
         for ij2, Bi in enumerate(Bi_rng):
             os.chdir(os.path.join(data_dir, res_dir + sim_suffix))
+            print('Directory {}\n'.format(os.path.join(data_dir, res_dir + sim_suffix)))
             sim_name = file_name.format(Be, Bi)
             print('Reading {} ...\n'.format(sim_name))
             fig_raster_tr, ax_raster_tr = plt.subplots(ncols=1, nrows=nn_stim_rng.size,

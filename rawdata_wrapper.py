@@ -68,9 +68,9 @@ for reg in ['ca1', 'ca3']:
                 with open(os.path.join(res_path, sim_name), 'wb') as fl:
                     pickle.dump(data, fl)
         #_remove_data(reg, res_path)
-#for reg in ['ca1', 'ca3']:
-#    for ij1 in range(EE_probchg_comb.size):
-#        sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
-#        res_path = os.path.join(data_dir, res_dir+sim_suffix_comp)
-#        _remove_data(reg, res_path)
+for reg in ['ca1', 'ca3']:
+    for ij1 in range(EE_probchg_comb.size):
+        sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
+        res_path = os.path.join(data_dir, res_dir+sim_suffix_comp)
+        _remove_data(reg, res_path)
          
