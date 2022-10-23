@@ -9,19 +9,25 @@ import matplotlib
 
 ## the number of cores to be used for simulations
 n_cores = 1
-check_isn_in_ca = False#'ca1'
-inh = True
+
+# Often changed parameters
+check_isn_in_ca = 'ca1'
+inh = False
+Ntrials = 10
+pert_pop = 'ca3'
+ca1_e_coef = 0.4
+
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_main_path = "/scratch/hpc-prf-clbbs"
+data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations"
 if check_isn_in_ca == 'ca1':
-    data_dir = os.path.join(data_main_path, "CA1-BalTest-conn/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+    data_dir = os.path.join(data_main_path, "CA1-ISN-test/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
-    data_dir = os.path.join(data_main_path, "CA3-BalTest-conn/")
+    data_dir = os.path.join(data_main_path, "CA3-ISN-test/")
 else:
-    data_dir = os.path.join(data_main_path, "CA3-CA1-cond-investigation/up-down-scale-e/")
+    data_dir = os.path.join(data_main_path, "Concluding-Simulations/checkISN-CA1/")
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -45,7 +51,7 @@ Gl = 1./140e6
 # Connections parameters
 
 if check_isn_in_ca == 'ca1':
-    Be_rng = np.array([0.55])
+    Be_rng = np.array([0.55*ca1_e_coef])
     if inh:
         Bi_rng = np.array([-0.3])
     else:
@@ -54,7 +60,7 @@ elif check_isn_in_ca == 'ca3':
     Be_rng = np.array([0.])
     Bi_rng = np.array([0.])
 else:
-    Be_rng = np.array([0.55])#np.arange(0.1, 0.55, 0.1)
+    Be_rng = np.array([0.55*ca1_e_coef])#np.arange(0.1, 0.55, 0.1)
     Bi_rng = np.array([-0.3])
 
 p_conn_EE = 0.14#np.array([0.9])
@@ -108,17 +114,17 @@ dt = .1
 r_bkg = 10000.-400.
 r_bkg_ca1 = 7000
 # rate of perturbation (sp/s)
-r_stim = -400.
+if check_isn_in_ca in {'ca1', 'ca3'}:
+    r_stim = 0.0
+else:
+    r_stim = -400.
 
 # transitent time to discard the data (ms)
 Ttrans = 1000.
 # simulation time before perturbation (ms)
 Tblank= 1000.
 # simulation time of and after perturbation (ms)
-Tstim = 1000.
-
-# number of trials
-Ntrials = 20
+Tstim = 100.
 
 # -- network params
 
@@ -135,7 +141,6 @@ NE = N - NI
 nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
-pert_pop = 'ca1'
 
 # record from conductances?
 rec_from_cond = False

@@ -222,10 +222,10 @@ C_rng_comb = C_rng_comb.flatten()[job_id::num_jobs]
 for ij1 in range(Be_rng_comb.size):
     
     Be, Bi = Be_rng_comb[ij1], Bi_rng_comb[ij1]
-    Bee, Bei = Be*EI_probchg_comb[ij1], Be*EI_probchg_comb[ij1] #Be*EE_probchg_comb[ij1], Be*EI_probchg_comb[ij1]
-    Bie, Bii = Bi, Bi#*EE_probchg_comb[ij1], Bi*EE_probchg_comb[ij1]#Bi*EI_probchg_comb[ij1], Bi*EI_probchg_comb[ij1]
+    Bee, Bei = Be*EE_probchg_comb[ij1], Be*EE_probchg_comb[ij1] #Be*EI_probchg_comb[ij1], Be*EI_probchg_comb[ij1] #Be*EE_probchg_comb[ij1], Be*EI_probchg_comb[ij1]
+    Bie, Bii = Bi*EI_probchg_comb[ij1], Bi*EI_probchg_comb[ij1] #Bi*EE_probchg_comb[ij1], Bi*EE_probchg_comb[ij1]#Bi*EI_probchg_comb[ij1], Bi*EI_probchg_comb[ij1]
 
-    Bee_ca3, Bei_ca3 = Be_ca3*EE_probchg_comb[ij1], Be_ca3*EE_probchg_comb[ij1]#Be_ca3*EE_probchg_comb[ij1], Be_ca3*EI_probchg_comb[ij1]
+    Bee_ca3, Bei_ca3 = Be_ca3, Be_ca3#Be_ca3*EE_probchg_comb[ij1], Be_ca3*EI_probchg_comb[ij1]
     Bie_ca3, Bii_ca3 = Bi_ca3, Bi_ca3#*EE_probchg_comb[ij1], Bi_ca3*EE_probchg_comb[ij1]
     sim_suffix_comp = sim_suffix.format(extra_bkg_e, E3E1_cond_chg, Bi_ca3, Be_ca3, r_bkg_ca1, E_extra_comb[ij1], EE_probchg_comb[ij1], EI_probchg_comb[ij1])
     print('####################')
@@ -258,8 +258,8 @@ for ij1 in range(Be_rng_comb.size):
         W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
         W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
         
-        W_E3toE =  np.zeros((NE, NE))#_mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
-        W_E3toI =  np.zeros((NE, NI))#_mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
+        W_E3toE =  _mycon_(NE, NE, Be_bkg*E3E1_cond_chg, Be_bkg*E3E1_cond_chg/5, 0.05)
+        W_E3toI =  _mycon_(NE, NI, Be_bkg, Be_bkg/5, 0.05)
         
         np.random.seed(100)
         r_extra = np.zeros(N+N)
