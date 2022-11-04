@@ -269,10 +269,10 @@ for ij1 in range(Be_rng_comb.size):
             r_extra[N+NE:N+NE+NI] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NI)
         else:
             if pert_pop == 'ca1':
-                r_extra[0:int(NE*nn_stim/NI)] = r_stim
+                #r_extra[0:int(NE*nn_stim/NI)] = r_stim
                 r_extra[NE:NE+nn_stim] = r_stim
             else:
-                r_extra[N:N+int(NE*nn_stim/NI)] = r_stim
+                #r_extra[N:N+int(NE*nn_stim/NI)] = r_stim
                 r_extra[N+NE:N+NE+nn_stim] = r_stim
 
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]

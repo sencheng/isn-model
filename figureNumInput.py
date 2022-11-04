@@ -476,7 +476,8 @@ class simdata():
                 sel_T  = self.sim_res[pert_val][2][tr]['times']
                 T_edges = T_edges_def
             
-            e, i = self.get_pop_fr(sel_id, sel_T, T_edges, is_ms=True)   
+            e, i = self.get_pop_fr(sel_id, sel_T, T_edges, is_ms=True)
+            print(tr, e.shape)
             
             fr_exc[tr, :] = e
             fr_inh[tr, :] = i

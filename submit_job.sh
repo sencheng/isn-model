@@ -18,6 +18,6 @@ source /upb/departments/pc2/users/c/clbbs001/ISN/packages/nest-install/bin/nest_
 
 echo "running3 simulation for task ID ${SLURM_ARRAY_TASK_ID}"
     
-./run_multiple_sims.sh $(($1*40)) $(($(($1+1))*40)) 100
+./run_multiple_sims.sh $(($1*40)) $(($(($1+1))*40)) 10
 sleep 35990
 #mpirun -np 40 python simulateNetworks.py 19 125

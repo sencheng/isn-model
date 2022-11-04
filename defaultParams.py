@@ -8,24 +8,24 @@ from matplotlib import rc
 import matplotlib
 
 ## the number of cores to be used for simulations
-n_cores = 1
+n_cores = 4
 
 # Often changed parameters
 check_isn_in_ca = 'ca1'
-inh = False
+inh = True
 Ntrials = 10
-pert_pop = 'ca3'
+pert_pop = 'ca1'
 ca1_e_coef = 0.4
 
 # Result directory
 res_dir = "SimulationFiles"
 fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
-data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations"
+data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations/"
 if check_isn_in_ca == 'ca1':
-    data_dir = os.path.join(data_main_path, "CA1-ISN-test/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+    data_dir = os.path.join(data_main_path, "CA1-photoinhibiting-inh/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
-    data_dir = os.path.join(data_main_path, "CA3-ISN-test/")
+    data_dir = os.path.join(data_main_path, "CA3-photoinhibiting-inh/")
 else:
     data_dir = os.path.join(data_main_path, "Concluding-Simulations/checkISN-CA1/")
 fig_dir  = data_dir
@@ -114,10 +114,13 @@ dt = .1
 r_bkg = 10000.-400.
 r_bkg_ca1 = 7000
 # rate of perturbation (sp/s)
+''' ISN check with/without inhibition
 if check_isn_in_ca in {'ca1', 'ca3'}:
     r_stim = 0.0
 else:
     r_stim = -400.
+'''
+r_stim = -400.
 
 # transitent time to discard the data (ms)
 Ttrans = 1000.
