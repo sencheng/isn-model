@@ -127,7 +127,7 @@ Ttrans = 1000.
 # simulation time before perturbation (ms)
 Tblank= 1000.
 # simulation time of and after perturbation (ms)
-Tstim = 100.
+Tstim = 1000.
 
 # -- network params
 
