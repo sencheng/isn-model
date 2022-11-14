@@ -15,6 +15,7 @@ check_isn_in_ca = "ca1"
 inh = True
 Ntrials = 10
 pert_pop = "ca1"
+pert_subpop = "inh"
 ca1_e_coef = 0.4
 
 # Result directory

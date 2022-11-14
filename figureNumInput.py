@@ -990,8 +990,15 @@ class simdata():
             exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
         elif fig_ca == 'ca1':
             if pert_pop == 'ca1':
-                inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
-                exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
+                if pert_subpop == 'inh':
+                    inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+                    exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()
+                elif pert_subpop == 'exc':
+                    inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
+                    exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
+                else:
+                    inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+                    exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
             else:
                 inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
                 exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()

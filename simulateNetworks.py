@@ -271,11 +271,21 @@ for ij1 in range(Be_rng_comb.size):
             r_extra[N+NE:N+NE+NI] = r_stim*nn_stim/NI*np.random.uniform(0, 1, NI)
         else:
             if pert_pop == 'ca1':
-                #r_extra[0:int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
-                r_extra[NE:NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                if pert_subpop == 'exc':
+                    r_extra[0:int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                elif pert_subpop == 'inh':
+                    r_extra[NE:NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                else:
+                    r_extra[0:int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[NE:NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
             else:
-                #r_extra[N:N+int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
-                r_extra[N+NE:N+NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                if pert_subpop == 'exc':
+                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                elif pert_subpop == 'inh':
+                    r_extra[N+NE:N+NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                else:
+                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[N+NE:N+NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
 
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),
