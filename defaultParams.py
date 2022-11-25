@@ -11,11 +11,11 @@ import matplotlib
 n_cores = 4
 
 # Often changed parameters
-check_isn_in_ca = "ca1"
+check_isn_in_ca = None#"ca3"
 inh = True
 Ntrials = 10
-pert_pop = "ca1"
-pert_subpop = "inh"
+pert_pop = "ca3"
+pert_subpop = "both"
 ca1_e_coef = 0.4
 
 # Result directory
@@ -24,11 +24,11 @@ fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
 data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations/"
 if check_isn_in_ca == 'ca1':
-    data_dir = os.path.join(data_main_path, "CA1-photoinh-ca1/highpert-cpee0/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+    data_dir = os.path.join(data_main_path, "CA1-photoinh-ca1-ca3/highpert-cpee0/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
-    data_dir = os.path.join(data_main_path, "CA3-photostim-ca3/")
+    data_dir = os.path.join(data_main_path, "CA3CA1-photoinh-ca3-inhexc/pert-cpee0/")
 else:
-    data_dir = os.path.join(data_main_path, "/CA1-CA3/")
+    data_dir = os.path.join(data_main_path, "CA3CA1/CA3-cpee1e-1/")
 fig_dir  = data_dir
 
 #------------- neuron params
@@ -64,7 +64,7 @@ else:
     Be_rng = np.array([0.55*ca1_e_coef])#np.arange(0.1, 0.55, 0.1)
     Bi_rng = np.array([-0.3])
 
-p_conn_EE = 0.14*0.0#np.array([0.9])
+p_conn_EE = 0.14#np.array([0.9])
 p_conn_EI = 0.45#np.array([3.0])
 
 
@@ -74,7 +74,7 @@ if (check_isn_in_ca == 'ca3') & inh:
     Bi_ca3 = -0.3
 elif (check_isn_in_ca == 'ca3') & (not inh):
     Bi_ca3 = 0.0
-p_conn_EE3, p_conn_EI3 = 0.4, 0.15
+p_conn_EE3, p_conn_EI3 = 0.4*0.1, 0.15
 
 # background and stimulus conductances (nS)
 Be_bkg = .1
@@ -142,7 +142,7 @@ NI = int(frac*N)
 NE = N - NI
 
 # range of the size of Inh perturbations
-nn_stim_rng = (np.array([0.6, 0.7, 0.8, 0.9, 1.0])*NI).astype('int')
+nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 

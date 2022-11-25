@@ -1081,7 +1081,7 @@ class simdata():
                     label=['I', 'E'])
         
     def plot_frdiff_dist(self, ax, num_bins=20):
-        
+        print(self.diff_inh.shape)
         edges = np.linspace(self.diff_inh.min(), self.diff_inh.max(), num_bins)
         
         if hasattr(self, 'diff_inh_pv'):
