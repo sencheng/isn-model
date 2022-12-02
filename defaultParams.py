@@ -11,10 +11,10 @@ import matplotlib
 n_cores = 4
 
 # Often changed parameters
-check_isn_in_ca = None#"ca3"
+check_isn_in_ca = "ca1"
 inh = True
 Ntrials = 10
-pert_pop = "ca3"
+pert_pop = "ca1"
 pert_subpop = "both"
 ca1_e_coef = 0.4
 
@@ -24,7 +24,7 @@ fig_initial = "Figures"
 sim_suffix = "-E3extrabkg{:.0f}-E3E1fac{:.1f}-bi{:.2f}-be{:.2f}-ca1bkgfr{:.0f}-Epertfac{:.1f}-EE_probchg{:.2f}-EI_probchg{:.2f}"
 data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations/"
 if check_isn_in_ca == 'ca1':
-    data_dir = os.path.join(data_main_path, "CA1-photoinh-ca1-ca3/highpert-cpee0/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
+    data_dir = os.path.join(data_main_path, "final_round/CA1-photoinh-both/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
     data_dir = os.path.join(data_main_path, "CA3CA1-photoinh-ca3-inhexc/pert-cpee0/")
 else:
@@ -74,7 +74,7 @@ if (check_isn_in_ca == 'ca3') & inh:
     Bi_ca3 = -0.3
 elif (check_isn_in_ca == 'ca3') & (not inh):
     Bi_ca3 = 0.0
-p_conn_EE3, p_conn_EI3 = 0.4*0.1, 0.15
+p_conn_EE3, p_conn_EI3 = 0.4, 0.15
 
 # background and stimulus conductances (nS)
 Be_bkg = .1

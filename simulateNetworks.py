@@ -255,7 +255,7 @@ for ij1 in range(Be_rng_comb.size):
         W_ItoE_ca3 = _mycon_(NI, NE, Bie_ca3, Bie_ca3/5, 1.)
         W_ItoI_ca3 = _mycon_(NI, NI, Bii_ca3, Bii_ca3/5, 1.)
         
-        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn_EE)#*EE_probchg_comb[ij1])
+        W_EtoE = _mycon_(NE, NE, Bee, Bee/5, p_conn_EE*EE_probchg_comb[ij1])
         W_EtoI = _mycon_(NE, NI, Bei, Bei/5, p_conn_EI)#*EI_probchg_comb[ij1])
         W_ItoE = _mycon_(NI, NE, Bie, Bie/5, 1.)
         W_ItoI = _mycon_(NI, NI, Bii, Bii/5, 1.)
@@ -272,20 +272,20 @@ for ij1 in range(Be_rng_comb.size):
         else:
             if pert_pop == 'ca1':
                 if pert_subpop == 'exc':
-                    r_extra[0:int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[0:int(NE*nn_stim/NI)] = r_stim#*EE_probchg_comb[ij1]
                 elif pert_subpop == 'inh':
-                    r_extra[NE:NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[NE:NE+nn_stim] = r_stim#*EE_probchg_comb[ij1]
                 else:
-                    r_extra[0:int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
-                    r_extra[NE:NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[0:int(NE*nn_stim/NI)] = r_stim#*EE_probchg_comb[ij1]
+                    r_extra[NE:NE+nn_stim] = r_stim#*EE_probchg_comb[ij1]
             else:
                 if pert_subpop == 'exc':
-                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim#*EE_probchg_comb[ij1]
                 elif pert_subpop == 'inh':
-                    r_extra[N+NE:N+NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[N+NE:N+NE+nn_stim] = r_stim#*EE_probchg_comb[ij1]
                 else:
-                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim*EE_probchg_comb[ij1]
-                    r_extra[N+NE:N+NE+nn_stim] = r_stim*EE_probchg_comb[ij1]
+                    r_extra[N:N+int(NE*nn_stim/NI)] = r_stim#*EE_probchg_comb[ij1]
+                    r_extra[N+NE:N+NE+nn_stim] = r_stim#*EE_probchg_comb[ij1]
 
         r_bkg_e = r_bkg*bkg_chg_comb[ij1]; r_bkg_i = r_bkg*bkg_chg_comb[ij1]
         rr1 = np.hstack(((r_bkg_ca1+extra_bkg_e)*np.ones(NE), r_bkg_ca1*np.ones(NI),
