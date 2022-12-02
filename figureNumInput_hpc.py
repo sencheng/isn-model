@@ -91,31 +91,31 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
         BE = Be_rng
     for ij1, Be in enumerate(BE):
         
-        # fig_box, ax_box = plt.subplots(nrows=2, ncols=Bi_rng.size,
-        #                                sharex=True, sharey=True,
-        #                                figsize=(6, 6))
+        fig_box, ax_box = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                        sharex=True, sharey=True,
+                                        figsize=(6, 6))
         
-        # fig_violin, ax_violin = plt.subplots(nrows=2, ncols=Bi_rng.size,
-        #                                      sharex=True, sharey=True,
-        #                                      figsize=(6, 6))
+        fig_violin, ax_violin = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                              sharex=True, sharey=True,
+                                              figsize=(6, 6))
         
-        # fig_box_mean, ax_box_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
-        #                                          sharex=True, sharey=True,
-        #                                          figsize=(6, 6))
+        fig_box_mean, ax_box_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                                  sharex=True, sharey=True,
+                                                  figsize=(6, 6))
         
-        # fig_violin_mean, ax_violin_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
-        #                                                sharex=True, sharey=True,
-        #                                                figsize=(6, 6))
+        fig_violin_mean, ax_violin_mean = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                                        sharex=True, sharey=True,
+                                                        figsize=(6, 6))
         
-        # fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
-        #                                    sharex=True, sharey=True)
+        fig_box_g, ax_box_g = plt.subplots(nrows=2, ncols=Bi_rng.size,
+                                            sharex=True, sharey=True)
         
         if Bi_rng.size == 1:
-            # ax_box = ax_box.reshape(-1, 1)
-            # ax_violin = ax_violin.reshape(-1, 1)
-            # ax_box_mean = ax_box_mean.reshape(-1, 1)
-            # ax_violin_mean = ax_violin_mean.reshape(-1, 1)
-            # ax_box_g = ax_box_g.reshape(-1, 1)
+            ax_box = ax_box.reshape(-1, 1)
+            ax_violin = ax_violin.reshape(-1, 1)
+            ax_box_mean = ax_box_mean.reshape(-1, 1)
+            ax_violin_mean = ax_violin_mean.reshape(-1, 1)
+            ax_box_g = ax_box_g.reshape(-1, 1)
         
         for ij2, Bi in enumerate(Bi_rng):
             
@@ -390,19 +390,19 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             
             # fig_avg_fr.savefig(os.path.join(avg_plots_fig, "avgfr-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
             #                    format="pdf")
-            -Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-                        format="pdf")
+            # -Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
+            #             format="pdf")
             
-            fig_e.savefig(os.path.join(other_fig, "fre-Ninp-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-                        format="pdf")
+            # fig_e.savefig(os.path.join(other_fig, "fre-Ninp-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
+            #             format="pdf")
             
-            fig_e_fr.suptitle("Excitatory neurons")
-            fig_e_fr.savefig(os.path.join(other_fig, "fre-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-                             format="pdf")
+            # fig_e_fr.suptitle("Excitatory neurons")
+            # fig_e_fr.savefig(os.path.join(other_fig, "fre-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
+            #                  format="pdf")
             
-            fig_i_fr.suptitle("Inhibitory neurons")
-            fig_i_fr.savefig(os.path.join(other_fig, "fr-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-                             format="pdf")
+            # fig_i_fr.suptitle("Inhibitory neurons")
+            # fig_i_fr.savefig(os.path.join(other_fig, "fr-fr-diff-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
+            #                  format="pdf")
             # fig_base_frdiff.savefig(os.path.join(base_diff_rel_fig, "basevsdiff-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
             #                    format="pdf")
                     
@@ -419,37 +419,37 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             plt.close(fig_dist_mean_sample)
             plt.close(fig_base_frdiff)
             
-        ax_box[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
-        ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
-        ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
-        fig_box.suptitle("Be={:.2f}".format(Be))
+        # ax_box[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
+        # ax_box[0, 0].set_ylabel(r"$\Delta FR_I$")
+        # ax_box[1, 0].set_ylabel(r"$\Delta FR_E$")
+        # fig_box.suptitle("Be={:.2f}".format(Be))
             
-        fig_box.savefig(os.path.join(diff_boxs_fig, "fr-diff-box-Be{:.2f}.pdf".format(Be)),
-                         format="pdf")
+        # fig_box.savefig(os.path.join(diff_boxs_fig, "fr-diff-box-Be{:.2f}.pdf".format(Be)),
+        #                  format="pdf")
         
-        ax_violin[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
-        ax_violin[0, 0].set_ylabel(r"$\Delta FR_I$")
-        ax_violin[1, 0].set_ylabel(r"$\Delta FR_E$")
-        fig_violin.suptitle("Be={:.2f}".format(Be))
+        # ax_violin[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
+        # ax_violin[0, 0].set_ylabel(r"$\Delta FR_I$")
+        # ax_violin[1, 0].set_ylabel(r"$\Delta FR_E$")
+        # fig_violin.suptitle("Be={:.2f}".format(Be))
             
-        fig_violin.savefig(os.path.join(diff_boxs_fig, "fr-diff-violin-Be{:.2f}.pdf".format(Be)),
-                         format="pdf")
+        # fig_violin.savefig(os.path.join(diff_boxs_fig, "fr-diff-violin-Be{:.2f}.pdf".format(Be)),
+        #                  format="pdf")
         
-        ax_box_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
-        ax_box_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
-        ax_box_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
-        fig_box_mean.suptitle("Be={:.2f}".format(Be))
+        # ax_box_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
+        # ax_box_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
+        # ax_box_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
+        # fig_box_mean.suptitle("Be={:.2f}".format(Be))
             
-        fig_box_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-box-Be{:.2f}.pdf".format(Be)),
-                         format="pdf")
+        # fig_box_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-box-Be{:.2f}.pdf".format(Be)),
+        #                  format="pdf")
         
-        ax_violin_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
-        ax_violin_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
-        ax_violin_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
-        fig_violin_mean.suptitle("Be={:.2f}".format(Be))
+        # ax_violin_mean[-1, int(Bi_rng.size/2)].set_xlabel("Percent of CA3 neurons perturbed")
+        # ax_violin_mean[0, 0].set_ylabel(r"$\Delta FR_I$")
+        # ax_violin_mean[1, 0].set_ylabel(r"$\Delta FR_E$")
+        # fig_violin_mean.suptitle("Be={:.2f}".format(Be))
             
-        fig_violin_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-violin-Be{:.2f}.pdf".format(Be)),
-                         format="pdf")
+        # fig_violin_mean.savefig(os.path.join(diff_boxs_fig, "fr-diffmean-violin-Be{:.2f}.pdf".format(Be)),
+        #                  format="pdf")
         
         fig_box_g.savefig(os.path.join(fig_path, "g-diff-box-Be{:.2f}.pdf".format(Be)),
                           format="pdf")
@@ -467,34 +467,34 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
                        'mean_change': mean_fr[:,:,:,1]}}
     
     fig_frchg_ei_e = frchg_vs_EtoI(frchgdata)
-    fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-E.pdf"),
-                           format="pdf")
+    # fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-E.pdf"),
+    #                        format="pdf")
     
-    fig_frchg_ei_e = frchg_vs_EtoI(frchgdata, "I")
-    fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-I.pdf"),
-                           format="pdf")
+    # fig_frchg_ei_e = frchg_vs_EtoI(frchgdata, "I")
+    # fig_frchg_ei_e.savefig(os.path.join(other_fig, "frchg-EtoI-I.pdf"),
+    #                        format="pdf")
 
-    fig_posprop = propposfrchg(frchgdata)
-    fig_posprop.savefig(os.path.join(other_fig, "propposfrchg.pdf"),
-                        format="pdf")
+    # fig_posprop = propposfrchg(frchgdata)
+    # fig_posprop.savefig(os.path.join(other_fig, "propposfrchg.pdf"),
+    #                     format="pdf")
     
-    fig_frchg = frchg(frchgdata)
-    fig_frchg.savefig(os.path.join(other_fig, "frchg.pdf"),
-                        format="pdf")
+    # fig_frchg = frchg(frchgdata)
+    # fig_frchg.savefig(os.path.join(other_fig, "frchg.pdf"),
+    #                     format="pdf")
     
-    fig_sig_exc = significant_proportions([significant_dec[:, :, :, 0],
-                                           significant_inc[:, :, :, 0],
-                                           non_significant[:, :, :, 0]])
+    # fig_sig_exc = significant_proportions([significant_dec[:, :, :, 0],
+    #                                        significant_inc[:, :, :, 0],
+    #                                        non_significant[:, :, :, 0]])
     
-    fig_sig_exc.savefig(os.path.join(other_fig, "change-fr-prop-exc.pdf"),
-                        format="pdf")
+    # fig_sig_exc.savefig(os.path.join(other_fig, "change-fr-prop-exc.pdf"),
+    #                     format="pdf")
     
-    fig_sig_inh = significant_proportions([significant_dec[:, :, :, 1],
-                                           significant_inc[:, :, :, 1],
-                                           non_significant[:, :, :, 1]])
+    # fig_sig_inh = significant_proportions([significant_dec[:, :, :, 1],
+    #                                        significant_inc[:, :, :, 1],
+    #                                        non_significant[:, :, :, 1]])
     
-    fig_sig_inh.savefig(os.path.join(other_fig, "change-fr-prop-inh.pdf"),
-                        format="pdf")
+    # fig_sig_inh.savefig(os.path.join(other_fig, "change-fr-prop-inh.pdf"),
+    #                     format="pdf")
     
     fl = open('fr-chgs-pos-prop', 'wb'); pickle.dump(frchgdata, fl); fl.close()
         
@@ -510,30 +510,30 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
     cv_ff_fig_path = os.path.join(fig_path, "CV-FF")
     os.makedirs(cv_ff_fig_path, exist_ok=True)
     
-    Ge = np.append(0, Be_rng)
-    Gi = np.append(0, Bi_rng)
+    # Ge = np.append(0, Be_rng)
+    # Gi = np.append(0, Bi_rng)
     
-    fig_psc, ax_psc = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
-    bar_psc = fig_psc.add_axes([0.7, 0.15, 0.02, 0.3])
+    # fig_psc, ax_psc = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
+    # bar_psc = fig_psc.add_axes([0.7, 0.15, 0.02, 0.3])
         
-    for ii, nn_stim in enumerate(nn_stim_rng):
+    # for ii, nn_stim in enumerate(nn_stim_rng):
         
-        # if paradox_score[:, :, ii].max()>1:
-        f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
-                                           vmin=paradox_score.min(),
-                                           vmax=paradox_score.max())
-        ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
+    #     # if paradox_score[:, :, ii].max()>1:
+    #     f = ax_psc[ii//3, ii%3].pcolormesh(Gi, Ge, paradox_score[:, :, ii],
+    #                                        vmin=paradox_score.min(),
+    #                                        vmax=paradox_score.max())
+    #     ax_psc[ii//3, ii%3].set_title("pert={:.0f}%".format(nn_stim/NI*100))
         
-    ax_psc[1, 0].set_xlabel("Inh. Cond.")
-    ax_psc[1, 1].set_xlabel("Inh. Cond.")
+    # ax_psc[1, 0].set_xlabel("Inh. Cond.")
+    # ax_psc[1, 1].set_xlabel("Inh. Cond.")
     
-    ax_psc[0, 0].set_ylabel("Exc. Cond.")
-    ax_psc[1, 0].set_ylabel("Exc. Cond.")
+    # ax_psc[0, 0].set_ylabel("Exc. Cond.")
+    # ax_psc[1, 0].set_ylabel("Exc. Cond.")
     
-    if "f" in locals():
-        plt.colorbar(f, cax=bar_psc)
+    # if "f" in locals():
+    #     plt.colorbar(f, cax=bar_psc)
     
-    fig_psc.savefig(os.path.join(other_fig, "paradoxical-score.pdf"), format="pdf")
+    # fig_psc.savefig(os.path.join(other_fig, "paradoxical-score.pdf"), format="pdf")
         
         # fig_cv, ax_cv = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
         # fig_ff, ax_ff = plt.subplots(nrows=2, ncols=3, sharex=True, sharey=True)
