@@ -152,7 +152,7 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             
             diff_dists_fig = simdata_obj.create_fig_subdir(fig_path, diff_dists)
             # diff_boxs_fig = simdata_obj.create_fig_subdir(fig_path, diff_boxs)
-            # avg_plots_fig = simdata_obj.create_fig_subdir(fig_path, avg_plots)
+            avg_plots_fig = simdata_obj.create_fig_subdir(fig_path, avg_plots)
             # base_diff_rel_fig = simdata_obj.create_fig_subdir(fig_path, base_diff_rel)
             # base_dist_fig = simdata_obj.create_fig_subdir(fig_path, base_dist)
             # other_fig = simdata_obj.create_fig_subdir(fig_path, other)
@@ -389,11 +389,8 @@ def run_for_each_parset(sim_suffix, file_name, fig_ca):
             # fig_base.savefig(os.path.join(base_dist_fig, "fr-base-dist-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
             #                  format="pdf")
             
-            # fig_avg_fr.savefig(os.path.join(avg_plots_fig, "avgfr-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-            #                    format="pdf")
-            # -Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
-            #             format="pdf")
-            
+            fig_avg_fr.savefig(os.path.join(avg_plots_fig, "avgfr-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)), format="pdf")
+                        
             # fig_e.savefig(os.path.join(other_fig, "fre-Ninp-Be{:.2f}-Bi{:.2f}.pdf".format(Be, Bi)),
             #             format="pdf")
             
