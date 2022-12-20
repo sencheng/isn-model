@@ -986,12 +986,29 @@ class simdata():
         # edges = np.linspace(self.diff_inh_m.min(), self.diff_inh_m.max(), num_bins)
         
         if fig_ca == 'ca3':
-            inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
-            exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
-            inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
-            num_neurons = (NI*self.num_models, NI*self.num_models, NE*self.num_models, NE*self.num_models)
-            L = [r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$']
-            Col = ['blue', 'skyblue', 'red', 'lightsalmon']
+            if pert_pop == 'ca3':
+                if pert_subpop == 'inh':
+                    inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+                    exc_pert, exc_nonpert = np.array([]), self.diff_exc_m.flatten()
+                    inh_exc = (inh_pert, inh_nonpert, exc_nonpert)
+                    num_neurons = (NI*self.num_models, NI*self.num_models, NE*self.num_models)
+                    L = [r'$I_{pert}$', r'$I$', r'$E$']
+                    Col = ['blue', 'skyblue', 'lightsalmon']
+                elif pert_subpop == 'exc':
+                    inh_pert, inh_nonpert = np.array([]), self.diff_inh_m.flatten()
+                    exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
+                    inh_exc = (inh_nonpert, exc_pert, exc_nonpert)
+                    num_neurons = (NI*self.num_models, NE*self.num_models, NE*self.num_models)
+                    L = [r'$I$', r'$E_{pert}$', r'$E$']
+                    Col = ['skyblue', 'red', 'lightsalmon']
+                                                                                
+                else:
+                    inh_pert, inh_nonpert = self.diff_inh_m[0:pert_num].flatten(), self.diff_inh_m[pert_num:].flatten()
+                    exc_pert, exc_nonpert = self.diff_exc_m[0:int(pert_num*NE/NI)].flatten(), self.diff_exc_m[int(pert_num*NE/NI):].flatten()
+                    inh_exc = (inh_pert, inh_nonpert, exc_pert, exc_nonpert)
+                    num_neurons = (NI*self.num_models, NI*self.num_models, NE*self.num_models, NE*self.num_models)
+                    L = [r'$I_{pert}$', r'$I$', r'$E_{pert}$', r'$E$']
+                    Col = ['blue', 'skyblue', 'red', 'lightsalmon']
         elif fig_ca == 'ca1':
             if pert_pop == 'ca1':
                 if pert_subpop == 'inh':
