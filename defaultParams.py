@@ -11,10 +11,10 @@ import matplotlib
 n_cores = 4
 
 # Often changed parameters
-check_isn_in_ca = "ca1"
+check_isn_in_ca = "ca3"
 inh = True
 Ntrials = 10
-pert_pop = "ca1"
+pert_pop = "ca3"
 pert_subpop = "inh"
 ca1_e_coef = 0.4
 
@@ -26,7 +26,7 @@ data_main_path = "/scratch/hpc-prf-clbbs/Concluding-Simulations/"
 if check_isn_in_ca == 'ca1':
     data_dir = os.path.join(data_main_path, "final_round/CA1-photoinh-inh-CPee14e-2/")#"./CA3-ISNTest"#"/local2/mohammad/data/ISN/CA3-ISNTest"
 elif check_isn_in_ca == 'ca3':
-    data_dir = os.path.join(data_main_path, "final_round/CA3-photoinh-inh-CPee4e-1/")
+    data_dir = os.path.join(data_main_path, "final_round/CA3-photoinh-inh-CPee4e-1")
 else:
     data_dir = os.path.join(data_main_path, "final_round/CA3CA1-CA3-photoinh-both-400Hz/")
 fig_dir  = data_dir
@@ -143,7 +143,8 @@ NE = N - NI
 
 # range of the size of Inh perturbations
 #nn_stim_rng = (np.array([0.1, 0.25, 0.5, 0.75, 1.0])*NI).astype('int')
-nn_stim_rng = (np.array([0.6, 0.7, 0.8, 0.9, 1.0])*NI).astype('int')
+#nn_stim_rng = (np.array([0.6, 0.7, 0.8, 0.9, 1.0])*NI).astype('int')
+nn_stim_rng = (np.array([0.2, 0.4, 0.6, 0.8, 1.0])*NI).astype('int')
 # single cell type
 cell_type = 'aeif_cond_alpha'
 
